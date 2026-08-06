@@ -157,6 +157,93 @@ body {
 }
 
 /* ========================================= */
+/* DECORATIVE SPLASH SHAPES */
+/* ========================================= */
+
+.splash-decor {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.splash {
+    position: absolute;
+    background: linear-gradient(135deg, var(--orange) 0%, var(--orange-d) 100%);
+    opacity: .16;
+    animation: splashFloat 10s ease-in-out infinite, blobMorph 14s ease-in-out infinite;
+}
+
+.splash-left-1 {
+    top: 6%;
+    left: -110px;
+    width: 260px;
+    height: 260px;
+    border-radius: 42% 58% 65% 35% / 45% 40% 60% 55%;
+    animation-duration: 11s, 16s;
+}
+
+.splash-left-2 {
+    top: 48%;
+    left: -60px;
+    width: 130px;
+    height: 130px;
+    border-radius: 58% 42% 35% 65% / 55% 60% 40% 45%;
+    opacity: .12;
+    animation-duration: 8s, 12s;
+    animation-delay: 1s, 0s;
+}
+
+.splash-left-3 {
+    bottom: 4%;
+    left: -90px;
+    width: 190px;
+    height: 190px;
+    border-radius: 35% 65% 55% 45% / 40% 55% 45% 60%;
+    opacity: .14;
+    animation-duration: 13s, 18s;
+    animation-delay: 2s, 3s;
+}
+
+.splash-right-1 {
+    top: 12%;
+    right: -120px;
+    width: 300px;
+    height: 300px;
+    border-radius: 58% 42% 35% 65% / 55% 60% 40% 45%;
+    opacity: .15;
+    animation-duration: 12s, 15s;
+}
+
+.splash-right-2 {
+    top: 58%;
+    right: -50px;
+    width: 110px;
+    height: 110px;
+    border-radius: 42% 58% 65% 35% / 45% 40% 60% 55%;
+    opacity: .1;
+    animation-duration: 9s, 13s;
+    animation-delay: .5s, 1.5s;
+}
+
+.splash-right-3 {
+    bottom: 6%;
+    right: -80px;
+    width: 170px;
+    height: 170px;
+    border-radius: 35% 65% 55% 45% / 40% 55% 45% 60%;
+    opacity: .13;
+    animation-duration: 10s, 17s;
+    animation-delay: 1.5s, .8s;
+}
+
+@keyframes splashFloat {
+    0%, 100% { transform: translateY(0) translateX(0); }
+    50% { transform: translateY(-18px) translateX(8px); }
+}
+
+/* ========================================= */
 /* HEADER */
 /* ========================================= */
 
@@ -383,13 +470,14 @@ body {
 .divider {
     display: flex;
     align-items: center;
+    justify-content: center;
     margin: 26px 0 20px;
 }
 
 .divider::before,
 .divider::after {
     content: '';
-    flex: 1;
+    width: 36px;
     height: 1px;
     background: rgba(255, 255, 255, .3);
 }
