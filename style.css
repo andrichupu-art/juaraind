@@ -192,11 +192,11 @@ body {
     max-width: 480px;
     margin: 0 auto;
     width: 100%;
-    padding: 44px 38px 36px;
-    background: var(--card);
-    border: 1.5px solid var(--line);
+    padding: 64px 38px 36px;
+    background: linear-gradient(135deg, var(--orange) 0%, var(--orange-d) 100%);
+    border: 1.5px solid var(--gold-l);
     border-radius: var(--radius-xl);
-    box-shadow: 0 18px 40px -22px rgba(11, 31, 58, .35);
+    box-shadow: 0 18px 40px -22px rgba(11, 31, 58, .5);
     position: relative;
 }
 
@@ -205,20 +205,24 @@ body {
     top: 22px;
     left: 50%;
     transform: translateX(-50%);
+    color: #fff;
+    border-color: #fff;
+    background: rgba(255, 255, 255, .12);
 }
 
 /* Icon Email di atas card */
 .mail-icon {
     text-align: center;
-    margin-bottom: 22px;
-    margin-top: 14px;
+    margin-bottom: 26px;
+    margin-top: 0;
 }
 
 .mail-icon svg {
     width: 60px;
     height: 60px;
     padding: 15px;
-    background: linear-gradient(135deg, var(--navy), var(--orange-d));
+    background: rgba(255, 255, 255, .16);
+    border: 1.5px solid rgba(255, 255, 255, .4);
     border-radius: 16px;
     box-shadow: 0 10px 24px -10px rgba(11, 31, 58, .5);
     animation: floatIcon 3s ease-in-out infinite;
@@ -232,14 +236,14 @@ body {
 .portal-title {
     text-align: center;
     font: 800 28px var(--disp);
-    color: var(--navy);
+    color: #fff;
     margin-bottom: 10px;
     letter-spacing: -.01em;
 }
 
 .portal-description {
     text-align: center;
-    color: var(--mut);
+    color: #dcebff;
     font-size: 14px;
     margin-bottom: 30px;
 }
@@ -320,13 +324,13 @@ body {
     content: '';
     flex: 1;
     height: 1px;
-    background: var(--line);
+    background: rgba(255, 255, 255, .3);
 }
 
 .divider-text {
     padding: 0 15px;
     font: 700 11px var(--body);
-    color: var(--mut);
+    color: #dcebff;
     text-transform: uppercase;
     letter-spacing: 1px;
 }
