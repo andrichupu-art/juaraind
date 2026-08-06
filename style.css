@@ -108,6 +108,55 @@ body {
 }
 
 /* ========================================= */
+/* MAIL RAIN BACKGROUND ANIMATION */
+/* ========================================= */
+
+.mail-rain {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.mail-rain-icon {
+    position: absolute;
+    top: -8%;
+    color: var(--orange);
+    opacity: 0;
+    animation-name: mailFall;
+    animation-timing-function: linear;
+    animation-iteration-count: infinite;
+    will-change: transform, opacity;
+}
+
+.mail-rain-icon svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+@keyframes mailFall {
+    0% {
+        transform: translateY(0) rotate(0deg);
+        opacity: 0;
+    }
+    8% {
+        opacity: var(--mail-opacity, .35);
+    }
+    92% {
+        opacity: var(--mail-opacity, .35);
+    }
+    100% {
+        transform: translateY(112vh) rotate(20deg);
+        opacity: 0;
+    }
+}
+
+/* ========================================= */
 /* HEADER */
 /* ========================================= */
 
