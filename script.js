@@ -13,8 +13,52 @@ document.addEventListener('DOMContentLoaded', function() {
     initFadeInAnimation();
     initRippleEffect();
     initCurrentYear();
+    initMailRain();
     
 });
+
+/* ========================================= */
+/* MAIL RAIN BACKGROUND ANIMATION */
+/* ========================================= */
+
+/**
+ * Membuat efek "hujan" ikon amplop yang jatuh perlahan
+ * di background halaman sebagai dekorasi
+ */
+function initMailRain() {
+    const container = document.getElementById('mailRain');
+    if (!container) return;
+
+    const ICON_COUNT = 16;
+    const mailSvg = `
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2.5" y="5" width="19" height="14" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M3.5 6.5L12 13L20.5 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    `;
+
+    for (let i = 0; i < ICON_COUNT; i++) {
+        const icon = document.createElement('div');
+        icon.className = 'mail-rain-icon';
+        icon.innerHTML = mailSvg;
+
+        // Randomisasi posisi, ukuran, kecepatan, dan delay agar terasa natural
+        const size = Math.random() * 16 + 14; // 14px - 30px
+        const left = Math.random() * 100; // 0% - 100%
+        const duration = Math.random() * 10 + 10; // 10s - 20s
+        const delay = Math.random() * -20; // mulai di posisi acak dalam siklus
+        const opacity = Math.random() * 0.3 + 0.15; // 0.15 - 0.45
+
+        icon.style.width = size + 'px';
+        icon.style.height = size + 'px';
+        icon.style.left = left + '%';
+        icon.style.animationDuration = duration + 's';
+        icon.style.animationDelay = delay + 's';
+        icon.style.setProperty('--mail-opacity', opacity);
+
+        container.appendChild(icon);
+    }
+}
 
 /* ========================================= */
 /* LOADING SCREEN */
