@@ -272,14 +272,16 @@ body {
 }
 
 .btn-login:hover {
-    transform: translate(-2px, -2px);
-    background: #fff;
-    color: var(--navy);
-    border-color: var(--navy);
+    transform: translateY(-2px);
+    background: #4a80f0;
+    color: #fff;
+    border-color: rgba(255, 255, 255, .55);
+    box-shadow: 0 10px 24px -10px rgba(11, 31, 58, .45);
 }
 
 .btn-login:active {
     transform: translateY(0);
+    box-shadow: none;
 }
 
 .btn-icon {
