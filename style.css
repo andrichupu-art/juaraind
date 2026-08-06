@@ -409,8 +409,8 @@ body {
     padding: 15px 20px;
     font: 700 15px var(--body);
     color: #fff;
-    background: var(--gold);
-    border: 2px solid var(--gold);
+    background: rgba(255, 255, 255, .16);
+    border: 1.5px solid rgba(255, 255, 255, .4);
     border-radius: var(--radius-md);
     cursor: pointer;
     position: relative;
@@ -421,13 +421,14 @@ body {
     gap: 10px;
     transition: all var(--transition-normal);
     letter-spacing: 0.3px;
+    box-shadow: 0 10px 24px -10px rgba(11, 31, 58, .5);
 }
 
 .btn-login:hover {
     transform: translateY(-2px);
-    background: #4a80f0;
+    background: rgba(255, 255, 255, .26);
     color: #fff;
-    border-color: rgba(255, 255, 255, .55);
+    border-color: rgba(255, 255, 255, .6);
     box-shadow: 0 10px 24px -10px rgba(11, 31, 58, .45);
 }
 
