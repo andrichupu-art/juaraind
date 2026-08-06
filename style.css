@@ -410,19 +410,16 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 12px;
-    background: var(--paper);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
+    gap: 7px;
+    margin-top: -8px;
     font-size: 12px;
     font-weight: 600;
-    color: var(--orange);
+    color: #dcebff;
 }
 
 .security-icon {
-    width: 18px;
-    height: 18px;
+    width: 15px;
+    height: 15px;
     flex-shrink: 0;
 }
 
