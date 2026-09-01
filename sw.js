@@ -2,7 +2,7 @@
    Meng-cache app shell (HTML, manifest, ikon) supaya bisa dibuka lagi
    tanpa koneksi, dan halaman terbuka lebih cepat. Data peserta sendiri
    tetap selalu diambil langsung dari Supabase (butuh internet). */
-const CACHE_NAME = 'juara-admin-v2'; // <== dinaikkan tiap kali index.html/app shell diubah, biar cache lama dibuang
+const CACHE_NAME = 'juara-admin-v3'; // <== dinaikkan tiap kali index.html/app shell diubah, biar cache lama dibuang
 const APP_SHELL = [
   './index.html',
   './manifest.json',
@@ -37,6 +37,30 @@ self.addEventListener('fetch', (event) => {
   // Jangan cache panggilan ke Supabase — data admin harus selalu fresh.
   if (url.hostname.endsWith('supabase.co')) return;
 
+  // NETWORK-FIRST untuk navigasi halaman (index.html / reload / buka app).
+  // Ini yang paling penting: begitu ada deploy baru, versi baru langsung
+  // tampil di kunjungan/reload BERIKUTNYA, bukan satu langkah tertinggal.
+  // Cache di sini hanya jadi fallback kalau benar-benar offline.
+  const isNavigation = req.mode === 'navigate' ||
+    (req.method === 'GET' && req.headers.get('accept')?.includes('text/html'));
+
+  if (isNavigation) {
+    event.respondWith(
+      fetch(req)
+        .then((res) => {
+          if (res && res.status === 200) {
+            const clone = res.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(req, clone));
+          }
+          return res;
+        })
+        .catch(() => caches.match(req).then((cached) => cached || caches.match('./index.html')))
+    );
+    return;
+  }
+
+  // CACHE-FIRST (stale-while-revalidate) untuk aset statis (ikon, manifest, dll)
+  // supaya tetap cepat dibuka dan hemat data.
   event.respondWith(
     caches.match(req).then((cached) => {
       const fetchPromise = fetch(req)
