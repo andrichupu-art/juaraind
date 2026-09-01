@@ -33,7 +33,7 @@
   --mono:ui-monospace,'Cascadia Mono','Segoe UI Mono',monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box}
-html,body{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+html,body{-webkit-touch-callout:none}
 input,textarea,[contenteditable="true"]{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 .allow-select,.allow-select *{-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
 html{scroll-behavior:smooth;background-color:var(--paper);
@@ -44,6 +44,11 @@ body{scrollbar-width:none;-ms-overflow-style:none}
 body{font-family:var(--body);color:var(--ink);line-height:1.55;min-height:100vh}
 img{max-width:100%} a{color:inherit;text-decoration:none} button,input,select{font-family:inherit}
 button{cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:3px solid rgba(46,155,214,.75);outline-offset:2px}
+/* Aksen fokus input pencarian dibuat putih sesuai tema header/panel.
+   Bayangan navy tetap dipertahankan agar batas fokus tidak hilang di atas
+   latar putih dan tetap mudah terlihat saat navigasi keyboard. */
+.peserta-search:focus-within,.bukti-search:focus-within,.sekolah-search:focus-within,.master-search:focus-within{border-color:#fff!important;box-shadow:0 0 0 3px rgba(27,58,102,.2)!important}
 ::selection{background:var(--orange);color:#fff}
 .box-h ::selection,header ::selection,.sidebar ::selection{background:var(--gold);color:var(--navy)}
 .wrap{width:min(1180px,94%);margin:0 auto}
@@ -893,7 +898,7 @@ body{overflow-x:hidden}
 .search-wrap{position:relative;flex:1;min-width:180px;display:flex}
 .search-wrap input[type=text]{width:100%;padding-right:38px}
 .search-clear-btn{display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);width:24px;height:24px;border:none;border-radius:50%;background:var(--line);color:var(--ink,#1a1a2e);font-size:.85rem;font-weight:800;line-height:1;cursor:pointer;align-items:center;justify-content:center}
-.search-clear-btn:hover{background:var(--gold,#c9a227);color:#fff}
+.search-clear-btn:hover{background:#fff;color:var(--navy);border:1px solid var(--line)}
 .search-wrap.has-value .search-clear-btn{display:flex}
 
 /* ============ CUSTOM DROPDOWN (csel) ============ */
@@ -1012,6 +1017,11 @@ td.nama span{color:var(--mut);font-size:.78rem}
   .mail-search input{min-width:0}
   .mail-topbar-r .mail-icon-btn{flex:0 0 auto;width:34px;height:34px}
   .mail-topbar-r .mail-icon-btn svg{width:15px;height:15px}
+  /* Pada layar kecil daftar email tidak lagi dipotong 320px. Biarkan seluruh
+     daftar halaman mengalir agar baris terakhir tidak terlihat terbelah. */
+  .mail-list{max-height:none;overflow:visible}
+  .mail-read-body{overflow:auto;min-height:420px}
+  .mail-read-body iframe{min-height:420px}
 }
 .mail-side{border-right:1.5px solid var(--line);padding:16px 10px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
 .mail-compose-btn{display:flex;align-items:center;gap:9px;justify-content:center;background:var(--navy);color:#fff;border:none;border-radius:24px;padding:13px 16px;font:800 .84rem var(--body);cursor:pointer;box-shadow:0 3px 10px rgba(19,49,77,.25);transition:.15s}
@@ -2022,7 +2032,7 @@ body:not(.menu-tab-active) .main-content{
   border-color:var(--gold);
 }
 a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{
-  outline:3px solid rgba(245,182,43,.35);
+  outline:3px solid rgba(255,255,255,.95);
   outline-offset:2px;
 }
 
@@ -3335,6 +3345,17 @@ document.addEventListener('DOMContentLoaded', ()=>{
    ditolak RLS. Begitu sesi hilang di luar alur logout manual, langsung
    balik ke layar login dengan pesan yang jelas. */
 let SB_MANUAL_SIGNOUT=false, ADMIN_LOGIN_PASSWORD='';
+/* app_metadata hanya dapat diubah oleh server/Supabase Admin API. Jika project
+   sudah memakai claim role/is_admin, akun non-admin langsung ditolak di UI.
+   Akun lama tanpa claim tetap diizinkan agar migrasi role tidak memutus akses;
+   proteksi final tetap wajib berada di RLS dan Edge Function. */
+function hasAdminAccess(user){
+  const meta=user?.app_metadata||{};
+  if(meta.role!==undefined)return meta.role==='admin';
+  if(meta.user_role!==undefined)return meta.user_role==='admin';
+  if(meta.is_admin!==undefined)return meta.is_admin===true;
+  return true;
+}
 sb.auth.onAuthStateChange((event, session)=>{
   if(event==='SIGNED_OUT' && !SB_MANUAL_SIGNOUT){
     showLogin();
@@ -3344,6 +3365,21 @@ sb.auth.onAuthStateChange((event, session)=>{
 });
 
 const $=s=>document.querySelector(s);
+/* Label tambahan untuk kontrol pencarian yang sebelumnya hanya mengandalkan
+   placeholder agar tetap jelas bagi screen reader. */
+const ACCESSIBLE_LABELS={
+  qSearchMaster:'Cari Data Master', qSekolah:'Cari sekolah',
+  qSearchPelatihan:'Cari peserta pelatihan', qSearchPenempatan:'Cari peserta penempatan',
+  qSearchVisaMcu:'Cari peserta visa dan MCU', qSearchKeberangkatan:'Cari peserta keberangkatan',
+  qSearchFin:'Cari data keuangan', qSearchBukti:'Cari bukti pembayaran',
+  mailSearch:'Cari email', maSearch:'Cari akun email'
+};
+Object.entries(ACCESSIBLE_LABELS).forEach(([id,label])=>{
+  const el=document.getElementById(id); if(el&&!el.getAttribute('aria-label'))el.setAttribute('aria-label',label);
+});
+document.querySelectorAll('button:not([type])').forEach(button=>{
+  if(!button.closest('form'))button.type='button';
+});
 /* Helper debounce umum -> dipakai buat search/filter yang berat (misal renderTable
    dengan ratusan/ribuan baris) supaya tidak render ulang di SETIAP ketukan huruf,
    tapi nunggu jeda singkat setelah user berhenti mengetik. */
@@ -3357,6 +3393,7 @@ function buildCsel(select){
   if(select._csel) return select._csel;
   const wrap=document.createElement('div'); wrap.className='csel';
   const btn=document.createElement('button'); btn.type='button'; btn.className='csel-btn';
+  btn.setAttribute('aria-haspopup','listbox'); btn.setAttribute('aria-expanded','false');
   btn.innerHTML='<span class="csel-label"></span><svg class="csel-chev" width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   const menu=document.createElement('div'); menu.className='csel-menu'; menu.setAttribute('role','listbox');
   select.parentNode.insertBefore(wrap,select);
@@ -3372,7 +3409,8 @@ function buildCsel(select){
       const badge=opt.dataset.badge||'';
       o.innerHTML=(price?`<span class="csel-opt-name">${escapeHtml(opt.textContent)}</span><span class="csel-opt-price">${escapeHtml(price)}</span>`:`<span class="csel-opt-name">${escapeHtml(opt.textContent)}</span>`)
         + (badge?`<span class="csel-opt-badge">${escapeHtml(badge)}</span>`:'');
-      o.dataset.value=opt.value; o.setAttribute('role','option');
+      o.dataset.value=opt.value; o.setAttribute('role','option'); o.tabIndex=-1;
+      o.setAttribute('aria-selected',String(opt.value===select.value));
       o.addEventListener('click',()=>{
         select.value=opt.value;
         select.dispatchEvent(new Event('change',{bubbles:true}));
@@ -3390,10 +3428,14 @@ function buildCsel(select){
       ? (price?`<span class="csel-label-name">${escapeHtml(opt.textContent)}</span><span class="csel-label-price">${escapeHtml(price)}</span>`:`<span class="csel-label-name">${escapeHtml(opt.textContent)}</span>`)
         + (badge?`<span class="csel-label-badge">${escapeHtml(badge)}</span>`:'')
       : '';
-    menu.querySelectorAll('.csel-opt').forEach(o=>o.classList.toggle('sel',o.dataset.value===select.value));
+    menu.querySelectorAll('.csel-opt').forEach(o=>{
+      const selected=o.dataset.value===select.value;
+      o.classList.toggle('sel',selected);
+      o.setAttribute('aria-selected',String(selected));
+    });
   }
-  function open(){ document.querySelectorAll('.csel.open').forEach(c=>{ if(c!==wrap)c.classList.remove('open'); }); wrap.classList.add('open'); }
-  function close(){ wrap.classList.remove('open'); }
+  function open(){ document.querySelectorAll('.csel.open').forEach(c=>{ if(c!==wrap){ c.classList.remove('open'); c.querySelector('.csel-btn')?.setAttribute('aria-expanded','false'); } }); wrap.classList.add('open'); btn.setAttribute('aria-expanded','true'); }
+  function close(){ wrap.classList.remove('open'); btn.setAttribute('aria-expanded','false'); }
   btn.addEventListener('click',e=>{ e.stopPropagation(); wrap.classList.contains('open')?close():open(); });
   document.addEventListener('click',e=>{ if(!wrap.contains(e.target)) close(); });
   btn.addEventListener('keydown',e=>{
@@ -3547,7 +3589,11 @@ function attachRupiahMask(el){
 /* ============ AUTH ============ */
 async function checkSession(){
   const {data:{session}}=await sb.auth.getSession();
-  if(session?.user){ enterDashboard(session.user); } else { showLogin(); }
+  if(session?.user && hasAdminAccess(session.user)){ enterDashboard(session.user); }
+  else if(session?.user){
+    SB_MANUAL_SIGNOUT=true; await sb.auth.signOut();
+    showLogin(); $('#loginErr').textContent='Akun ini tidak memiliki akses admin.';
+  } else { showLogin(); }
 }
 function showLogin(){
   $('#loginView').style.display='flex'; $('#appShell').classList.remove('show','email-only'); $('#hdRight').style.display='none'; document.querySelector('header').style.display='none';
@@ -3605,6 +3651,11 @@ $('#frmLogin').addEventListener('submit', async e=>{
   const {data,error}=await sb.auth.signInWithPassword({email,password:pass});
   btn.disabled=false; btn.textContent='Masuk';
   if(error){ $('#loginErr').textContent='Login gagal: '+error.message; return; }
+  if(!hasAdminAccess(data.user)){
+    SB_MANUAL_SIGNOUT=true; await sb.auth.signOut();
+    $('#loginErr').textContent='Akun ini tidak memiliki akses admin.';
+    return;
+  }
   ADMIN_LOGIN_PASSWORD=pass;
   enterDashboard(data.user);
 });
@@ -3637,19 +3688,41 @@ document.addEventListener('click', e=>{ if(!whoBlock.contains(e.target)) closeWh
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeWhoDropdown(); });
 
 /* ============ LOAD DATA ============ */
+/*
+   Ambil data secara bertahap agar dashboard tidak bergantung pada satu
+   response Supabase yang sangat besar. Semua baris tetap dikumpulkan di
+   client karena statistik, pencarian, dan beberapa alur bisnis memakai
+   keseluruhan dataset, tetapi setiap request dibatasi ke satu batch.
+*/
+async function fetchAllRows(queryFactory, batchSize=500){
+  const rows=[];
+  try{
+    for(let from=0;;from+=batchSize){
+      const {data,error}=await queryFactory().range(from,from+batchSize-1);
+      if(error)return {data:[],error};
+      const batch=data||[];
+      rows.push(...batch);
+      if(batch.length<batchSize)break;
+    }
+    return {data:rows,error:null};
+  }catch(error){
+    return {data:[],error};
+  }
+}
+
 async function loadAll(){
   $('#tblBody').innerHTML='<tr class="empty-row"><td colspan="5">Memuat data…</td></tr>';
   try{
     const [pRes,dRes,sRes,mRes,skRes,fcRes,fbRes,fpRes,ppRes]=await Promise.all([
-      sb.from('participants_v2').select('*').order('created_at',{ascending:false}),
-      sb.from('documents_v2').select('*'),
-      sb.from('progress_v2').select('*'),
-      sb.from('master_data_v2').select('*').order('converted_at',{ascending:false}),
-      sb.from('sekolah_mitra').select('*').order('nama',{ascending:true}),
-      sb.from('finance_categories_v2').select('*').order('urutan',{ascending:true}),
-      sb.from('finance_bills_v2').select('*'),
-      sb.from('finance_payments_v2').select('*').order('tanggal',{ascending:false}),
-      sb.from('payment_proofs_v2').select('*').order('created_at',{ascending:false})
+      fetchAllRows(()=>sb.from('participants_v2').select('*').order('created_at',{ascending:false})),
+      fetchAllRows(()=>sb.from('documents_v2').select('*')),
+      fetchAllRows(()=>sb.from('progress_v2').select('*')),
+      fetchAllRows(()=>sb.from('master_data_v2').select('*').order('converted_at',{ascending:false})),
+      fetchAllRows(()=>sb.from('sekolah_mitra').select('*').order('nama',{ascending:true})),
+      fetchAllRows(()=>sb.from('finance_categories_v2').select('*').order('urutan',{ascending:true})),
+      fetchAllRows(()=>sb.from('finance_bills_v2').select('*')),
+      fetchAllRows(()=>sb.from('finance_payments_v2').select('*').order('tanggal',{ascending:false})),
+      fetchAllRows(()=>sb.from('payment_proofs_v2').select('*').order('created_at',{ascending:false}))
     ]);
     if(pRes.error)throw pRes.error;
     if(dRes.error)throw dRes.error;
@@ -3663,45 +3736,18 @@ async function loadAll(){
     MCU_STATUS_BY_PID={};
     (sRes.data||[]).forEach(s=>{ STAGE_BY_PID[s.participant_id]=s.tahap??0; PELATIHAN_SELESAI_BY_PID[s.participant_id]=!!s.pelatihan_selesai; MCU_STATUS_BY_PID[s.participant_id]=s.mcu_status||null; });
 
-    if(mRes.error){
-      console.warn('Tabel master_data_v2 belum tersedia:',mRes.error.message);
-      MASTER_ROWS=[]; MASTER_IDS=new Set();
-    }else{
-      MASTER_ROWS=mRes.data||[];
-      MASTER_IDS=new Set(MASTER_ROWS.map(r=>r.participant_id));
-    }
-
-    if(skRes.error){
-      console.warn('Tabel sekolah_mitra belum tersedia:',skRes.error.message);
-      SEKOLAH_MITRA=[];
-    }else{
-      SEKOLAH_MITRA=skRes.data||[];
-    }
-
-    if(fcRes.error){
-      console.warn('Tabel finance_categories_v2 belum tersedia:',fcRes.error.message);
-      FIN_CATS=[];
-    }else{
-      FIN_CATS=fcRes.data||[];
-    }
-    if(fbRes.error){
-      console.warn('Tabel finance_bills_v2 belum tersedia:',fbRes.error.message);
-      FIN_BILLS=[];
-    }else{
-      FIN_BILLS=fbRes.data||[];
-    }
-    if(fpRes.error){
-      console.warn('Tabel finance_payments_v2 belum tersedia:',fpRes.error.message);
-      FIN_PAYMENTS=[];
-    }else{
-      FIN_PAYMENTS=fpRes.data||[];
-    }
-    if(ppRes.error){
-      console.warn('Tabel payment_proofs_v2 belum tersedia:',ppRes.error.message);
-      PAY_PROOFS=[];
-    }else{
-      PAY_PROOFS=ppRes.data||[];
-    }
+    if(mRes.error){ console.warn('Tabel master_data_v2 belum tersedia:',mRes.error.message); }
+    if(skRes.error){ console.warn('Tabel sekolah_mitra belum tersedia:',skRes.error.message); }
+    if(fcRes.error){ console.warn('Tabel finance_categories_v2 belum tersedia:',fcRes.error.message); }
+    if(fbRes.error){ console.warn('Tabel finance_bills_v2 belum tersedia:',fbRes.error.message); }
+    if(fpRes.error){ console.warn('Tabel finance_payments_v2 belum tersedia:',fpRes.error.message); }
+    if(ppRes.error){ console.warn('Tabel payment_proofs_v2 belum tersedia:',ppRes.error.message); }
+    MASTER_ROWS=mRes.data||[]; MASTER_IDS=new Set(MASTER_ROWS.map(r=>r.participant_id));
+    SEKOLAH_MITRA=skRes.data||[];
+    FIN_CATS=fcRes.data||[];
+    FIN_BILLS=fbRes.data||[];
+    FIN_PAYMENTS=fpRes.data||[];
+    PAY_PROOFS=ppRes.data||[];
 
     renderStats();
     renderTable();
@@ -7079,6 +7125,12 @@ img:not(.mail-img-grid img){max-width:150px!important;max-height:130px!important
       try{
         const idoc=ifr.contentDocument;
         if(!idoc) return;
+        // Di mobile, tinggi iframe mengikuti isi email supaya pesan panjang
+        // tidak terpotong oleh tinggi panel tetap.
+        if(window.innerWidth<=860){
+          const contentHeight=Math.max(idoc.body?.scrollHeight||0,idoc.documentElement?.scrollHeight||0,420);
+          ifr.style.height=contentHeight+'px';
+        }
         idoc.querySelectorAll('img').forEach(img=>{
           img.style.cursor='zoom-in';
           img.addEventListener('click', (e)=>{
