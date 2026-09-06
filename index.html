@@ -166,6 +166,11 @@ header{position:sticky;top:0;z-index:50;background:#13314D;border-bottom:3px sol
 .fld select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231B3A66' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");background-repeat:no-repeat;background-position:right 12px center;background-size:15px;padding-right:34px}
 .fld-sec{grid-column:1/-1;font:800 .68rem var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin:4px 0 -2px;padding-top:12px;border-top:1px dashed var(--line)}
 .fld-sec:first-child{border-top:none;padding-top:0;margin-top:0}
+.fld-pass-wrap{position:relative}
+.fld-pass-wrap input{padding-right:44px!important}
+.fld-pass-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:var(--mut);cursor:pointer;border-radius:6px}
+.fld-pass-eye:hover{color:var(--navy)}
+.fld-pass-eye svg{width:19px;height:19px}
 #loginBtn{width:100%;justify-content:center;margin-top:6px}
 .err-txt{color:var(--red);font:600 .8rem var(--body);margin-top:10px;text-align:center;min-height:1em}
 
@@ -977,7 +982,7 @@ td.nama span{color:var(--mut);font-size:.78rem}
 
 /* ============ KELOLA EMAIL (gaya Gmail — flat, tanpa card) ============ */
 .mail-shell{background:transparent;border:none;border-radius:0}
-.mail-topbar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:16px 20px;background:#fff;border-top:4px solid var(--gold)}
+.mail-topbar{display:flex;gap:14px;flex-wrap:wrap;align-items:center;justify-content:space-between;padding:16px 20px;background:#fff;border-top:4px solid var(--gold);position:fixed;top:70px;left:0;right:0;z-index:40;width:100%;box-sizing:border-box}
 .mail-topbar .csel{min-width:190px;max-width:280px}
 .mail-topbar-r{display:flex;align-items:center;gap:10px;flex:1;min-width:260px}
 .mail-search{display:flex;align-items:center;gap:8px;background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:9px 16px;min-width:200px;flex:1;transition:.15s}
@@ -999,16 +1004,15 @@ td.nama span{color:var(--mut);font-size:.78rem}
 .mail-icon-btn{width:38px;height:38px;border-radius:50%;border:1.5px solid var(--line);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--navy);transition:.15s;flex-shrink:0}
 .mail-icon-btn svg{width:17px;height:17px;stroke:currentColor}
 .mail-icon-btn:hover{background:#EEF3FA;border-color:var(--navy)}
-.mail-shell{display:flex;flex-direction:column}
-.mail-topbar{flex-shrink:0}
-.mail-body{display:grid;grid-template-columns:184px 320px 1fr;gap:0;flex:1;min-height:480px;background:transparent;border-top:1.5px solid var(--line)}
-.mail-pagination{flex-shrink:0}
+.mail-shell{display:flex;flex-direction:column;padding-top:60px}
+
+.mail-body{display:grid;grid-template-columns:184px 320px 1fr;gap:0;flex:1;min-height:480px;background:transparent;border-top:1.5px solid var(--line);height:calc(100vh - 230px)}
 @media(max-width:980px){.mail-body{grid-template-columns:150px 280px 1fr}}
-@media(max-width:860px){.mail-body{grid-template-columns:1fr;height:auto}
-  .mail-side{border-right:none;border-bottom:1.5px solid var(--line)}
+@media(max-width:860px){.mail-body{grid-template-columns:1fr;height:auto;overflow-y:visible}
+  .mail-side{border-right:none;border-bottom:1.5px solid var(--line);position:static}
+  .mail-read{min-height:420px;position:static}
   .mail-folder-nav{display:flex;overflow-x:auto;gap:6px;padding:10px}
-  .mail-folder-nav button{white-space:nowrap}
-  .mail-list{max-height:320px}.mail-read{min-height:420px}}
+  .mail-folder-nav button{white-space:nowrap}}
 @media(max-width:760px){
   .mail-topbar{flex-direction:column;align-items:stretch;gap:10px}
   .mail-topbar .csel{max-width:none;width:100%}
@@ -1017,13 +1021,11 @@ td.nama span{color:var(--mut);font-size:.78rem}
   .mail-search input{min-width:0}
   .mail-topbar-r .mail-icon-btn{flex:0 0 auto;width:34px;height:34px}
   .mail-topbar-r .mail-icon-btn svg{width:15px;height:15px}
-  /* Pada layar kecil daftar email tidak lagi dipotong 320px. Biarkan seluruh
-     daftar halaman mengalir agar baris terakhir tidak terlihat terbelah. */
-  .mail-list{max-height:none;overflow:visible}
+  /* mail-list flow handled by mail-shell overflow now */
   .mail-read-body{overflow:auto;min-height:420px}
   .mail-read-body iframe{min-height:420px}
 }
-.mail-side{border-right:1.5px solid var(--line);padding:16px 10px;display:flex;flex-direction:column;gap:14px;overflow-y:auto}
+.mail-side{border-right:1.5px solid var(--line);padding:16px 10px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;background:#fff}
 .mail-compose-btn{display:flex;align-items:center;gap:9px;justify-content:center;background:var(--navy);color:#fff;border:none;border-radius:24px;padding:13px 16px;font:800 .84rem var(--body);cursor:pointer;box-shadow:0 3px 10px rgba(19,49,77,.25);transition:.15s}
 .mail-compose-btn:hover{background:var(--navy3);transform:translateY(-1px)}
 .mail-compose-btn svg{width:16px;height:16px;stroke:currentColor;flex-shrink:0}
@@ -1039,7 +1041,7 @@ td.nama span{color:var(--mut);font-size:.78rem}
   .mail-folder-nav button span{display:none}
   #secEmail .mail-side{padding-left:10px!important}
 }
-.mail-list{border-right:1.5px solid var(--line);overflow-y:auto;background:transparent}
+.mail-list{border-right:1.5px solid var(--line);background:transparent;overflow-y:auto;min-height:0}
 .mail-item{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:none;cursor:pointer;transition:.12s}
 .mail-item:hover{background:#F7F8FA;box-shadow:inset 0 0 0 9999px rgba(0,0,0,.015)}
 .mail-item.active{background:#EEF3FA}
@@ -1910,7 +1912,6 @@ td.kode{
   min-height:0;
 }
 @media(min-width:861px){
-  .mail-shell{height:calc(100vh - 105px);}
 }
 .mail-body>.mail-side,
 .mail-body>.mail-list,
@@ -1928,6 +1929,14 @@ td.kode{
   padding:16px 20px 4px;
   min-height:56px;
   box-sizing:border-box;
+  position:fixed;
+  bottom:0;
+  left:0;
+  right:0;
+  background:#fff;
+  border-top:1.5px solid var(--line);
+  z-index:40;
+  width:100%;
 }
 .mail-page-btn{
   width:36px;height:36px;border-radius:50%;
@@ -3094,14 +3103,21 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
         <div id="maAddBody">
           <div class="fld"><label>Label</label><input type="text" id="maLabel" placeholder="Contoh: Juara 199"></div>
           <div class="fld"><label>Alamat Email</label><input type="email" id="maEmail" placeholder="juara199@juaraind.com"></div>
-          <div class="fld"><label>Password Email (cPanel)</label><input type="password" id="maPassword" placeholder="Password mailbox asli, bukan password login admin" autocomplete="new-password"></div>
+          <div class="fld"><label>Password Email (cPanel)</label>
+            <div class="fld-pass-wrap">
+              <input type="password" id="maPassword" placeholder="Password mailbox asli, bukan password login admin" autocomplete="off" name="mailbox_pw_no_autofill" data-lpignore="true" data-1p-ignore data-form-type="other" spellcheck="false">
+              <span class="fld-pass-eye" id="toggleMaPass" role="button" tabindex="-1" aria-label="Tampilkan password">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+              </span>
+            </div>
+          </div>
           <div class="info-grid mail-server-settings" id="maServerSettings" hidden>
             <div class="fld"><label>IMAP Host</label><input type="text" id="maImapHost" value="mail.juaraind.com"></div>
             <div class="fld"><label>IMAP Port</label><input type="text" id="maImapPort" value="993"></div>
             <div class="fld"><label>SMTP Host</label><input type="text" id="maSmtpHost" value="mail.juaraind.com"></div>
             <div class="fld"><label>SMTP Port</label><input type="text" id="maSmtpPort" value="465"></div>
           </div>
-          <button class="btn b-navy sm" id="btnMailAccAdd" style="margin-top:6px">💾 Simpan Akun</button>
+          <button type="button" class="btn b-navy sm" id="btnMailAccAdd" tabindex="0" style="margin-top:6px">💾 Simpan Akun</button>
           <p class="err-txt" id="maErr"></p>
         </div>
       </div>
@@ -3668,6 +3684,12 @@ if(toggleLoginPass){
   const toggle=()=>{ const input=$('#lgPass'); input.type=input.type==='password'?'text':'password'; };
   toggleLoginPass.addEventListener('click',toggle);
   toggleLoginPass.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();} });
+}
+const toggleMaPass=$('#toggleMaPass');
+if(toggleMaPass){
+  const toggle=()=>{ const input=$('#maPassword'); input.type=input.type==='password'?'text':'password'; };
+  toggleMaPass.addEventListener('click',toggle);
+  toggleMaPass.addEventListener('keydown',e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();} });
 }
 
 $('#btnLogout').addEventListener('click', async ()=>{
@@ -6668,6 +6690,20 @@ async function initMailPanel(){
   }
 }
 
+// FIX: saat Edge Function menolak request dengan status non-2xx (400/500),
+// supabase-js hanya kasih pesan generik "Edge Function returned a non-2xx
+// status code" di error.message, padahal pesan yang sebenarnya (mis. "Password
+// salah...") sudah ada di body response. Ambil dari sana dulu kalau tersedia.
+async function fnErrorMessage(error, fallback){
+  try{
+    if(error?.context && typeof error.context.json==='function'){
+      const body=await error.context.clone().json();
+      if(body?.error) return body.error;
+    }
+  }catch{ /* body bukan JSON atau sudah terpakai, pakai fallback di bawah */ }
+  return error?.message || fallback;
+}
+
 const ACC_TRASH_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
 const ACC_BELL_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
 const ACC_KEY_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>';
@@ -6698,13 +6734,11 @@ function renderMailAccList(){
         <span>${escapeHtml(a.email)}</span>
       </div>
       <button class="mail-acc-watch${a.watch_notif?' on':''}" data-watch-acc="${a.id}" title="${watchTitle}">${ACC_BELL_SVG}</button>
-      <button class="mail-acc-key" data-key-acc="${a.id}" data-key-email="${escapeHtml(a.email)}" title="Ubah password mailbox">${ACC_KEY_SVG}</button>
       <button class="mail-acc-del" data-del-acc="${a.id}" title="Hapus akun">${ACC_TRASH_SVG}</button>
     </div>`;
   }).join('');
   wrap.querySelectorAll('[data-del-acc]').forEach(b=>b.addEventListener('click', ()=>deleteMailAccount(b.dataset.delAcc)));
   wrap.querySelectorAll('[data-watch-acc]').forEach(b=>b.addEventListener('click', ()=>toggleMailWatch(b.dataset.watchAcc)));
-  wrap.querySelectorAll('[data-key-acc]').forEach(b=>b.addEventListener('click', ()=>updateMailAccountPassword(b.dataset.keyAcc,b.dataset.keyEmail)));
 }
 
 $('#maSearch')?.addEventListener('input', renderMailAccList);
@@ -6729,9 +6763,10 @@ $('#btnMailAccAdvanced')?.addEventListener('click', ()=>{
 async function updateMailAccountPassword(id,email){
   const password=prompt('Masukkan password mailbox terbaru untuk '+email+':');
   if(!password)return;
+  toast('Memverifikasi ke server mail…','ok');
   try{
     const {data,error}=await sb.functions.invoke('email-accounts',{body:{action:'update_password',id,password}});
-    if(error)throw new Error(error.message||'Gagal menyimpan');
+    if(error)throw new Error(await fnErrorMessage(error,'Gagal menyimpan'));
     if(data?.error)throw new Error(data.error);
     toast('Password untuk '+email+' berhasil diperbarui ✓','ok');
   }catch(err){
@@ -6876,6 +6911,15 @@ async function deleteMailAccount(id){
   }
 }
 
+// FIX: Safari (default) tidak memasukkan <button> ke urutan Tab kecuali "Full
+// Keyboard Access" diaktifkan di System Settings, jadi Tab dari field password
+// bisa "kabur" ke UI browser. Tambahan jaring pengaman: tekan Enter di salah
+// satu field akun langsung memicu Simpan Akun, tidak bergantung pada Tab/fokus.
+['maLabel','maEmail','maPassword'].forEach(id=>{
+  $('#'+id)?.addEventListener('keydown', e=>{
+    if(e.key==='Enter'){ e.preventDefault(); $('#btnMailAccAdd').click(); }
+  });
+});
 $('#btnMailAccAdd').addEventListener('click', async ()=>{
   // FIX: sebelumnya field ini memakai ADMIN_LOGIN_PASSWORD (password login admin ke
   // dashboard ini), padahal itu BUKAN password mailbox cPanel yang sebenarnya —
@@ -6889,10 +6933,10 @@ $('#btnMailAccAdd').addEventListener('click', async ()=>{
   $('#maErr').textContent='';
   if(!email){ $('#maErr').textContent='Alamat email wajib diisi.'; return; }
   if(!password){ $('#maErr').textContent='Password mailbox (dari cPanel) wajib diisi.'; return; }
-  const btn=$('#btnMailAccAdd'); const orig=btn.textContent; btn.disabled=true; btn.textContent='Menyimpan…';
+  const btn=$('#btnMailAccAdd'); const orig=btn.textContent; btn.disabled=true; btn.textContent='Memverifikasi ke server mail…';
   try{
     const {data,error}=await sb.functions.invoke('email-accounts',{body:{action:'add',label,email,password,imap_host,imap_port,smtp_host,smtp_port}});
-    if(error)throw new Error(error.message||'Gagal memanggil layanan email');
+    if(error)throw new Error(await fnErrorMessage(error,'Gagal memanggil layanan email'));
     if(data?.error)throw new Error(data.error);
     toast('Akun email ditambahkan ✓','ok');
     $('#maLabel').value=''; $('#maEmail').value=''; $('#maPassword').value='';
@@ -6913,7 +6957,7 @@ $('#btnMailAccAdd').addEventListener('click', async ()=>{
 async function invokeMailImap(body){
   const call=async()=>{
     const {data,error}=await sb.functions.invoke('email-imap',{body});
-    if(error)throw new Error(error.message||'Gagal memanggil layanan email');
+    if(error)throw new Error(await fnErrorMessage(error,'Gagal memanggil layanan email'));
     if(data?.error)throw new Error(data.error);
     return data;
   };
@@ -7309,7 +7353,20 @@ $('#btnMailAccounts').addEventListener('click', ()=>{
   $('#mailAccModal').classList.add('show');
 });
 $('#btnCloseMailAcc').addEventListener('click', ()=>$('#mailAccModal').classList.remove('show'));
-$('#mailAccModal').addEventListener('click', e=>{ if(e.target.id==='mailAccModal')$('#mailAccModal').classList.remove('show'); });
+// FIX: sebelumnya modal ini tertutup sendiri kalau user mengklik-drag untuk
+// menyeleksi/mengoreksi teks di dalam field (misal membetulkan password yang
+// salah) lalu tanpa sengaja melepas klik (mouseup) di luar kotak popup, di area
+// backdrop gelap. Event "click" browser mengikuti titik mouseup, jadi target-nya
+// jadi backdrop meski proses klik dimulai dari dalam popup — akibatnya popup
+// dianggap "diklik di luar" dan tertutup. Sekarang popup hanya ditutup kalau
+// mousedown DAN click sama-sama terjadi tepat di backdrop (klik utuh di luar
+// kotak), bukan cuma dari titik mouseup-nya saja.
+let mailAccMouseDownOnBackdrop=false;
+$('#mailAccModal').addEventListener('mousedown', e=>{ mailAccMouseDownOnBackdrop=(e.target.id==='mailAccModal'); });
+$('#mailAccModal').addEventListener('click', e=>{
+  if(e.target.id==='mailAccModal' && mailAccMouseDownOnBackdrop) $('#mailAccModal').classList.remove('show');
+  mailAccMouseDownOnBackdrop=false;
+});
 
 let MC_ATTACHMENTS=[]; // {file, id}
 const MC_ATTACH_MAX_TOTAL=15*1024*1024; // 15MB
