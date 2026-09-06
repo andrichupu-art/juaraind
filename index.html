@@ -1091,6 +1091,9 @@ td.nama span{color:var(--mut);font-size:.78rem}
 .mail-acc-watch:hover{border-color:var(--gold);color:var(--gold)}
 .mail-acc-watch.on{border-color:var(--gold);color:var(--gold);background:#FFF7E3}
 .mail-acc-watch.on svg{fill:var(--gold)}
+.mail-acc-key{width:28px;height:28px;border-radius:8px;border:1.5px solid var(--line);background:#fff;color:var(--mut);display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:.15s}
+.mail-acc-key svg{width:14px;height:14px}
+.mail-acc-key:hover{border-color:var(--navy);color:var(--navy)}
 .mail-acc-row-info{position:relative}
 .mail-acc-unread{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--red);color:#fff;font:800 .66rem var(--body);margin-left:7px;vertical-align:middle}
 .sb-link{position:relative}
@@ -3091,6 +3094,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
         <div id="maAddBody">
           <div class="fld"><label>Label</label><input type="text" id="maLabel" placeholder="Contoh: Juara 199"></div>
           <div class="fld"><label>Alamat Email</label><input type="email" id="maEmail" placeholder="juara199@juaraind.com"></div>
+          <div class="fld"><label>Password Email (cPanel)</label><input type="password" id="maPassword" placeholder="Password mailbox asli, bukan password login admin" autocomplete="new-password"></div>
           <div class="info-grid mail-server-settings" id="maServerSettings" hidden>
             <div class="fld"><label>IMAP Host</label><input type="text" id="maImapHost" value="mail.juaraind.com"></div>
             <div class="fld"><label>IMAP Port</label><input type="text" id="maImapPort" value="993"></div>
@@ -6666,6 +6670,7 @@ async function initMailPanel(){
 
 const ACC_TRASH_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
 const ACC_BELL_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
+const ACC_KEY_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>';
 
 function renderMailAccList(){
   const q=($('#maSearch')?.value||'').trim().toLowerCase();
@@ -6693,11 +6698,13 @@ function renderMailAccList(){
         <span>${escapeHtml(a.email)}</span>
       </div>
       <button class="mail-acc-watch${a.watch_notif?' on':''}" data-watch-acc="${a.id}" title="${watchTitle}">${ACC_BELL_SVG}</button>
+      <button class="mail-acc-key" data-key-acc="${a.id}" data-key-email="${escapeHtml(a.email)}" title="Ubah password mailbox">${ACC_KEY_SVG}</button>
       <button class="mail-acc-del" data-del-acc="${a.id}" title="Hapus akun">${ACC_TRASH_SVG}</button>
     </div>`;
   }).join('');
   wrap.querySelectorAll('[data-del-acc]').forEach(b=>b.addEventListener('click', ()=>deleteMailAccount(b.dataset.delAcc)));
   wrap.querySelectorAll('[data-watch-acc]').forEach(b=>b.addEventListener('click', ()=>toggleMailWatch(b.dataset.watchAcc)));
+  wrap.querySelectorAll('[data-key-acc]').forEach(b=>b.addEventListener('click', ()=>updateMailAccountPassword(b.dataset.keyAcc,b.dataset.keyEmail)));
 }
 
 $('#maSearch')?.addEventListener('input', renderMailAccList);
@@ -6715,6 +6722,23 @@ $('#btnMailAccAdvanced')?.addEventListener('click', ()=>{
   btn.title=show?'Sembunyikan pengaturan server':'Tampilkan pengaturan server';
   btn.setAttribute('aria-label',btn.title);
 });
+
+// FIX: dulu satu-satunya cara memperbaiki password mailbox yang salah/berubah
+// adalah hapus akun lalu tambah ulang. Sekarang bisa langsung ganti password
+// tanpa kehilangan pengaturan akun (label, watch_notif, dll).
+async function updateMailAccountPassword(id,email){
+  const password=prompt('Masukkan password mailbox terbaru untuk '+email+':');
+  if(!password)return;
+  try{
+    const {data,error}=await sb.functions.invoke('email-accounts',{body:{action:'update_password',id,password}});
+    if(error)throw new Error(error.message||'Gagal menyimpan');
+    if(data?.error)throw new Error(data.error);
+    toast('Password untuk '+email+' berhasil diperbarui ✓','ok');
+  }catch(err){
+    console.error(err);
+    toast('Gagal mengubah password: '+(err.message||'terjadi kesalahan'),'err');
+  }
+}
 
 async function toggleMailWatch(id){
   const acc=MAIL_ACCOUNTS.find(a=>a.id===id);
@@ -6853,21 +6877,25 @@ async function deleteMailAccount(id){
 }
 
 $('#btnMailAccAdd').addEventListener('click', async ()=>{
-  const label=$('#maLabel').value.trim(), email=$('#maEmail').value.trim(), password=ADMIN_LOGIN_PASSWORD||$('#lgPass').value;
+  // FIX: sebelumnya field ini memakai ADMIN_LOGIN_PASSWORD (password login admin ke
+  // dashboard ini), padahal itu BUKAN password mailbox cPanel yang sebenarnya —
+  // akibatnya akun IMAP gagal auth terus meski password mailbox tidak pernah diubah.
+  // Sekarang wajib diisi manual lewat field #maPassword (password mailbox asli).
+  const label=$('#maLabel').value.trim(), email=$('#maEmail').value.trim(), password=$('#maPassword').value;
   const imap_host=$('#maImapHost').value.trim()||'mail.juaraind.com';
   const imap_port=parseInt($('#maImapPort').value)||993;
   const smtp_host=$('#maSmtpHost').value.trim()||'mail.juaraind.com';
   const smtp_port=parseInt($('#maSmtpPort').value)||465;
   $('#maErr').textContent='';
   if(!email){ $('#maErr').textContent='Alamat email wajib diisi.'; return; }
-  if(!password){ $('#maErr').textContent='Password login belum tersedia. Silakan keluar lalu masuk kembali.'; return; }
+  if(!password){ $('#maErr').textContent='Password mailbox (dari cPanel) wajib diisi.'; return; }
   const btn=$('#btnMailAccAdd'); const orig=btn.textContent; btn.disabled=true; btn.textContent='Menyimpan…';
   try{
     const {data,error}=await sb.functions.invoke('email-accounts',{body:{action:'add',label,email,password,imap_host,imap_port,smtp_host,smtp_port}});
     if(error)throw new Error(error.message||'Gagal memanggil layanan email');
     if(data?.error)throw new Error(data.error);
     toast('Akun email ditambahkan ✓','ok');
-    $('#maLabel').value=''; $('#maEmail').value='';
+    $('#maLabel').value=''; $('#maEmail').value=''; $('#maPassword').value='';
     loadMailAccounts();
   }catch(err){
     console.error(err);
