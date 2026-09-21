@@ -3377,7 +3377,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 <div class="modal" id="mailAccModal">
   <div class="box" style="max-width:560px">
     <div class="box-h">
-      <div style="min-width:0"><h3>⚙ Kelola Akun Email</h3><p>IMAP/SMTP — mail.juaraind.com</p></div>
+      <div style="min-width:0"><h3>⚙ Kelola Akun Email</h3><p>IMAP/SMTP — toscana.id.rapidplex.com</p></div>
       <div class="mail-acc-head-actions">
         <button type="button" class="mail-acc-advanced-toggle" id="btnMailAccAdvanced" title="Tampilkan pengaturan server" aria-label="Tampilkan pengaturan server" aria-expanded="false">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></svg>
@@ -3416,9 +3416,9 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
             </div>
           </div>
           <div class="info-grid mail-server-settings" id="maServerSettings" hidden>
-            <div class="fld"><label>IMAP Host</label><input type="text" id="maImapHost" value="mail.juaraind.com"></div>
+            <div class="fld"><label>IMAP Host</label><input type="text" id="maImapHost" value="toscana.id.rapidplex.com"></div>
             <div class="fld"><label>IMAP Port</label><input type="text" id="maImapPort" value="993"></div>
-            <div class="fld"><label>SMTP Host</label><input type="text" id="maSmtpHost" value="mail.juaraind.com"></div>
+            <div class="fld"><label>SMTP Host</label><input type="text" id="maSmtpHost" value="toscana.id.rapidplex.com"></div>
             <div class="fld"><label>SMTP Port</label><input type="text" id="maSmtpPort" value="465"></div>
           </div>
           <button type="button" class="btn b-navy sm" id="btnMailAccAdd" tabindex="0" style="margin-top:6px">💾 Simpan Akun</button>
@@ -7230,9 +7230,9 @@ $('#btnMailAccAdd').addEventListener('click', async ()=>{
   // akibatnya akun IMAP gagal auth terus meski password mailbox tidak pernah diubah.
   // Sekarang wajib diisi manual lewat field #maPassword (password mailbox asli).
   const label=$('#maLabel').value.trim(), email=$('#maEmail').value.trim(), password=$('#maPassword').value;
-  const imap_host=$('#maImapHost').value.trim()||'mail.juaraind.com';
+  const imap_host=$('#maImapHost').value.trim()||'toscana.id.rapidplex.com';
   const imap_port=parseInt($('#maImapPort').value)||993;
-  const smtp_host=$('#maSmtpHost').value.trim()||'mail.juaraind.com';
+  const smtp_host=$('#maSmtpHost').value.trim()||'toscana.id.rapidplex.com';
   const smtp_port=parseInt($('#maSmtpPort').value)||465;
   $('#maErr').textContent='';
   if(!email){ $('#maErr').textContent='Alamat email wajib diisi.'; return; }
@@ -7253,7 +7253,7 @@ $('#btnMailAccAdd').addEventListener('click', async ()=>{
   }
 });
 
-// FIX: cold-connect ke server IMAP (mail.juaraind.com) kadang lambat kirim
+// FIX: cold-connect ke server IMAP (toscana.id.rapidplex.com) kadang lambat kirim
 // greeting dan kena timeout di Edge Function (lihat catatan di email-imap/index.ts),
 // tapi percobaan kedua hampir selalu berhasil dalam hitungan detik karena instance
 // function/koneksi sudah "hangat". Daripada langsung menampilkan error ke admin,
