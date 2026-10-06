@@ -3597,6 +3597,7 @@ syncAppViewport();
 /* ============ AUTH ============ */
 let MAIL_LOADED=false, MAIL_ACCOUNTS=[], MAIL_ACTIVE=null, MAIL_MSGS=[], MAIL_OPEN=null, MAIL_FOLDER='INBOX', MAIL_SELECTED=new Set(), MAIL_FOLDERS=[];
 let MAIL_PAGE=1; const MAIL_PAGE_SIZE=10;
+let MAIL_FOLDER_REQUEST_ID=0, MAIL_LIST_REQUEST_ID=0, MAIL_READ_REQUEST_ID=0;
 let MAIL_WATCH_UNSEEN=new Map(), MAIL_WATCH_BASELINE=new Map(), MAIL_WATCH_TIMER=null, MAIL_WATCH_BASELINED=false;
 const MAIL_WATCH_INTERVAL_MS=60000;
 
@@ -6957,10 +6958,11 @@ async function invokeMailImap(body){
   }
 }
 
-async function loadMailFolders(){
+async function loadMailFolders(accountId=MAIL_ACTIVE){
+  const requestId=++MAIL_FOLDER_REQUEST_ID;
   let folders=[{path:'INBOX',name:'Kotak Masuk'}];
   try{
-    const data=await invokeMailImap({action:'folders',account_id:MAIL_ACTIVE});
+    const data=await invokeMailImap({action:'folders',account_id:accountId});
     folders=(data?.folders?.length?data.folders:folders);
     // FIX: urutan folder yang dikembalikan server IMAP tidak selalu menaruh INBOX
     // di posisi pertama (kadang "Arsip"/folder lain lebih dulu), jadi daftar
@@ -6970,6 +6972,7 @@ async function loadMailFolders(){
   }catch(err){
     console.error(err);
   }
+  if(requestId!==MAIL_FOLDER_REQUEST_ID || accountId!==MAIL_ACTIVE)return;
   // FIX: Kotak Masuk (INBOX) selalu jadi folder default yang terpilih saat
   // akun dibuka/diganti, bukan folder terakhir yang kebetulan ada di urutan pertama.
   MAIL_FOLDERS=folders;
@@ -6981,24 +6984,28 @@ async function loadMailFolders(){
   $('#mailFolderNav').querySelectorAll('button').forEach(b=>b.addEventListener('click', ()=>{
     if(b.dataset.folder===MAIL_FOLDER)return;
     MAIL_FOLDER=b.dataset.folder; MAIL_OPEN=null; MAIL_PAGE=1;
+    MAIL_READ_REQUEST_ID++;
     $('#mailFolderNav').querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));
     $('#mailRead').innerHTML=renderMailEmptyState('Belum ada email dipilih', 'Klik salah satu email untuk membaca isinya.');
-    loadMailList();
+    loadMailList(accountId, MAIL_FOLDER);
   }));
 }
 
-async function loadMailList(){
+async function loadMailList(accountId=MAIL_ACTIVE, folder=MAIL_FOLDER){
+  const requestId=++MAIL_LIST_REQUEST_ID;
   MAIL_SELECTED.clear();
   MAIL_PAGE=1;
   updateBulkDeleteBtn();
-  if(!MAIL_ACTIVE){ $('#mailList').innerHTML='<div class="mail-empty">Pilih akun email terlebih dahulu.</div>'; return; }
+  if(!accountId){ $('#mailList').innerHTML='<div class="mail-empty">Pilih akun email terlebih dahulu.</div>'; return; }
   $('#mailList').innerHTML='<div class="mail-empty">Memuat email…</div>';
   try{
-    const data=await invokeMailImap({action:'list',account_id:MAIL_ACTIVE,folder:MAIL_FOLDER,limit:20});
+    const data=await invokeMailImap({action:'list',account_id:accountId,folder,limit:20});
+    if(requestId!==MAIL_LIST_REQUEST_ID || accountId!==MAIL_ACTIVE || folder!==MAIL_FOLDER)return;
     MAIL_MSGS=data?.messages||[];
     renderMailList();
   }catch(err){
     console.error(err);
+    if(requestId!==MAIL_LIST_REQUEST_ID || accountId!==MAIL_ACTIVE || folder!==MAIL_FOLDER)return;
     $('#mailList').innerHTML='<div class="mail-empty">Gagal memuat: '+escapeHtml(err.message)+'</div>';
   }
 }
@@ -7111,19 +7118,25 @@ async function deleteSelectedMail(){
 $('#btnMailBulkDelete')?.addEventListener('click', deleteSelectedMail);
 
 async function openMailMessage(uid){
+  const accountId=MAIL_ACTIVE;
+  const folder=MAIL_FOLDER;
+  const requestId=++MAIL_READ_REQUEST_ID;
+  const sentFolder=MAIL_FOLDERS.find(f=>f.path===folder)?.name==='Terkirim';
   MAIL_OPEN=uid;
   renderMailList();
   $('#mailRead').innerHTML='<div class="mail-empty">Memuat pesan…</div>';
   try{
-    const data=await invokeMailImap({action:'read',account_id:MAIL_ACTIVE,folder:MAIL_FOLDER,uid});
-    const msg=data.message;
+    const data=await invokeMailImap({action:'read',account_id:accountId,folder,uid});
+    if(requestId!==MAIL_READ_REQUEST_ID || accountId!==MAIL_ACTIVE || folder!==MAIL_FOLDER || MAIL_OPEN!==uid)return;
+    const msg=data?.message;
+    if(!msg || typeof msg!=='object')throw new Error('Isi email tidak diterima dari server. Coba muat ulang daftar email.');
     $('#mailRead').innerHTML=`
       <div class="mail-read-hd">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
           <h4>${escapeHtml(msg.subject||'(tanpa subjek)')}</h4>
         </div>
-        <div class="mail-read-meta"><span class="mi-avatar">${escapeHtml(mailInitial(isSentFolder()?msg.to:msg.from))}</span><span><b>${escapeHtml((isSentFolder()?msg.to:msg.from)||'-')}</b> · ${fmtMailDate(msg.date)}</span></div>
-        ${isSentFolder() && msg.from ? `<div style="font:600 .78rem var(--body);color:var(--mut);margin-top:2px">Dari: ${escapeHtml(msg.from)}</div>` : ''}
+        <div class="mail-read-meta"><span class="mi-avatar">${escapeHtml(mailInitial(sentFolder?msg.to:msg.from))}</span><span><b>${escapeHtml((sentFolder?msg.to:msg.from)||'-')}</b> · ${fmtMailDate(msg.date)}</span></div>
+        ${sentFolder && msg.from ? `<div style="font:600 .78rem var(--body);color:var(--mut);margin-top:2px">Dari: ${escapeHtml(msg.from)}</div>` : ''}
         ${msg.attachments && msg.attachments.length ? `
         <div class="mail-attach-list" id="mailReadAttachList" style="display:flex;flex-direction:column;gap:6px;margin-top:12px">
           ${msg.attachments.length>1 ? `
@@ -7245,7 +7258,9 @@ img:not(.mail-img-grid img){max-width:150px!important;max-height:130px!important
     checkMailNotifications();
   }catch(err){
     console.error(err);
-    $('#mailRead').innerHTML='<div class="mail-empty">Gagal memuat pesan: '+escapeHtml(err.message)+'</div>';
+    if(requestId===MAIL_READ_REQUEST_ID && accountId===MAIL_ACTIVE && folder===MAIL_FOLDER && MAIL_OPEN===uid){
+      $('#mailRead').innerHTML='<div class="mail-empty">Gagal memuat pesan: '+escapeHtml(err.message)+'</div>';
+    }
   }
 }
 
@@ -7343,11 +7358,18 @@ async function sendMailReply(msg){
 }
 
 $('#mailAcc').addEventListener('change', ()=>{
-  MAIL_ACTIVE=$('#mailAcc').value; MAIL_OPEN=null;
+  MAIL_ACTIVE=$('#mailAcc').value; MAIL_FOLDER='INBOX'; MAIL_OPEN=null;
+  const accountId=MAIL_ACTIVE;
+  MAIL_MSGS=[];
+  MAIL_SELECTED.clear();
+  MAIL_LIST_REQUEST_ID++;
+  MAIL_READ_REQUEST_ID++;
+  updateBulkDeleteBtn();
+  $('#mailList').innerHTML='<div class="mail-empty">Memuat email…</div>';
   $('#mailRead').innerHTML='<div class="mail-empty"><p>Pilih email untuk membaca</p></div>';
-  // FIX: sama seperti di loadMailAccounts() — jalankan paralel, bukan berurutan.
-  loadMailFolders();
-  loadMailList();
+  loadMailFolders(accountId).then(()=>{
+    if(accountId===MAIL_ACTIVE)loadMailList(accountId, MAIL_FOLDER);
+  });
 });
 $('#btnMailRefresh').addEventListener('click', loadMailList);
 
