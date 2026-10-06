@@ -6962,7 +6962,7 @@ async function loadMailFolders(){
     if(b.dataset.folder===MAIL_FOLDER)return;
     MAIL_FOLDER=b.dataset.folder; MAIL_OPEN=null; MAIL_PAGE=1;
     $('#mailFolderNav').querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));
-    $('#mailRead').innerHTML='<div class="mail-empty"><p>Pilih email untuk membaca</p></div>';
+    $('#mailRead').innerHTML=renderMailEmptyState('Belum ada email dipilih', 'Klik salah satu email untuk membaca isinya.');
     loadMailList();
   }));
 }
@@ -6986,17 +6986,33 @@ async function loadMailList(){
 function isSentFolder(){
   return MAIL_FOLDERS.find(f=>f.path===MAIL_FOLDER)?.name==='Terkirim';
 }
+function renderMailEmptyState(title, subtitle='Silakan pilih folder lain atau muat ulang.'){
+  const folderName=MAIL_FOLDERS.find(f=>f.path===MAIL_FOLDER)?.name||'folder ini';
+  return `
+    <div class="mail-empty">
+      <svg viewBox="0 0 24 24" width="42" height="42" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v9A2.5 2.5 0 0 1 17.5 19h-11A2.5 2.5 0 0 1 4 16.5v-9Z"/>
+        <path d="M4.5 7.5 12 13l7.5-5.5"/>
+      </svg>
+      <b style="font:800 .9rem var(--disp);color:var(--ink);margin-top:2px">${escapeHtml(title)}</b>
+      <span>${escapeHtml(subtitle.replace('{folder}', folderName))}</span>
+    </div>`;
+}
 function renderMailList(){
   const pagEl=$('#mailPagination');
   const sentFolder=isSentFolder();
-  if(!MAIL_MSGS.length){ $('#mailList').innerHTML='<div class="mail-empty">Tidak ada email di folder ini.</div>'; MAIL_SELECTED.clear(); updateBulkDeleteBtn(); if(pagEl)pagEl.style.visibility='hidden'; return; }
+  if(!MAIL_MSGS.length){
+    const folderLabel=MAIL_FOLDERS.find(f=>f.path===MAIL_FOLDER)?.name||'folder ini';
+    $('#mailList').innerHTML=renderMailEmptyState('Inbox masih kosong', `Belum ada email di ${folderLabel}.`);
+    MAIL_SELECTED.clear(); updateBulkDeleteBtn(); if(pagEl)pagEl.style.visibility='hidden'; return;
+  }
   const q=($('#mailSearch')?.value||'').trim().toLowerCase();
   const filtered=q ? MAIL_MSGS.filter(m=>
     (m.from||'').toLowerCase().includes(q) ||
     (m.to||'').toLowerCase().includes(q) ||
     (m.subject||'').toLowerCase().includes(q)
   ) : MAIL_MSGS;
-  if(!filtered.length){ $('#mailList').innerHTML='<div class="mail-empty">Tidak ada email yang cocok dengan pencarian.</div>'; if(pagEl)pagEl.style.visibility='hidden'; return; }
+  if(!filtered.length){ $('#mailList').innerHTML=renderMailEmptyState('Tidak ada hasil pencarian', 'Coba kata kunci lain atau pilih folder lain.'); if(pagEl)pagEl.style.visibility='hidden'; return; }
   const totalPages=Math.max(1,Math.ceil(filtered.length/MAIL_PAGE_SIZE));
   if(MAIL_PAGE>totalPages)MAIL_PAGE=totalPages;
   if(MAIL_PAGE<1)MAIL_PAGE=1;
@@ -7065,7 +7081,7 @@ async function deleteSelectedMail(){
       await invokeMailImap({action:'delete',account_id:MAIL_ACTIVE,folder:MAIL_FOLDER,uid});
       MAIL_MSGS=MAIL_MSGS.filter(m=>m.uid!==uid);
       MAIL_SELECTED.delete(uid);
-      if(MAIL_OPEN===uid){ MAIL_OPEN=null; $('#mailRead').innerHTML='<div class="mail-empty"><p>Pilih email untuk membaca</p></div>'; }
+      if(MAIL_OPEN===uid){ MAIL_OPEN=null; $('#mailRead').innerHTML=renderMailEmptyState('Belum ada email dipilih', 'Klik salah satu email untuk membaca isinya.'); }
     }catch(err){ console.error(err); failCount++; }
   }
   renderMailList();
