@@ -31,6 +31,7 @@
   --sky:#2E9BD6; --green:#17B26A; --red:#E5484D;
   --disp:'Sora',sans-serif; --body:'Plus Jakarta Sans',sans-serif;
   --mono:ui-monospace,'Cascadia Mono','Segoe UI Mono',monospace;
+  --app-vh:1vh;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html,body{-webkit-touch-callout:none}
@@ -41,7 +42,7 @@ html{scroll-behavior:smooth;background-color:var(--paper);
 html::-webkit-scrollbar{display:none}
 body::-webkit-scrollbar{display:none}
 body{scrollbar-width:none;-ms-overflow-style:none}
-body{font-family:var(--body);color:var(--ink);line-height:1.55;min-height:100vh}
+body{font-family:var(--body);color:var(--ink);line-height:1.55;min-height:calc(var(--app-vh, 1vh) * 100)}
 img{max-width:100%} a{color:inherit;text-decoration:none} button,input,select{font-family:inherit}
 button{cursor:pointer}
 button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{outline:3px solid rgba(46,155,214,.75);outline-offset:2px}
@@ -98,7 +99,7 @@ header{position:sticky;top:0;z-index:50;background:#13314D;border-bottom:3px sol
 .app-shell{display:none}
 .app-shell.show{display:flex;align-items:flex-start}
 .sidebar{width:236px;flex-shrink:0;background:#13314D;border-right:3px solid var(--gold);
-  position:sticky;top:70px;height:calc(100vh - 70px);overflow-y:auto;
+  position:sticky;top:70px;height:calc((var(--app-vh, 1vh) * 100) - 70px);overflow-y:auto;
   transition:margin-left .25s ease,transform .25s ease;
   scrollbar-width:none;-ms-overflow-style:none}
 .sidebar::-webkit-scrollbar{display:none}
@@ -151,7 +152,7 @@ header{position:sticky;top:0;z-index:50;background:#13314D;border-bottom:3px sol
 .btn[disabled]{opacity:.5;pointer-events:none}
 
 /* ============ LOGIN ============ */
-#loginView{min-height:calc(100vh - 70px);display:flex;align-items:center;justify-content:center;padding:24px}
+#loginView{min-height:calc((var(--app-vh, 1vh) * 100) - 70px);display:flex;align-items:center;justify-content:center;padding:24px}
 .gate{background:var(--card);border-radius:22px;border:1.5px solid var(--line);max-width:400px;width:100%;overflow:hidden}
 .gate-logo{background:radial-gradient(circle at 30% 20%,#1E4478 0%,#0B1F3A 65%,#081527 100%);padding:34px 30px 28px;display:flex;align-items:center;justify-content:center}
 .gate-logo svg{width:210px;height:auto}
@@ -1006,7 +1007,7 @@ td.nama span{color:var(--mut);font-size:.78rem}
 .mail-icon-btn:hover{background:#EEF3FA;border-color:var(--navy)}
 .mail-shell{display:flex;flex-direction:column;padding-top:50px}
 
-.mail-body{display:grid;grid-template-columns:184px 320px 1fr;gap:0;flex:1;min-height:0;background:var(--mail-bg,#F2EFEA);border-top:none;height:calc(100vh - 166px)}
+.mail-body{display:grid;grid-template-columns:184px 320px 1fr;gap:0;flex:1;min-height:0;background:var(--mail-bg,#F2EFEA);border-top:none;height:calc((var(--app-vh, 1vh) * 100) - 166px)}
 @media(max-width:980px){.mail-body{grid-template-columns:150px 280px 1fr}}
 @media(max-width:860px){.mail-body{grid-template-columns:1fr;height:auto;overflow-y:visible}
   .mail-side{border-right:none;border-bottom:1.5px solid var(--line);position:static}
@@ -1067,7 +1068,7 @@ td.nama span{color:var(--mut);font-size:.78rem}
 .mail-reply textarea{flex:1;border:1.5px solid var(--line);border-radius:22px;padding:12px 18px;font:600 .85rem var(--body);resize:vertical;min-height:44px;max-height:140px;background:#F7F8FA}
 .mail-reply textarea:focus{outline:none;border-color:var(--navy);background:#fff}
 .mail-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;min-height:220px;color:var(--mut);gap:8px;padding:40px;text-align:center;font:600 .82rem var(--body)}
-.mail-shell-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:calc(100vh - 250px);color:var(--mut);font:700 .88rem var(--body)}
+.mail-shell-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:calc((var(--app-vh, 1vh) * 100) - 250px);color:var(--mut);font:700 .88rem var(--body)}
 .mail-loading-svg{width:150px;height:110px}
 .mail-acc-item{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
 .mail-acc-item:last-child{border-bottom:none}
@@ -1161,7 +1162,7 @@ td.nama span{color:var(--mut);font-size:.78rem}
 
 /* Detail peserta sebagai panel samping kiri, tinggi penuh */
 #detailModal{justify-content:flex-start;align-items:stretch;padding:0}
-#detailModal .box{max-width:520px;width:100%;height:100vh;border-radius:0;display:flex;flex-direction:column;animation:panelIn .22s ease-out}
+#detailModal .box{max-width:520px;width:100%;height:calc(var(--app-vh, 1vh) * 100);border-radius:0;display:flex;flex-direction:column;animation:panelIn .22s ease-out}
 #detailModal .box-body{max-height:none;flex:1;overflow-y:auto}
 @keyframes panelIn{from{transform:translateX(-24px);opacity:0}to{transform:translateX(0);opacity:1}}
 @media(max-width:560px){#detailModal .box{max-width:100%}}
@@ -1175,7 +1176,7 @@ td.nama span{color:var(--mut);font-size:.78rem}
 #mailComposeModal .box{
   max-width:520px!important;
   width:100%;
-  height:100vh;
+  height:calc(var(--app-vh, 1vh) * 100);
   border-radius:0;
   display:flex;
   flex-direction:column;
@@ -1194,7 +1195,7 @@ td.nama span{color:var(--mut);font-size:.78rem}
 #mailAccModal .box{
   max-width:560px!important;
   width:100%;
-  height:100vh;
+  height:calc(var(--app-vh, 1vh) * 100);
   border-radius:0;
   display:flex;
   flex-direction:column;
@@ -1264,7 +1265,7 @@ td.nama span{color:var(--mut);font-size:.78rem}
 
 /* Kelola Dokumen (data master) juga sebagai panel samping kiri, tinggi penuh */
 #masterDocModal{justify-content:flex-start;align-items:stretch;padding:0}
-#masterDocModal .box{height:100vh;border-radius:0;display:flex;flex-direction:column;animation:panelIn .22s ease-out}
+#masterDocModal .box{height:calc(var(--app-vh, 1vh) * 100);border-radius:0;display:flex;flex-direction:column;animation:panelIn .22s ease-out}
 #masterDocModal .box-body{max-height:none;flex:1;overflow-y:auto}
 @media(max-width:940px){#masterDocModal .box{max-width:100%}}
 
@@ -1362,12 +1363,12 @@ td.nama span{color:var(--mut);font-size:.78rem}
 
 /* ============ KELOLA KEUANGAN ============ */
 #financeModal{justify-content:flex-start;align-items:stretch;padding:0}
-#financeModal .box{max-width:780px;width:100%;height:100vh;border-radius:0;display:flex;flex-direction:column;animation:panelIn .22s ease-out}
+#financeModal .box{max-width:780px;width:100%;height:calc(var(--app-vh, 1vh) * 100);border-radius:0;display:flex;flex-direction:column;animation:panelIn .22s ease-out}
 #financeModal .box-body{max-height:70vh;overflow-y:auto}
 @media(max-width:860px){#financeModal .box{max-width:100%}}
 
 #finCatModal{justify-content:flex-start;align-items:stretch;padding:0}
-#finCatModal .box{max-width:600px;width:100%;height:100vh;border-radius:0;display:flex;flex-direction:column;animation:panelIn .22s ease-out}
+#finCatModal .box{max-width:600px;width:100%;height:calc(var(--app-vh, 1vh) * 100);border-radius:0;display:flex;flex-direction:column;animation:panelIn .22s ease-out}
 #finCatModal .box-body{max-height:none;flex:1;overflow-y:auto}
 @media(max-width:640px){#finCatModal .box{max-width:100%}}
 .fin-cat-list{display:flex;flex-direction:column;gap:12px}
@@ -1596,7 +1597,7 @@ header{
 .sidebar{
   width:252px;
   top:76px;
-  height:calc(100vh - 76px);
+  height:calc((var(--app-vh, 1vh) * 100) - 76px);
   background:var(--navy);
   border-right:2px solid var(--gold);
   box-shadow:none;
@@ -1667,7 +1668,7 @@ header{
 
 /* Login — visual DNA portal peserta */
 #loginView{
-  min-height:calc(100vh - 76px);
+  min-height:calc((var(--app-vh, 1vh) * 100) - 76px);
   padding:42px 20px 70px;
 }
 .gate{
@@ -2052,7 +2053,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 @media(max-width:860px){
   .sidebar{
     top:76px;
-    height:calc(100vh - 76px);
+    height:calc((var(--app-vh, 1vh) * 100) - 76px);
     border-right:2px solid var(--gold);
   }
   .sidebar.hidden{
@@ -2179,7 +2180,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
    UI-only redesign. Existing form IDs/flow remain unchanged.
    ========================================================= */
 #loginView{
-  min-height:100vh;
+  min-height:calc(var(--app-vh, 1vh) * 100);
   padding:42px 20px 30px;
   display:flex;
   align-items:center;
@@ -2283,7 +2284,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 #appShell.email-only .sb-link:not([data-target="secEmail"]){display:none!important}
 #appShell.email-only .tab-panel:not(#secEmail){display:none!important}
 #appShell.email-only .jd-card[data-target]:not([data-target="secEmail"]){display:none!important}
-#appShell.email-only #secEmail{display:block;margin-top:0;min-height:calc(100vh - 76px)}
+#appShell.email-only #secEmail{display:block;margin-top:0;min-height:calc((var(--app-vh, 1vh) * 100) - 76px)}
 
 /* Tombol keluar melayang di pojok kanan bawah. */
 .floating-logout{
@@ -2333,7 +2334,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 }
 
 /* Shell — ID selector agar lebih spesifik dari rule lama */
-#secEmail{background:var(--mail-bg);min-height:calc(100vh - 70px)}
+#secEmail{background:var(--mail-bg);min-height:calc((var(--app-vh, 1vh) * 100) - 70px)}
 #secEmail #mailShell,
 #secEmail .mail-shell{
   padding-top:50px!important;
@@ -2361,6 +2362,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 }
 .mail-topbar .csel-btn:hover{border-color:var(--navy);box-shadow:0 0 0 3px rgba(19,49,77,.07)}
 .mail-topbar .csel{min-width:196px;max-width:290px}
+.mail-status{display:inline-flex;align-items:center;justify-content:center;width:24px;height:24px;flex:0 0 24px}
+.mail-status::before{content:"";width:10px;height:10px;border-radius:50%;background:#17b26a;box-shadow:0 0 0 3px rgba(23,178,106,.14)}
 
 /* Search */
 .mail-search{
@@ -2400,7 +2403,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   grid-template-columns:196px 308px 1fr!important;
   background:var(--mail-bg)!important;
   border-top:none!important;
-  height:calc(100vh - 166px)!important;
+  height:calc((var(--app-vh, 1vh) * 100) - 166px)!important;
 }
 @media(max-width:1100px){#secEmail .mail-body{grid-template-columns:176px 276px 1fr!important}}
 @media(max-width:980px){#secEmail .mail-body{grid-template-columns:156px 252px 1fr!important}}
@@ -2577,7 +2580,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 /* Loading */
 .mail-shell-loading{
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:8px;min-height:calc(100vh - 250px);
+  gap:8px;min-height:calc((var(--app-vh, 1vh) * 100) - 250px);
   color:var(--mut);font:500 .86rem var(--body);
 }
 
@@ -2746,7 +2749,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
           <div class="mail-topbar">
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
               <select id="mailAcc"></select>
-              <span class="mail-status" id="mailStatusBadge" aria-live="polite">Terhubung</span>
+              <span class="mail-status" id="mailStatusBadge" role="img" aria-label="Terhubung" title="Terhubung"></span>
             </div>
             <div class="mail-topbar-r">
               <div class="mail-search">
@@ -3576,6 +3579,15 @@ function attachRupiahMask(el){
     try{ el.setSelectionRange(pos,pos); }catch(e){}
   });
 }
+
+function syncAppViewport(){
+  const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  document.documentElement.style.setProperty('--app-vh', (viewportHeight * 0.01) + 'px');
+}
+window.addEventListener('resize', syncAppViewport);
+window.addEventListener('orientationchange', syncAppViewport);
+window.addEventListener('load', syncAppViewport);
+syncAppViewport();
 
 /* ============ AUTH ============ */
 let MAIL_LOADED=false, MAIL_ACCOUNTS=[], MAIL_ACTIVE=null, MAIL_MSGS=[], MAIL_OPEN=null, MAIL_FOLDER='INBOX', MAIL_SELECTED=new Set(), MAIL_FOLDERS=[];
