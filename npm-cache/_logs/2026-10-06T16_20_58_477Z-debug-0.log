@@ -1,0 +1,24 @@
+0 verbose cli /usr/local/bin/node /usr/local/lib/node_modules/npm/bin/npm-cli.js
+1 info using npm@11.12.1
+2 info using node@v24.15.0
+3 silly config load:file:/usr/local/lib/node_modules/npm/npmrc
+4 silly config load:file:/Volumes/Macintosh HD - Data 1/juaraind/.npmrc
+5 silly config load:file:/Users/em2studio/.npmrc
+6 silly config load:file:/usr/local/etc/npmrc
+7 verbose title npm exec supabase login
+8 verbose argv "exec" "--" "supabase" "login"
+9 verbose logfile logs-max:10 dir:/Volumes/Macintosh HD - Data 1/juaraind/npm-cache/_logs/2026-10-06T16_20_58_477Z-
+10 verbose logfile /Volumes/Macintosh HD - Data 1/juaraind/npm-cache/_logs/2026-10-06T16_20_58_477Z-debug-0.log
+11 silly logfile done cleaning log files
+12 http fetch GET 200 https://registry.npmjs.org/npm 235ms
+13 verbose cwd /Volumes/Macintosh HD - Data 1/juaraind
+14 verbose os Darwin 21.6.0
+15 verbose node v24.15.0
+16 verbose npm  v11.12.1
+17 notice
+17 notice New [31mmajor[39m version of npm available! [31m11.12.1[39m -> [34m12.2.0[39m
+17 notice Changelog: [34mhttps://github.com/npm/cli/releases/tag/v12.2.0[39m
+17 notice To update run: [4mnpm install -g npm@12.2.0[24m
+17 notice  { force: true, Symbol(proc-log.meta): true }
+18 verbose exit 0
+19 info ok
