@@ -2744,7 +2744,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
         </div>
         <div class="mail-shell" id="mailShell" style="display:none">
           <div class="mail-topbar">
-            <select id="mailAcc"></select>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <select id="mailAcc"></select>
+              <span class="mail-status" id="mailStatusBadge" aria-live="polite">Terhubung</span>
+            </div>
             <div class="mail-topbar-r">
               <div class="mail-search">
                 <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
