@@ -2274,13 +2274,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .login-footer img{width:24px}
 }
 
-/* Mode aplikasi ini dibatasi untuk login dan pengelolaan email. Panel lain
-   tetap berada di file legacy agar integrasi email tidak berubah, tetapi tidak
-   ditampilkan atau dapat dinavigasikan dari UI. */
+/* Aplikasi ini dipersempit menjadi fokus email saja. Semua panel non-email
+   tetap ada di file legacy agar tidak mengganggu integrasi, tetapi disembunyikan
+   sepenuhnya dari UI dan tidak bisa diakses. */
 #appShell.email-only .sidebar{display:none}
 #appShell.email-only .hamburger{display:none!important}
 #appShell.email-only .main-content{width:100%}
+#appShell.email-only .sb-link:not([data-target="secEmail"]){display:none!important}
 #appShell.email-only .tab-panel:not(#secEmail){display:none!important}
+#appShell.email-only .jd-card[data-target]:not([data-target="secEmail"]){display:none!important}
 #appShell.email-only #secEmail{display:block;margin-top:0;min-height:calc(100vh - 76px)}
 
 /* Tombol keluar melayang di pojok kanan bawah. */
@@ -2714,349 +2716,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   <aside class="sidebar hidden" id="sidebar">
     <nav class="sb-nav">
       <span class="sb-label">Menu</span>
-      <a class="sb-link active" data-target="secRingkasan"><span class="ic"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="4" y2="14"/><line x1="10" y1="20" x2="10" y2="8"/><line x1="16" y1="20" x2="16" y2="4"/><line x1="21" y1="20" x2="3" y2="20"/></svg></span> Ringkasan</a>
-      <a class="sb-link" data-target="secPeserta"><span class="ic"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1z"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="13" y2="18"/></svg></span> Data Peserta<span class="sb-badge" id="sbPesertaBadge" style="display:none">0</span></a>
-      <a class="sb-link" data-target="secMaster"><span class="ic"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></span> Data Master</a>
-      <a class="sb-link" data-target="secSekolah"><span class="ic"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 8.5 12 14l10-5.5L12 3Z"/><path d="M6 11.5v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/><path d="M21 8.5v6"/></svg></span> Sekolah Mitra</a>
-      <span class="sb-label">Proses Penempatan</span>
-      <a class="sb-link" data-target="secPelatihan"><span class="ic"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1.3 2.7 3 6 3s6-1.7 6-3v-5"/><path d="M22 10v6"/></svg></span> Pelatihan &amp; Pembekalan<span class="sb-badge" id="sbPelatihanBadge" style="display:none">0</span></a>
-      <a class="sb-link" data-target="secPenempatan"><span class="ic"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V6a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v15"/><path d="M14 10h5a1 1 0 0 1 1 1v10"/><path d="M8 8h2M8 12h2M8 16h2"/><path d="M2 21h20"/></svg></span> Penempatan &amp; Perusahaan<span class="sb-badge" id="sbPenempatanBadge" style="display:none">0</span></a>
-      <a class="sb-link" data-target="secVisaMcu"><span class="ic"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2.5" width="14" height="19" rx="2"/><circle cx="12" cy="9.2" r="2.6"/><path d="M8.8 15.5c.7-1.6 2-2.4 3.2-2.4s2.5.8 3.2 2.4"/></svg></span> Visa &amp; MCU<span class="sb-badge" id="sbVisaMcuBadge" style="display:none">0</span></a>
-      <a class="sb-link" data-target="secKeberangkatan"><span class="ic"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.8 19.8 19 21l1-1-1.2-3.2"/><path d="M11 15l-6.5 1.5L2 15l4-4L2 6l2.5-1.5L11 6"/><path d="M11 15l6-9c1-1.5 3.5-1.5 4 0 .5 1.5-.5 3-2 4l-8 5Z"/></svg></span> Tiket &amp; Keberangkatan<span class="sb-badge" id="sbKeberangkatanBadge" style="display:none">0</span></a>
-      <span class="sb-label">Lainnya</span>
-      <a class="sb-link" data-target="secKeuangan"><span class="ic"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2.5" x2="12" y2="21.5"/><path d="M17 6.5H9.8a2.8 2.8 0 0 0 0 5.6h4.4a2.8 2.8 0 0 1 0 5.6H7"/></svg></span> ADM Peserta</a>
-      <a class="sb-link" data-target="secBukti"><span class="ic"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/><path d="m15.5 15.5 1.3 1.3 2.2-2.4" stroke="var(--green,#17B26A)"/></svg></span> Bukti Pembayaran<span class="sb-badge" id="sbBuktiBadge" style="display:none">0</span></a>
-      <a class="sb-link" data-target="secEmail"><span class="ic"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.4"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg></span> Kelola Email<span class="sb-link-dot" id="mailNavDot"></span></a>
-      <span class="sb-label">Akun</span>
+      <a class="sb-link active" data-target="secEmail"><span class="ic"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.4"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg></span> Kelola Email<span class="sb-link-dot" id="mailNavDot"></span></a>
     </nav>
   </aside>
-  <div class="sb-overlay" id="sbOverlay"></div>
-  <div class="main-content">
-    <div class="wrap">
-      <div class="tab-panel active" id="secRingkasan">
-        <div class="juara-dashboard">
-          <section class="jd-hero">
-            <div class="jd-hero-grid">
-              <div class="jd-hero-copy">
-                <div class="jd-kicker"><span></span> ADMIN CONTROL CENTER</div>
-                <h1>Pusat Kendali<br><strong>PT. JUARA</strong></h1>
-                <div class="jd-meta">
-                  <span class="jd-live"><i></i> Sistem aktif</span>
-                  <span>Panel Administrasi</span>
-                </div>
-              </div>
-              <div class="jd-hero-stat">
-                <div class="jd-stat-head"><span>Total Pendaftar</span><b id="stTotal">0</b></div>
-                <div class="jd-stat-line"><span></span></div>
-                <div class="jd-stat-grid">
-                  <div><b id="stPria">0</b><small>Laki-laki</small></div>
-                  <div><b id="stWanita">0</b><small>Perempuan</small></div>
-                  <div><b id="stVerified">0</b><small>Terverifikasi</small></div>
-                  <div><b id="stLolos">0</b><small>Peserta Lolos</small></div>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section class="jd-menu-grid">
-            <article class="jd-card jd-card-wide" data-target="secPeserta">
-              <div class="jd-card-icon"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6a1 1 0 0 1 1 1v1H8V5a1 1 0 0 1 1-1z"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="16" y2="14"/><line x1="8" y1="18" x2="13" y2="18"/></svg></div>
-              <div class="jd-card-copy"><span class="jd-card-label">Data Peserta</span><p>Kelola pendaftaran, profil, dokumen, dan tahapan peserta.</p></div><span class="jd-arrow">→</span>
-              <span class="nc-badge jd-badge" id="ncPesertaBadge">0</span>
-              <span class="jd-wm">01</span>
-            </article>
-            <article class="jd-card jd-card-wide" data-target="secMaster">
-              <div class="jd-card-icon"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg></div>
-              <div class="jd-card-copy"><span class="jd-card-label">Data Master</span><p>Data peserta yang sudah masuk ke sistem utama.</p></div><span class="jd-arrow">→</span>
-              <span class="jd-wm">02</span>
-            </article>
-            <article class="jd-card" data-target="secKeuangan">
-              <div class="jd-card-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="2.5" x2="12" y2="21.5"/><path d="M17 6.5H9.8a2.8 2.8 0 0 0 0 5.6h4.4a2.8 2.8 0 0 1 0 5.6H7"/></svg></div>
-              <span class="jd-card-label">ADM Peserta</span><p>Kelola tagihan dan pembayaran peserta.</p><span class="jd-arrow">→</span><span class="nc-badge nc-badge-gold jd-badge" id="ncFinKolektifBadge">0</span>
-            </article>
-            <article class="jd-card" data-target="secBukti">
-              <div class="jd-card-icon"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/><path d="m15.5 15.5 1.3 1.3 2.2-2.4"/></svg></div>
-              <span class="jd-card-label">Bukti Pembayaran</span><p>Periksa dan verifikasi bukti transaksi.</p><span class="jd-arrow">→</span><span class="nc-badge jd-badge" id="ncBuktiBadge">0</span>
-            </article>
-            <article class="jd-card" data-target="secSekolah">
-              <div class="jd-card-icon"><svg viewBox="0 0 24 24"><path d="M12 3 2 8.5 12 14l10-5.5L12 3Z"/><path d="M6 11.5v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/><path d="M21 8.5v6"/></svg></div>
-              <span class="jd-card-label">Sekolah Mitra</span><p>Kelola sekolah dan jaringan mitra.</p><span class="jd-arrow">→</span>
-            </article>
-            <article class="jd-card" data-target="secEmail">
-              <div class="jd-card-icon"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2.4"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg></div>
-              <span class="jd-card-label">Kelola Email</span><p>Kelola komunikasi dan pesan peserta dari satu tempat.</p><span class="jd-arrow">→</span>
-            </article>
-          </section>
-
-          <section class="jd-footer-card">
-            <div class="jd-footer-icon"><svg viewBox="0 0 24 24"><path d="M12 3 4 7v5c0 4.6 3.1 7.7 8 9 4.9-1.3 8-4.4 8-9V7l-8-4Z"/><path d="m8.5 12 2.2 2.2 4.8-5"/></svg></div>
-            <div><b>Administrasi lebih terarah</b><span>Semua modul penting PT. JUARA tersedia dalam satu dashboard.</span></div>
-            <span class="jd-footer-mark">PT. JUARA · ADMIN</span>
-          </section>
-        </div>
-      </div>
-
-      <div class="tab-panel" id="secPeserta">
-        <div class="peserta-head">
-          <div>
-            <h2>Data Peserta</h2>
-            <div class="peserta-legend">
-              <span class="peserta-legend-item"><span class="peserta-legend-dot ready"></span>Siap Convert</span>
-              <span class="peserta-legend-item"><span class="peserta-legend-dot verif"></span>Menunggu Verifikasi</span>
-              <span class="peserta-legend-item"><span class="peserta-legend-dot empty"></span>Belum Unggah Dokumen</span>
-            </div>
-          </div>
-          <div class="peserta-head-mark"><span id="pesertaCountLabel">DATA AKTIF</span><b>PT. JUARA</b></div>
-        </div>
-
-        <div class="toolbar peserta-toolbar">
-          <div class="peserta-search">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
-            <input type="text" id="qSearch" placeholder="Cari nama, NIK, kota, atau kode peserta…">
-          </div>
-          <div class="peserta-filter">
-            <select id="qStage">
-              <option value="">Semua Tahap</option>
-              <option value="0">Tahap 1 — Berkas Diterima</option>
-              <option value="1">Tahap 2 — Verifikasi Dokumen</option>
-              <option value="2">Tahap 3 — Pelatihan &amp; Pembekalan</option>
-              <option value="3">Tahap 4 — Matching Perusahaan</option>
-              <option value="4">Tahap 5 — Proses Visa &amp; MCU</option>
-              <option value="5">Tahap 6 — Tiket &amp; Keberangkatan</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="tbl-wrap peserta-table-wrap">
-          <table>
-            <thead><tr>
-              <th>No</th><th>Kode</th><th>Peserta</th><th>Kota</th><th>Tahap</th><th>Dokumen</th><th>Aksi</th>
-            </tr></thead>
-            <tbody id="tblBody"><tr class="empty-row"><td colspan="7">Memuat data…</td></tr></tbody>
-          </table>
-        </div>
-        <div class="peserta-pagination" id="pesertaPagination"></div>
-      </div>
-
-      <div class="tab-panel" id="secMaster">
-        <div class="master-head">
-          <div>
-            <h2>Peserta Terdaftar</h2>
-            <p>Kelola peserta yang sudah dikonversi ke Data Master.</p>
-          </div>
-          <div class="master-head-mark">
-            <span>PT. JUARA</span>
-            <b>MASTER DATABASE</b>
-          </div>
-        </div>
-
-        <div class="master-toolbar">
-          <div class="master-search" id="qSearchMasterWrap">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="11" cy="11" r="7"></circle>
-              <path d="m20 20-4-4"></path>
-            </svg>
-            <input type="text" id="qSearchMaster" placeholder="Cari nama, kota, atau kode peserta di Data Master…">
-            <button type="button" id="qSearchMasterClear" class="search-clear-btn" title="Hapus filter" aria-label="Hapus filter">✕</button>
-          </div>
-          <div class="master-toolbar-note">
-            <span class="master-dot"></span>
-            Peserta aktif di Data Master
-          </div>
-        </div>
-
-        <div class="master-table-wrap">
-          <div class="tbl-wrap master-table-card">
-            <table>
-              <thead><tr>
-                <th>No</th><th>Kode</th><th>Peserta</th><th>Kota</th><th>Tahap</th><th>Dikonversi</th><th>Aksi</th>
-              </tr></thead>
-              <tbody id="tblMasterBody"><tr class="empty-row"><td colspan="5">Belum ada peserta di Data Master.</td></tr></tbody>
-            </table>
-          </div>
-          <div class="master-pagination" id="masterPagination"></div>
-        </div>
-      </div>
-
-      <div class="tab-panel" id="secSekolah">
-        <div class="sekolah-head">
-          <div>
-            <h2>Sekolah Mitra</h2>
-            <p>Kelola daftar sekolah mitra dan jaringan asal peserta.</p>
-          </div>
-          <div class="sekolah-head-mark"><span>JARINGAN</span><b>PT. JUARA</b></div>
-        </div>
-        <div class="sekolah-toolbar">
-          <div class="sekolah-search">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
-            <input type="text" id="qSekolah" placeholder="Cari nama sekolah…">
-          </div>
-          <div class="sekolah-add">
-            <input type="text" id="newSekolahNama" placeholder="Nama sekolah baru…">
-            <button class="btn b-pri sm" id="btnAddSekolah">+ Tambah Sekolah</button>
-          </div>
-        </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr>
-              <th>Nama Sekolah</th><th>Status</th><th>Ditambahkan</th><th>Aksi</th>
-            </tr></thead>
-            <tbody id="tblSekolahBody"><tr class="empty-row"><td colspan="4">Memuat data…</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="tab-panel" id="secPelatihan">
-        <div class="sekolah-head">
-          <div>
-            <h2>Pelatihan &amp; Pembekalan</h2>
-            <p>Peserta yang sedang menjalani pelatihan kerja (Tahap 3). Upload sertifikat pelatihan dan centang "Selesai" — begitu dua-duanya terpenuhi, tahap naik otomatis ke Penempatan &amp; Perusahaan.</p>
-          </div>
-          <div class="sekolah-head-mark"><span>TAHAP</span><b>3 / 6</b></div>
-        </div>
-        <div class="stats">
-          <div class="stat"><b id="stPelatihanCount">0</b><span>Peserta di Tahap Ini</span></div>
-        </div>
-        <div class="toolbar">
-          <input type="text" id="qSearchPelatihan" placeholder="Cari nama, kota, atau kode peserta…">
-        </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>No</th><th>Kode</th><th>Peserta</th><th>Kota</th><th>Sertifikat</th><th>Selesai</th><th>Aksi</th></tr></thead>
-            <tbody id="tblPelatihanBody"><tr class="empty-row"><td colspan="7">Memuat data…</td></tr></tbody>
-          </table>
-        </div>
-        <input type="file" id="sertifikatFileInput" style="display:none" accept="image/*,.pdf">
-      </div>
-
-      <div class="tab-panel" id="secPenempatan">
-        <div class="sekolah-head">
-          <div>
-            <h2>Penempatan &amp; Perusahaan</h2>
-            <p>Peserta yang sedang dicocokkan (matching) dengan perusahaan/user pengguna di luar negeri (Tahap 4). Upload dokumen PK (Perjanjian Kerja) — begitu terunggah, tahap naik otomatis ke Visa &amp; MCU.</p>
-          </div>
-          <div class="sekolah-head-mark"><span>TAHAP</span><b>4 / 6</b></div>
-        </div>
-        <div class="stats">
-          <div class="stat"><b id="stPenempatanCount">0</b><span>Peserta di Tahap Ini</span></div>
-        </div>
-        <div class="toolbar">
-          <input type="text" id="qSearchPenempatan" placeholder="Cari nama, kota, atau kode peserta…">
-        </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>No</th><th>Kode</th><th>Peserta</th><th>Kota</th><th>Dokumen PK</th><th>Aksi</th></tr></thead>
-            <tbody id="tblPenempatanBody"><tr class="empty-row"><td colspan="6">Memuat data…</td></tr></tbody>
-          </table>
-        </div>
-        <input type="file" id="pkFileInput" style="display:none" accept="image/*,.pdf">
-      </div>
-
-      <div class="tab-panel" id="secVisaMcu">
-        <div class="sekolah-head">
-          <div>
-            <h2>Visa &amp; MCU</h2>
-            <p>Peserta dalam proses Medical Check-Up dan pengurusan visa kerja (Tahap 5). Upload Hasil MCU (tandai Fit/Unfit) dan Visa Kerja — begitu MCU Fit &amp; Visa lengkap, tahap naik otomatis ke Tiket &amp; Keberangkatan.</p>
-          </div>
-          <div class="sekolah-head-mark"><span>TAHAP</span><b>5 / 6</b></div>
-        </div>
-        <div class="stats">
-          <div class="stat"><b id="stVisaMcuCount">0</b><span>Peserta di Tahap Ini</span></div>
-        </div>
-        <div class="toolbar">
-          <input type="text" id="qSearchVisaMcu" placeholder="Cari nama, kota, atau kode peserta…">
-        </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>No</th><th>Kode</th><th>Peserta</th><th>Kota</th><th>Hasil MCU</th><th>Visa Kerja</th><th>Aksi</th></tr></thead>
-            <tbody id="tblVisaMcuBody"><tr class="empty-row"><td colspan="7">Memuat data…</td></tr></tbody>
-          </table>
-        </div>
-        <input type="file" id="hasilMcuFileInput" style="display:none" accept="image/*,.pdf">
-        <input type="file" id="visaFileInput" style="display:none" accept="image/*,.pdf">
-      </div>
-
-      <div class="tab-panel" id="secKeberangkatan">
-        <div class="sekolah-head">
-          <div>
-            <h2>Tiket &amp; Keberangkatan</h2>
-            <p>Peserta yang siap berangkat: PAP, asuransi, tiket, dan jadwal keberangkatan (Tahap 6).</p>
-          </div>
-          <div class="sekolah-head-mark"><span>TAHAP</span><b>6 / 6</b></div>
-        </div>
-        <div class="stats">
-          <div class="stat"><b id="stKeberangkatanCount">0</b><span>Peserta di Tahap Ini</span></div>
-        </div>
-        <div class="toolbar">
-          <input type="text" id="qSearchKeberangkatan" placeholder="Cari nama, kota, atau kode peserta…">
-        </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr><th>No</th><th>Kode</th><th>Peserta</th><th>Kota</th><th>Aksi</th></tr></thead>
-            <tbody id="tblKeberangkatanBody"><tr class="empty-row"><td colspan="5">Memuat data…</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="tab-panel" id="secKeuangan">
-        <div class="stats">
-          <div class="stat"><b id="finStTagihan">Rp 0</b><span>Total Tagihan</span></div>
-          <div class="stat ok"><b id="finStBayar">Rp 0</b><span>Total Terbayar</span></div>
-          <div class="stat warn"><b id="finStSisa">Rp 0</b><span>Sisa Tagihan</span></div>
-          <div class="stat bad"><b id="finStBelumLunas">0</b><span>Peserta Belum Lunas</span></div>
-        </div>
-        <div class="toolbar">
-          <input type="text" id="qSearchFin" placeholder="Cari nama, kota, atau kode peserta…">
-          <button class="btn b-ghost sm" id="btnKelolaKategori" style="margin-left:auto" title="Kelola Kategori Biaya" aria-label="Kelola Kategori Biaya"><svg class="kk-ico" viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span class="kk-label"> Kelola Kategori Biaya</span></button>
-        </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr>
-              <th>No</th><th>Kode</th><th>Peserta</th><th>Kota</th><th>Tagihan</th><th>Terbayar</th><th>Sisa</th><th>Status</th><th>Aksi</th>
-            </tr></thead>
-            <tbody id="tblFinBody"><tr class="empty-row"><td colspan="9">Memuat data…</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-
-      <div class="tab-panel" id="secBukti">
-        <div class="bukti-head">
-          <div>
-            <h2>Bukti Pembayaran</h2>
-            <p>Periksa dan verifikasi bukti transaksi pembayaran yang diunggah peserta.</p>
-          </div>
-          <div class="bukti-head-mark"><span>VERIFIKASI</span><b>PT. JUARA</b></div>
-        </div>
-        <div class="stats">
-          <div class="stat warn"><b id="bpStPending">0</b><span>Verifikasi</span></div>
-          <div class="stat ok"><b id="bpStApproved">0</b><span>Disetujui</span></div>
-          <div class="stat bad"><b id="bpStRejected">0</b><span>Ditolak</span></div>
-        </div>
-        <div class="bukti-toolbar">
-          <div class="bukti-search">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>
-            <input type="text" id="qSearchBukti" placeholder="Cari nama, kode, atau kota peserta…">
-          </div>
-          <div class="bukti-filter">
-            <select id="qBuktiStatus">
-              <option value="">Semua Status</option>
-              <option value="menunggu">Menunggu Verifikasi</option>
-              <option value="disetujui">Disetujui</option>
-              <option value="ditolak">Ditolak</option>
-            </select>
-          </div>
-        </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead><tr>
-              <th>No</th><th>Kode</th><th>Peserta</th><th>Nominal</th><th>Diunggah</th><th>Status</th><th>Aksi</th>
-            </tr></thead>
-            <tbody id="tblBuktiBody"><tr class="empty-row"><td colspan="7">Memuat data…</td></tr></tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <div class="tab-panel" id="secEmail">
+  <div class="tab-panel active" id="secEmail">
         <!-- FIX: overlay ini menutupi seluruh panel Kelola Email selagi akun,
              folder, dan daftar email pertama disiapkan sekaligus di belakang layar.
              Toolbar+daftar+panel baca baru ditampilkan setelah semuanya siap,
@@ -3950,24 +3613,19 @@ function toggleSidebar(){
 $('#btnSidebarToggle').addEventListener('click', toggleSidebar);
 $('#sbOverlay').addEventListener('click', closeSidebar);
 function goToTab(targetId){
-  document.querySelectorAll('.sb-link').forEach(l=>l.classList.toggle('active', l.dataset.target===targetId));
-  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active', p.id===targetId));
-  const isEmailTab = targetId==='secEmail';
+  const safeTarget = 'secEmail';
+  document.querySelectorAll('.sb-link').forEach(l=>l.classList.toggle('active', l.dataset.target===safeTarget));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active', p.id===safeTarget));
   document.querySelector('header').style.display = '';
-  document.body.classList.toggle('menu-tab-active', !isEmailTab);
+  document.body.classList.toggle('menu-tab-active', false);
   window.scrollTo({top:0,behavior:'smooth'});
   if(window.innerWidth<=860) closeSidebar();
-  if(targetId==='secEmail' && !MAIL_LOADED){ MAIL_LOADED=true; initMailPanel(); }
-  if(targetId==='secEmail'){ startMailWatch(); } else { stopMailWatch(); }
+  if(!MAIL_LOADED){ MAIL_LOADED=true; initMailPanel(); }
+  startMailWatch();
 }
 document.querySelectorAll('.sb-link').forEach(link=>{
-  link.addEventListener('click', ()=>{ goToTab(link.dataset.target); });
-});
-document.querySelectorAll('.nav-card,.jd-card').forEach(card=>{
-  card.addEventListener('click', ()=>{ goToTab(card.dataset.target); });
-});
-if(window.innerWidth<=860) closeSidebar();
-$('#frmLogin').addEventListener('submit', async e=>{
+  link.addEventListener('click', ()=>{ goToTab('secEmail'); });
+});$('#frmLogin').addEventListener('submit', async e=>{
   e.preventDefault();
   const email=$('#lgEmail').value.trim(), pass=$('#lgPass').value;
   const btn=$('#loginBtn'); btn.disabled=true; btn.textContent='Memeriksa…';
