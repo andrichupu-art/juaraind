@@ -6584,7 +6584,7 @@ let MAIL_PAGE=1; const MAIL_PAGE_SIZE=10;
 // lama begitu fitur ini pertama kali dinyalakan. Polling hanya berjalan selagi
 // tab "Kelola Email" sedang aktif (lihat startMailWatch/stopMailWatch di goToTab).
 let MAIL_WATCH_UNSEEN=new Map(), MAIL_WATCH_BASELINE=new Map(), MAIL_WATCH_TIMER=null, MAIL_WATCH_BASELINED=false;
-const MAIL_WATCH_INTERVAL_MS=30000;
+const MAIL_WATCH_INTERVAL_MS=60000;
 
 function escapeHtml(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function fmtMailDate(d){ if(!d)return '-'; const dt=new Date(d); if(isNaN(dt))return '-'; return dt.toLocaleDateString('id-ID',{day:'2-digit',month:'short'})+' '+dt.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}); }
@@ -6648,14 +6648,13 @@ async function loadMailAccounts(){
 // (atau gagal) panel sebenarnya ditampilkan. Ini menghindari kesan "patah-patah"
 // (toolbar kosong dulu, lalu satu-satu bagian terisi belakangan).
 async function initMailPanel(){
+  $('#mailShellLoading').style.display='none';
+  $('#mailShell').style.display='';
+  startMailWatch();
   try{
     await loadMailAccounts();
   }catch(err){
     console.error(err);
-  }finally{
-    $('#mailShellLoading').style.display='none';
-    $('#mailShell').style.display='';
-    startMailWatch();
   }
 }
 
@@ -6796,7 +6795,7 @@ function updateMailNavDot(){
 async function refreshMailListSilently(){
   if(!MAIL_ACTIVE || MAIL_FOLDER!=='INBOX' || document.hidden)return;
   try{
-    const data=await invokeMailImap({action:'list',account_id:MAIL_ACTIVE,folder:'INBOX',limit:50});
+    const data=await invokeMailImap({action:'list',account_id:MAIL_ACTIVE,folder:'INBOX',limit:20});
     const newMsgs=data?.messages||[];
     const changed=newMsgs.length!==MAIL_MSGS.length||
       newMsgs.some((m,i)=>!MAIL_MSGS[i]||MAIL_MSGS[i].uid!==m.uid||MAIL_MSGS[i].seen!==m.seen);
@@ -6827,7 +6826,7 @@ async function probeLatestInbox(){
 // watch_notif-nya aktif (supaya tidak spam toast untuk akun yang memang
 // sengaja tidak mau dipantau notifikasinya).
 async function checkMailNotifications(){
-  if(!MAIL_ACCOUNTS.length)return;
+  if(document.hidden || !document.querySelector('#secEmail')?.classList.contains('active') || !MAIL_ACCOUNTS.length)return;
   const isFirstRun=!MAIL_WATCH_BASELINED;
   await Promise.all(MAIL_ACCOUNTS.map(async a=>{
     try{
@@ -6857,6 +6856,7 @@ async function checkMailNotifications(){
 }
 
 function startMailWatch(){
+  if(document.hidden || !document.querySelector('#secEmail')?.classList.contains('active')) return;
   checkMailNotifications();
   if(MAIL_WATCH_TIMER)return;
   MAIL_WATCH_TIMER=setInterval(checkMailNotifications, MAIL_WATCH_INTERVAL_MS);
@@ -6864,6 +6864,10 @@ function startMailWatch(){
 function stopMailWatch(){
   if(MAIL_WATCH_TIMER){ clearInterval(MAIL_WATCH_TIMER); MAIL_WATCH_TIMER=null; }
 }
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden){ stopMailWatch(); }
+  else { startMailWatch(); }
+});
 
 async function deleteMailAccount(id){
   if(!await customConfirm('Hapus akun email ini? Password tersimpan juga akan terhapus.'))return;
@@ -6975,7 +6979,7 @@ async function loadMailList(){
   if(!MAIL_ACTIVE){ $('#mailList').innerHTML='<div class="mail-empty">Pilih akun email terlebih dahulu.</div>'; return; }
   $('#mailList').innerHTML='<div class="mail-empty">Memuat email…</div>';
   try{
-    const data=await invokeMailImap({action:'list',account_id:MAIL_ACTIVE,folder:MAIL_FOLDER,limit:50});
+    const data=await invokeMailImap({action:'list',account_id:MAIL_ACTIVE,folder:MAIL_FOLDER,limit:20});
     MAIL_MSGS=data?.messages||[];
     renderMailList();
   }catch(err){
