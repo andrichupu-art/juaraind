@@ -3343,16 +3343,12 @@ document.addEventListener('DOMContentLoaded', ()=>{
    ditolak RLS. Begitu sesi hilang di luar alur logout manual, langsung
    balik ke layar login dengan pesan yang jelas. */
 let SB_MANUAL_SIGNOUT=false, ADMIN_LOGIN_PASSWORD='';
-/* app_metadata hanya dapat diubah oleh server/Supabase Admin API. Jika project
-   sudah memakai claim role/is_admin, akun non-admin langsung ditolak di UI.
-   Akun lama tanpa claim tetap diizinkan agar migrasi role tidak memutus akses;
-   proteksi final tetap wajib berada di RLS dan Edge Function. */
+/* app_metadata hanya dapat diubah oleh server/Supabase Admin API. Akses ditolak
+   jika akun tidak memiliki claim admin yang eksplisit; Edge Function juga
+   memvalidasi claim ini di server sebelum menjalankan aksi email. */
 function hasAdminAccess(user){
   const meta=user?.app_metadata||{};
-  if(meta.role!==undefined)return meta.role==='admin';
-  if(meta.user_role!==undefined)return meta.user_role==='admin';
-  if(meta.is_admin!==undefined)return meta.is_admin===true;
-  return true;
+  return meta.role==='admin'||meta.user_role==='admin'||meta.is_admin===true;
 }
 sb.auth.onAuthStateChange((event, session)=>{
   if(event==='SIGNED_OUT' && !SB_MANUAL_SIGNOUT){

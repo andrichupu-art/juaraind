@@ -10,6 +10,7 @@ import { createClient } from 'npm:@supabase/supabase-js@2';
 import { ImapFlow } from 'npm:imapflow@1.0.98';
 import { simpleParser } from 'npm:mailparser@3.7.1';
 import { Buffer } from 'node:buffer';
+import { requireAdmin } from '../_shared/auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -157,6 +158,9 @@ function guessImageMime(filename?: string): string | null {
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  if (req.method !== 'POST') return jsonResponse({ error: 'Method tidak didukung.' }, 405);
+  const denied = await requireAdmin(req);
+  if (denied) return denied;
 
   let client: ImapFlow | null = null;
   let account_id_used: string | null = null;
