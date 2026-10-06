@@ -2,7 +2,7 @@
 // Membaca inbox cPanel lewat IMAP (toscana.id.rapidplex.com:993) untuk akun yang dipilih.
 //
 // body: { action: 'folders', account_id }
-// body: { action: 'list',    account_id, folder?, limit? }
+// body: { action: 'list',    account_id, folder?, page?, page_size?, query? }
 // body: { action: 'read',    account_id, folder?, uid }
 // body: { action: 'unseen',  account_id, folder? }
 
@@ -80,6 +80,7 @@ async function openClientWithRetry(acc: { email: string; password: string; imap_
 }
 
 const connectionPool = new Map<string, ImapFlow>();
+const connectionPoolPending = new Map<string, Promise<ImapFlow>>();
 
 async function getPooledClient(account_id: string, acc: { email: string; password: string; imap_host: string; imap_port: number }) {
   const cached = connectionPool.get(account_id);
@@ -88,10 +89,31 @@ async function getPooledClient(account_id: string, acc: { email: string; passwor
     connectionPool.delete(account_id);
     try { cached.close(); } catch { /* noop */ }
   }
-  const client = await openClientWithRetry(acc);
-  connectionPool.set(account_id, client);
-  return client;
+  let pending = connectionPoolPending.get(account_id);
+  if (!pending) {
+    pending = openClientWithRetry(acc);
+    connectionPoolPending.set(account_id, pending);
+  }
+  try {
+    const client = await pending;
+    if (connectionPoolPending.get(account_id) === pending) {
+      connectionPool.set(account_id, client);
+      connectionPoolPending.delete(account_id);
+    }
+    return client;
+  } catch (err) {
+    if (connectionPoolPending.get(account_id) === pending) connectionPoolPending.delete(account_id);
+    throw err;
+  }
 }
+
+type ParsedAttachment = {
+  cid?: string;
+  content?: Buffer;
+  contentType?: string;
+  filename?: string;
+  size?: number;
+};
 
 function specialUseLabel(mbox: { path: string; name?: string; specialUse?: string }) {
   const use = mbox.specialUse;
@@ -150,8 +172,8 @@ Deno.serve(async (req: Request) => {
     if (action === 'folders') {
       const list = await client.list();
       const folders = list
-        .filter((f) => !f.flags?.has?.('\\Noselect'))
-        .map((f) => ({ path: f.path, name: specialUseLabel(f) }));
+        .filter((f: { flags?: Set<string> }) => !f.flags?.has?.('\\Noselect'))
+        .map((f: { path: string; name?: string; specialUse?: string }) => ({ path: f.path, name: specialUseLabel(f) }));
       return jsonResponse({ folders });
     }
 
@@ -163,14 +185,52 @@ Deno.serve(async (req: Request) => {
 
     if (action === 'list') {
       const folder = body.folder || 'INBOX';
-      const limit = Math.min(body.limit || 50, 100);
+      const pageSizeValue = Number(body.page_size ?? body.limit ?? 50);
+      if (!Number.isInteger(pageSizeValue) || pageSizeValue < 1) {
+        return jsonResponse({ error: 'page_size harus berupa bilangan bulat positif.' }, 400);
+      }
+      const pageSize = Math.min(pageSizeValue, 100);
+      const requestedPage = Number(body.page ?? 1);
+      if (!Number.isInteger(requestedPage) || requestedPage < 1) {
+        return jsonResponse({ error: 'page harus berupa bilangan bulat positif.' }, 400);
+      }
+      const query = typeof body.query === 'string' ? body.query.trim() : '';
       const lock = await client.getMailboxLock(folder);
       const messages: Array<Record<string, unknown>> = [];
+      let total = 0;
+      let page = requestedPage;
       try {
-        const total = client.mailbox && 'exists' in client.mailbox ? client.mailbox.exists : 0;
-        if (total > 0) {
-          const from = Math.max(1, total - limit + 1);
-          for await (const msg of client.fetch(`${from}:*`, { envelope: true, flags: true, uid: true })) {
+        const mailboxTotal = client.mailbox && 'exists' in client.mailbox ? client.mailbox.exists : 0;
+        let range: string | number[] | null = null;
+        let useUid = false;
+        if (query) {
+          const found = new Set<number>();
+          for (const criteria of [{ from: query }, { to: query }, { subject: query }]) {
+            const matches = await client.search(criteria, { uid: true });
+            if (matches) for (const uid of matches) found.add(uid);
+          }
+          const matchingUids = [...found].sort((a, b) => b - a);
+          total = matchingUids.length;
+          const totalPages = Math.max(1, Math.ceil(total / pageSize));
+          page = Math.min(requestedPage, totalPages);
+          range = matchingUids.slice((page - 1) * pageSize, page * pageSize);
+          useUid = true;
+        } else {
+          total = mailboxTotal;
+          const totalPages = Math.max(1, Math.ceil(total / pageSize));
+          page = Math.min(requestedPage, totalPages);
+          if (total > 0) {
+            const to = total - (page - 1) * pageSize;
+            const from = Math.max(1, to - pageSize + 1);
+            range = `${from}:${to}`;
+          }
+        }
+        if (range && (typeof range === 'string' || range.length > 0)) {
+          const fetchOptions = { envelope: true, flags: true, uid: true };
+          const fetchIterator = useUid
+            ? client.fetch(range as number[], fetchOptions, { uid: true })
+            : client.fetch(range as string, fetchOptions);
+          for await (const msg of fetchIterator) {
             messages.push({
               uid: msg.uid,
               subject: msg.envelope?.subject || '',
@@ -186,7 +246,13 @@ Deno.serve(async (req: Request) => {
         lock.release();
       }
       messages.sort((a, b) => new Date(b.date as string).getTime() - new Date(a.date as string).getTime());
-      return jsonResponse({ messages });
+      return jsonResponse({
+        messages,
+        total,
+        page,
+        page_size: pageSize,
+        total_pages: Math.max(1, Math.ceil(total / pageSize)),
+      });
     }
 
     if (action === 'read') {
@@ -220,7 +286,7 @@ Deno.serve(async (req: Request) => {
         const parsed = await simpleParser(buf);
 
         let html = parsed.html || (parsed.text ? `<pre style="white-space:pre-wrap;font-family:inherit">${escapeHtml(parsed.text)}</pre>` : '');
-        const attachments = parsed.attachments || [];
+        const attachments: ParsedAttachment[] = parsed.attachments || [];
 
         const usedCids = new Set<string>();
         for (const att of attachments) {
