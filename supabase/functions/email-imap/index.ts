@@ -197,14 +197,25 @@ Deno.serve(async (req: Request) => {
       let result: Record<string, unknown> | null = null;
       try {
         const raw = await client.download(String(uid), undefined, { uid: true });
-        if (!raw?.content || typeof raw.content[Symbol.asyncIterator] !== 'function') {
-          return jsonResponse({
-            error: 'Server IMAP tidak mengembalikan isi email ini. Muat ulang daftar email, lalu coba lagi.',
-          }, 502);
+        let buf: Buffer;
+        if (raw?.content && typeof raw.content[Symbol.asyncIterator] === 'function') {
+          const chunks: Uint8Array[] = [];
+          for await (const chunk of raw.content) chunks.push(chunk as Uint8Array);
+          buf = Buffer.concat(chunks);
+        } else {
+          const fetched = await client.fetchOne(String(uid), { source: true }, { uid: true });
+          if (
+            !fetched ||
+            typeof fetched !== 'object' ||
+            !('source' in fetched) ||
+            !(fetched.source instanceof Uint8Array)
+          ) {
+            return jsonResponse({
+              error: 'Isi email tidak tersedia dari server IMAP. Muat ulang daftar email, lalu coba lagi.',
+            }, 502);
+          }
+          buf = Buffer.from(fetched.source);
         }
-        const chunks: Uint8Array[] = [];
-        for await (const chunk of raw.content) chunks.push(chunk as Uint8Array);
-        const buf = Buffer.concat(chunks);
 
         const parsed = await simpleParser(buf);
 
