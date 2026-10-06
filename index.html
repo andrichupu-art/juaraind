@@ -3599,6 +3599,7 @@ let MAIL_LOADED=false, MAIL_ACCOUNTS=[], MAIL_ACTIVE=null, MAIL_MSGS=[], MAIL_OP
 let MAIL_PAGE=1; const MAIL_PAGE_SIZE=10;
 let MAIL_FOLDER_REQUEST_ID=0, MAIL_LIST_REQUEST_ID=0, MAIL_READ_REQUEST_ID=0;
 let MAIL_WATCH_UNSEEN=new Map(), MAIL_WATCH_BASELINE=new Map(), MAIL_WATCH_TIMER=null, MAIL_WATCH_BASELINED=false;
+let MAIL_WATCH_CHECKING=false;
 const MAIL_WATCH_INTERVAL_MS=60000;
 
 async function checkSession(){
@@ -6809,13 +6810,25 @@ function updateMailNavDot(){
 // Refresh hanya dipanggil berdasarkan perubahan jumlah email belum dibaca,
 // bukan dengan timer daftar email terpisah.
 async function refreshMailListSilently(){
-  if(!MAIL_ACTIVE || MAIL_FOLDER!=='INBOX' || document.hidden)return;
+  const accountId=MAIL_ACTIVE;
+  const folder=MAIL_FOLDER;
+  const listRequestId=MAIL_LIST_REQUEST_ID;
+  if(!accountId || folder!=='INBOX' || document.hidden)return;
   try{
-    const data=await invokeMailImap({action:'list',account_id:MAIL_ACTIVE,folder:'INBOX',limit:20});
+    const data=await invokeMailImap({action:'list',account_id:accountId,folder,limit:20});
+    if(document.hidden || accountId!==MAIL_ACTIVE || folder!==MAIL_FOLDER || listRequestId!==MAIL_LIST_REQUEST_ID)return;
     const newMsgs=data?.messages||[];
     const changed=newMsgs.length!==MAIL_MSGS.length||
       newMsgs.some((m,i)=>!MAIL_MSGS[i]||MAIL_MSGS[i].uid!==m.uid||MAIL_MSGS[i].seen!==m.seen);
-    if(changed){ MAIL_MSGS=newMsgs; renderMailList(); }
+    if(changed){
+      MAIL_MSGS=newMsgs;
+      if(MAIL_OPEN!==null && !newMsgs.some(m=>m.uid===MAIL_OPEN)){
+        MAIL_OPEN=null;
+        MAIL_READ_REQUEST_ID++;
+        $('#mailRead').innerHTML=renderMailEmptyState('Belum ada email dipilih', 'Klik salah satu email untuk membaca isinya.');
+      }
+      renderMailList();
+    }
   }catch(err){ console.warn('Refresh Kotak Masuk gagal:',err.message); }
 }
 
@@ -6823,9 +6836,12 @@ async function refreshMailListSilently(){
 // jumlah unread. Hanya satu email terbaru yang diperiksa; daftar lengkap
 // dimuat ulang jika UID teratas berubah.
 async function probeLatestInbox(){
-  if(!MAIL_ACTIVE || MAIL_FOLDER!=='INBOX' || document.hidden)return;
+  const accountId=MAIL_ACTIVE;
+  const folder=MAIL_FOLDER;
+  if(!accountId || folder!=='INBOX' || document.hidden)return;
   try{
-    const data=await invokeMailImap({action:'list',account_id:MAIL_ACTIVE,folder:'INBOX',limit:1});
+    const data=await invokeMailImap({action:'list',account_id:accountId,folder,limit:1});
+    if(document.hidden || accountId!==MAIL_ACTIVE || folder!==MAIL_FOLDER)return;
     const latest=data?.messages?.[0]?.uid||null;
     const current=MAIL_MSGS[0]?.uid||null;
     if(latest!==current) await refreshMailListSilently();
@@ -6842,33 +6858,38 @@ async function probeLatestInbox(){
 // watch_notif-nya aktif (supaya tidak spam toast untuk akun yang memang
 // sengaja tidak mau dipantau notifikasinya).
 async function checkMailNotifications(){
-  if(document.hidden || !document.querySelector('#secEmail')?.classList.contains('active') || !MAIL_ACCOUNTS.length)return;
-  const isFirstRun=!MAIL_WATCH_BASELINED;
-  await Promise.all(MAIL_ACCOUNTS.map(async a=>{
-    try{
-      const data=await invokeMailImap({action:'unseen',account_id:a.id,folder:'INBOX'});
-      const unseen=data?.unseen||0;
-      const prev=MAIL_WATCH_BASELINE.has(a.id)?MAIL_WATCH_BASELINE.get(a.id):unseen;
-      MAIL_WATCH_UNSEEN.set(a.id,unseen);
-      MAIL_WATCH_BASELINE.set(a.id,unseen);
-      if(!isFirstRun && unseen!==prev){
-        if(unseen>prev && a.watch_notif){
-          const label=a.label||a.email;
-          toast(`📩 Email baru masuk ke ${label} (${a.email})`,'ok');
-          if(window.Notification && Notification.permission==='granted'){
-            try{ new Notification('Email baru masuk',{body:`${label} — ${a.email}`}); }catch{}
+  if(MAIL_WATCH_CHECKING || document.hidden || !document.querySelector('#secEmail')?.classList.contains('active') || !MAIL_ACCOUNTS.length)return;
+  MAIL_WATCH_CHECKING=true;
+  try{
+    const isFirstRun=!MAIL_WATCH_BASELINED;
+    await Promise.all(MAIL_ACCOUNTS.map(async a=>{
+      try{
+        const data=await invokeMailImap({action:'unseen',account_id:a.id,folder:'INBOX'});
+        const unseen=data?.unseen||0;
+        const prev=MAIL_WATCH_BASELINE.has(a.id)?MAIL_WATCH_BASELINE.get(a.id):unseen;
+        MAIL_WATCH_UNSEEN.set(a.id,unseen);
+        MAIL_WATCH_BASELINE.set(a.id,unseen);
+        if(!isFirstRun && unseen!==prev){
+          if(unseen>prev && a.watch_notif){
+            const label=a.label||a.email;
+            toast(`📩 Email baru masuk ke ${label} (${a.email})`,'ok');
+            if(window.Notification && Notification.permission==='granted'){
+              try{ new Notification('Email baru masuk',{body:`${label} — ${a.email}`}); }catch{}
+            }
           }
         }
+      }catch(err){
+        console.warn('Cek unseen gagal untuk akun',a.email,err.message);
       }
-    }catch(err){
-      console.warn('Cek unseen gagal untuk akun',a.email,err.message);
-    }
-  }));
-  MAIL_WATCH_BASELINED=true;
-  if(!isFirstRun) await probeLatestInbox();
-  renderMailAccList();
-  updateMailAccDropdownBadges();
-  updateMailNavDot();
+    }));
+    MAIL_WATCH_BASELINED=true;
+    if(!isFirstRun) await probeLatestInbox();
+    renderMailAccList();
+    updateMailAccDropdownBadges();
+    updateMailNavDot();
+  }finally{
+    MAIL_WATCH_CHECKING=false;
+  }
 }
 
 function startMailWatch(){
