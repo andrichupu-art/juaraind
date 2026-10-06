@@ -2284,7 +2284,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 #appShell.email-only .sb-link:not([data-target="secEmail"]){display:none!important}
 #appShell.email-only .tab-panel:not(#secEmail){display:none!important}
 #appShell.email-only .jd-card[data-target]:not([data-target="secEmail"]){display:none!important}
-#appShell.email-only #secEmail{display:block;margin-top:0;min-height:calc((var(--app-vh, 1vh) * 100) - 76px)}
+#appShell.email-only #secEmail{display:flex;flex-direction:column;margin-top:0;min-height:calc((var(--app-vh, 1vh) * 100) - 76px)}
+#appShell.email-only #secEmail .mail-shell{flex:1;min-height:0}
 
 /* Tombol keluar melayang di pojok kanan bawah. */
 .floating-logout{
@@ -3581,7 +3582,7 @@ function attachRupiahMask(el){
 }
 
 function syncAppViewport(){
-  const viewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+  const viewportHeight = document.documentElement.clientHeight || window.innerHeight;
   document.documentElement.style.setProperty('--app-vh', (viewportHeight * 0.01) + 'px');
 }
 window.addEventListener('resize', syncAppViewport);
