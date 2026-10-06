@@ -3575,6 +3575,11 @@ function attachRupiahMask(el){
 }
 
 /* ============ AUTH ============ */
+let MAIL_LOADED=false, MAIL_ACCOUNTS=[], MAIL_ACTIVE=null, MAIL_MSGS=[], MAIL_OPEN=null, MAIL_FOLDER='INBOX', MAIL_SELECTED=new Set(), MAIL_FOLDERS=[];
+let MAIL_PAGE=1; const MAIL_PAGE_SIZE=10;
+let MAIL_WATCH_UNSEEN=new Map(), MAIL_WATCH_BASELINE=new Map(), MAIL_WATCH_TIMER=null, MAIL_WATCH_BASELINED=false;
+const MAIL_WATCH_INTERVAL_MS=60000;
+
 async function checkSession(){
   const {data:{session}}=await sb.auth.getSession();
   if(session?.user && hasAdminAccess(session.user)){ enterDashboard(session.user); }
@@ -5429,8 +5434,8 @@ function initPesertaTableEvents(){
 /* Debounce ~250ms -> renderTable (yang menghitung status dokumen semua baris
    dan replace innerHTML) cuma jalan setelah user berhenti mengetik sejenak,
    bukan di SETIAP huruf. Penting kalau peserta sampai ratusan/ribuan baris. */
-$('#qSearch').addEventListener('input', debounce(()=>{ pesertaPage=1; renderTable(); },250));
-$('#qStage').addEventListener('change', ()=>{ pesertaPage=1; renderTable(); });
+$('#qSearch')?.addEventListener('input', debounce(()=>{ pesertaPage=1; renderTable(); },250));
+$('#qStage')?.addEventListener('change', ()=>{ pesertaPage=1; renderTable(); });
 initPesertaTableEvents();
 
 /* ============ HAPUS PESERTA TOTAL (data + berkas storage) ============
@@ -6576,16 +6581,6 @@ async function downloadPickedZip(){
 $('#btnDownloadPicked').addEventListener('click', downloadPickedZip);
 
 /* ============ KELOLA EMAIL (IMAP/SMTP terintegrasi) ============ */
-let MAIL_LOADED=false, MAIL_ACCOUNTS=[], MAIL_ACTIVE=null, MAIL_MSGS=[], MAIL_OPEN=null, MAIL_FOLDER='INBOX', MAIL_SELECTED=new Set(), MAIL_FOLDERS=[];
-let MAIL_PAGE=1; const MAIL_PAGE_SIZE=10;
-// FIX: notifikasi email masuk. MAIL_WATCH_UNSEEN menyimpan jumlah unseen terakhir
-// per akun yang dipantau (dipakai untuk badge di daftar akun); MAIL_WATCH_BASELINE
-// dipakai untuk deteksi "bertambah" supaya tidak langsung nge-toast semua unseen
-// lama begitu fitur ini pertama kali dinyalakan. Polling hanya berjalan selagi
-// tab "Kelola Email" sedang aktif (lihat startMailWatch/stopMailWatch di goToTab).
-let MAIL_WATCH_UNSEEN=new Map(), MAIL_WATCH_BASELINE=new Map(), MAIL_WATCH_TIMER=null, MAIL_WATCH_BASELINED=false;
-const MAIL_WATCH_INTERVAL_MS=60000;
-
 function escapeHtml(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function fmtMailDate(d){ if(!d)return '-'; const dt=new Date(d); if(isNaN(dt))return '-'; return dt.toLocaleDateString('id-ID',{day:'2-digit',month:'short'})+' '+dt.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}); }
 /* Versi ringkas (tanggal saja, tanpa jam) — dipakai khusus di layar mobile
