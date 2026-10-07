@@ -1308,9 +1308,6 @@ td.nama span{color:var(--mut);font-size:.78rem}
 .dnd-rm:hover{border-color:var(--red);color:var(--red)}
 .dnd-del{flex-shrink:0;width:24px;height:24px;border-radius:7px;border:1.5px solid var(--line);background:#fff;color:var(--red);font-size:.78rem;display:flex;align-items:center;justify-content:center;transition:.15s;cursor:pointer}
 .dnd-del:hover{background:var(--red);border-color:var(--red);color:#fff}
-.dnd-view{flex-shrink:0;width:24px;height:24px;border-radius:7px;border:1.5px solid var(--line);background:#fff;color:var(--navy);font-size:.78rem;display:flex;align-items:center;justify-content:center;transition:.15s;cursor:pointer}
-.dnd-view svg{width:14px;height:14px;-webkit-user-drag:none;user-select:none;pointer-events:none}
-.dnd-view:hover{background:var(--navy);border-color:var(--navy);color:#fff}
 .dnd-upload{flex-shrink:0;width:24px;height:24px;border-radius:7px;border:1.5px solid var(--gold,#c9a227);background:#FFF8EA;color:var(--navy);font-size:.72rem;display:flex;align-items:center;justify-content:center;transition:.15s;cursor:pointer}
 .dnd-upload:hover{background:var(--gold,#c9a227);color:#fff}
 .dnd-add-extra{margin-top:10px;width:100%;justify-content:center;border-style:dashed}
@@ -2701,23 +2698,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     </div>
   </div>
 </div>
-
-<!-- ============ MODAL LIHAT DOKUMEN (preview inline, tidak buka tab baru) ============ -->
-<div class="modal" id="docViewModal">
-  <div class="box" style="max-width:640px">
-    <div class="box-h">
-      <div style="min-width:0"><h3>📄 Pratinjau Dokumen</h3><p id="dvSub">-</p></div>
-      <button class="x" id="btnCloseDocView">✕</button>
-    </div>
-    <div class="box-body" style="max-height:78vh;display:flex;flex-direction:column;align-items:center;gap:14px">
-      <div id="dvLoading" style="padding:40px 0;color:var(--mut);font:600 .85rem var(--body)">Memuat berkas…</div>
-      <img id="dvImg" style="display:none;max-width:100%;max-height:60vh;border-radius:12px;border:1.5px solid var(--line);object-fit:contain" alt="Pratinjau dokumen">
-      <iframe id="dvPdf" style="display:none;width:100%;height:60vh;border:1.5px solid var(--line);border-radius:12px" title="Pratinjau dokumen"></iframe>
-      <a id="dvOpenNew" href="#" target="_blank" rel="noopener" class="btn b-ghost sm" style="display:none">Buka di tab baru</a>
-    </div>
-  </div>
-</div>
-
 
 <div class="modal" id="emailModal">
   <div class="box" style="max-width:480px">
@@ -5230,72 +5210,6 @@ async function viewDoc(pid,jenis){
     toast('Gagal membuka berkas: '+(err.message||''),'err');
   }
 }
-/* Pratinjau dokumen langsung di halaman yang sama (modal), tanpa buka tab baru —
-   dipakai oleh tombol mata 👁 di panel Kelola Dokumen. */
-let dvCurrentDoc=null;
-async function viewDocInline(pid,jenis){
-  const doc=(DOCS_BY_PID[pid]||{})[jenis]; if(!doc?.storage_path)return toast('Berkas tidak ditemukan','err');
-  const label=DOCS.find(d=>d.k===jenis)?.t||doc.file_name||'Dokumen';
-  const modal=$('#docViewModal');
-  dvCurrentDoc=doc;
-  $('#dvSub').textContent=label;
-  const imgEl=$('#dvImg'), pdfEl=$('#dvPdf'), loadEl=$('#dvLoading'), openEl=$('#dvOpenNew');
-  imgEl.style.display='none'; pdfEl.style.display='none'; openEl.style.display='none';
-  imgEl.src=''; pdfEl.src=''; imgEl.onerror=null;
-  loadEl.textContent='Memuat berkas…'; loadEl.style.display='block'; loadEl.style.color='';
-  modal.classList.add('show');
-  try{
-    const url=await getSignedDocUrl(doc.storage_path);
-    const isPdf=/\.pdf($|\?)/i.test(doc.storage_path)||/\.pdf($|\?)/i.test(doc.file_name||'');
-    if(isPdf){
-      const ok=await checkSignedUrlOk(url);
-      loadEl.style.display='none';
-      if(!ok){
-        loadEl.style.color='var(--r,#dc2626)';
-        loadEl.textContent='Tautan berkas sudah kedaluwarsa. Tutup jendela ini lalu buka pratinjau lagi untuk memuat ulang.';
-        loadEl.style.display='block';
-        return;
-      }
-      pdfEl.src=url; pdfEl.style.display='block';
-    }
-    else{
-      loadEl.style.display='none';
-      imgEl.onerror=()=>{
-        imgEl.style.display='none';
-        loadEl.style.color='var(--r,#dc2626)';
-        loadEl.textContent='Tautan berkas sudah kedaluwarsa. Tutup jendela ini lalu buka pratinjau lagi untuk memuat ulang.';
-        loadEl.style.display='block';
-      };
-      imgEl.src=url; imgEl.style.display='block';
-    }
-    openEl.style.display='inline-flex';
-  }catch(err){
-    loadEl.textContent='Gagal memuat berkas: '+(err.message||'terjadi kesalahan');
-    loadEl.style.display='block';
-  }
-}
-$('#dvOpenNew')?.addEventListener('click',async e=>{
-  e.preventDefault();
-  if(!dvCurrentDoc?.storage_path)return;
-  const openEl=e.currentTarget;
-  openEl.style.pointerEvents='none'; openEl.style.opacity='.6';
-  try{
-    // Selalu buat tautan baru saat tombol diklik, biar tidak pernah pakai tautan basi/kedaluwarsa
-    const url=await getSignedDocUrl(dvCurrentDoc.storage_path,true);
-    window.open(url,'_blank','noopener');
-  }catch(err){
-    toast('Gagal membuka berkas, coba lagi','err');
-  }finally{
-    openEl.style.pointerEvents=''; openEl.style.opacity='';
-  }
-});
-$('#btnCloseDocView')?.addEventListener('click',()=>{
-  $('#docViewModal').classList.remove('show');
-  $('#dvImg').src=''; $('#dvPdf').src='';
-});
-$('#docViewModal')?.addEventListener('click', e=>{
-  if(e.target.id==='docViewModal'){ $('#docViewModal').classList.remove('show'); $('#dvImg').src=''; $('#dvPdf').src=''; }
-});
 async function setDocStatus(pid,jenis,status){
   const doc=(DOCS_BY_PID[pid]||{})[jenis]; if(!doc)return;
   const {error}=await sb.from('documents_v2').update({status}).eq('id',doc.id);
@@ -5438,10 +5352,6 @@ function dndItemHtml(d,up){
   // berkas aslinya sudah di tangan, tanpa perlu batalkan-kolektif dulu.
   const canUploadDirect=st==='kolektif';
   const uploadBtn=canUploadDirect?`<button type="button" class="dnd-upload" data-kolektif-upload="${d.k}" title="Lengkapi dokumen ini — unggah berkas asli sekarang">⬆</button>`:'';
-  // Tombol lihat/pratinjau berkas — cuma ditampilkan kalau berkasnya sudah ada
-  // (bukan status kolektif yang belum punya file fisik), supaya admin bisa cek
-  // ulang isinya sebelum kirim email / download.
-  const viewBtn=(up?.storage_path)?`<button type="button" class="dnd-view" data-view="${d.k}" title="Lihat berkas ini"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" draggable="false"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg></button>`:'';
   // Dokumen tambahan (di luar 7 tipe standar) boleh dihapus manual oleh admin,
   // beda dengan dokumen wajib yang cuma bisa dipilih/dikembalikan ke daftar.
   const delBtn=d.extra?`<button type="button" class="dnd-del" data-del="${d.k}" title="Hapus dokumen tambahan ini">🗑</button>`:'';
@@ -5449,7 +5359,6 @@ function dndItemHtml(d,up){
     <span class="dnd-ic">${d.ic}</span>
     <div class="dnd-lbl"><b>${d.t}</b><span class="dnd-dot ${dot}" title="${dotTitle}"></span></div>
     ${uploadBtn}
-    ${viewBtn}
     ${delBtn}
     <button class="dnd-rm" data-rm="${d.k}" title="Kembalikan ke daftar dokumen">✕</button>
   </div>`;
@@ -5569,8 +5478,6 @@ function initDndLists(){
       if(rm){ moveDndToSource(rm.dataset.rm); return; }
       const del=e.target.closest('.dnd-del');
       if(del){ e.stopPropagation(); deleteExtraDoc(DND_PID, del.dataset.del); return; }
-      const view=e.target.closest('.dnd-view');
-      if(view){ e.stopPropagation(); viewDocInline(DND_PID, view.dataset.view); return; }
       const up=e.target.closest('.dnd-upload');
       if(up){ e.stopPropagation(); PENDING_KOLEKTIF_KEY=up.dataset.kolektifUpload; $('#kolektifFileInput').click(); return; }
       const item=e.target.closest('.dnd-item'); if(!item)return;
