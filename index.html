@@ -48,7 +48,6 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 /* Aksen fokus input pencarian dibuat putih sesuai tema header/panel.
    Bayangan navy tetap dipertahankan agar batas fokus tidak hilang di atas
    latar putih dan tetap mudah terlihat saat navigasi keyboard. */
-.peserta-search:focus-within,.bukti-search:focus-within,.sekolah-search:focus-within{border-color:#fff!important;box-shadow:0 0 0 3px rgba(27,58,102,.2)!important}
 ::selection{background:var(--orange);color:#fff}
 .box-h ::selection,header ::selection{background:var(--gold);color:var(--navy)}
 .wrap{width:min(1180px,94%);margin:0 auto}
@@ -94,7 +93,6 @@ header{position:sticky;top:0;z-index:50;background:#13314D;border-bottom:3px sol
 
 .app-shell{display:none}
 .app-shell.show{display:flex;align-items:flex-start}
-.main-content{flex:1;min-width:0}
 
 /* ============ BUTTONS ============ */
 .btn{display:inline-flex;align-items:center;gap:8px;font:700 .88rem var(--body);
@@ -151,540 +149,11 @@ header{position:sticky;top:0;z-index:50;background:#13314D;border-bottom:3px sol
 #loginBtn{width:100%;justify-content:center;margin-top:6px}
 .err-txt{color:var(--red);font:600 .8rem var(--body);margin-top:10px;text-align:center;min-height:1em}
 
-/* ============ PREMIUM PESERTA REDESIGN ============ */
-#secPeserta{padding-top:4px;margin-top:-18px}
-#secPeserta .peserta-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin:0 0 18px;padding:0 4px}
-#secPeserta .peserta-eyebrow{display:inline-flex;align-items:center;gap:8px;font:800 .64rem var(--body);letter-spacing:.16em;color:var(--gold);text-transform:uppercase}
-#secPeserta .peserta-eyebrow::before{content:'';width:24px;height:2px;background:var(--gold);border-radius:2px}
-#secPeserta .peserta-head h2{margin-top:6px;font:800 1.65rem/1.15 var(--disp);letter-spacing:-.03em;color:var(--navy)}
-#secPeserta .peserta-head p{margin-top:5px;font:600 .78rem/1.5 var(--body);color:var(--mut)}
-/* Legenda warna baris (pengganti subjudul lama) -> jelasin arti warna
-   row-ready/row-needs-verif/row-empty tanpa admin harus nebak sendiri. */
-#secPeserta .peserta-legend{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-top:7px}
-#secPeserta .peserta-legend-item{display:flex;align-items:center;gap:6px;font:700 .68rem var(--body);color:var(--mut)}
-#secPeserta .peserta-legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-#secPeserta .peserta-legend-dot.ready{background:#3F9E6E;box-shadow:0 0 0 3px #DDF5E7}
-#secPeserta .peserta-legend-dot.verif{background:#D6A426;box-shadow:0 0 0 3px #FBEECB}
-#secPeserta .peserta-legend-dot.empty{background:#D65C5C;box-shadow:0 0 0 3px #FBDCDC}
-#secPeserta .peserta-head-mark{text-align:right;padding-bottom:2px}
-#secPeserta .peserta-head-mark span{display:block;font:800 .58rem var(--body);letter-spacing:.14em;color:var(--mut);margin-bottom:2px}
-#secPeserta .peserta-head-mark b{font:800 .72rem var(--disp);letter-spacing:.12em;color:var(--navy);opacity:.72}
-#secPeserta .peserta-toolbar{margin-bottom:14px;background:rgba(255,255,255,.66);border:1px solid rgba(217,227,239,.95);border-radius:16px;padding:9px;gap:9px;box-shadow:0 8px 22px rgba(27,58,102,.055);backdrop-filter:blur(10px)}
-#secPeserta .peserta-search{display:flex;align-items:center;gap:9px;flex:1;min-width:260px;background:#fff;border:1.5px solid #D5DFEA;border-radius:11px;padding:0 13px;height:46px;transition:.18s}
-#secPeserta .peserta-search:focus-within{border-color:var(--gold);box-shadow:0 0 0 3px rgba(190,129,70,.11)}
-#secPeserta .peserta-search svg{width:17px;height:17px;stroke:#718198;fill:none;stroke-width:2;flex-shrink:0}
-#secPeserta .peserta-search input{width:100%;height:100%;border:0;outline:0;background:transparent;padding:0;font:600 .83rem var(--body);color:var(--ink)}
-#secPeserta .peserta-search input::placeholder{color:#93A0B1}
-#secPeserta .peserta-filter{position:relative;min-width:245px}
-#secPeserta .peserta-filter select{width:100%;height:46px;border:1.5px solid #D5DFEA;border-radius:11px;background:#fff;color:var(--navy);font:800 .79rem var(--body);padding:0 36px 0 13px;outline:0;transition:.18s}
-#secPeserta .peserta-filter select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(190,129,70,.11)}
-#secPeserta .peserta-table-wrap{background:transparent;border:0;border-radius:0;overflow:visible}
-#secPeserta .table-topline{display:flex;align-items:center;justify-content:space-between;padding:2px 6px 7px;color:#7A8798}
-#secPeserta .table-topline span:first-child{font:800 .61rem var(--body);letter-spacing:.14em;color:var(--navy)}
-#secPeserta .table-topline span:last-child{font:600 .62rem var(--body);color:#8B96A5}
-#secPeserta .peserta-table-wrap table{border-collapse:collapse;border-spacing:0}
-#secPeserta .peserta-table-wrap thead th{background:var(--navy);color:#E7DCC4;border:0;padding:7px 14px;font-size:.61rem;letter-spacing:.1em}
-#secPeserta .peserta-table-wrap tbody tr{transition:background .12s ease}
-
-/* ============ PREMIUM BUKTI PEMBAYARAN REDESIGN (mengikuti pola Data Peserta/Data Master) ============ */
-#secBukti{padding-top:4px;margin-top:-18px}
-#secBukti .bukti-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin:0 0 18px;padding:0 4px}
-#secBukti .bukti-head h2{margin-top:6px;font:800 1.65rem/1.15 var(--disp);letter-spacing:-.03em;color:var(--navy)}
-#secBukti .bukti-head p{margin-top:5px;font:600 .78rem/1.5 var(--body);color:var(--mut)}
-#secBukti .bukti-head-mark{text-align:right;padding-bottom:2px}
-#secBukti .bukti-head-mark span{display:block;font:800 .58rem var(--body);letter-spacing:.14em;color:var(--mut);margin-bottom:2px}
-#secBukti .bukti-head-mark b{font:800 .72rem var(--disp);letter-spacing:.12em;color:var(--navy);opacity:.72}
-#secBukti .bukti-toolbar{margin-bottom:14px;background:rgba(255,255,255,.66);border:1px solid rgba(217,227,239,.95);border-radius:16px;padding:9px;gap:9px;box-shadow:0 8px 22px rgba(27,58,102,.055);backdrop-filter:blur(10px);display:flex;flex-wrap:wrap;align-items:center}
-#secBukti .bukti-search{display:flex;align-items:center;gap:9px;flex:1;min-width:260px;background:#fff;border:1.5px solid #D5DFEA;border-radius:11px;padding:0 13px;height:46px;transition:.18s}
-#secBukti .bukti-search:focus-within{border-color:var(--gold);box-shadow:0 0 0 3px rgba(190,129,70,.11)}
-#secBukti .bukti-search svg{width:17px;height:17px;stroke:#718198;fill:none;stroke-width:2;flex-shrink:0}
-#secBukti .bukti-search input{width:100%;height:100%;border:0;outline:0;background:transparent;padding:0;font:600 .83rem var(--body);color:var(--ink)}
-#secBukti .bukti-search input::placeholder{color:#93A0B1}
-#secBukti .bukti-filter{position:relative;min-width:220px}
-#secBukti .bukti-filter select{width:100%;height:46px;border:1.5px solid #D5DFEA;border-radius:11px;background:#fff;color:var(--navy);font:800 .79rem var(--body);padding:0 36px 0 13px;outline:0;transition:.18s}
-#secBukti .bukti-filter select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(190,129,70,.11)}
-#secBukti .tbl-wrap{background:transparent;border:0;border-radius:0;overflow:visible}
-#secBukti .tbl-wrap table{border-collapse:collapse;border-spacing:0}
-#secBukti .tbl-wrap thead th{background:var(--navy);color:#E7DCC4;border:0;padding:11px 14px;font-size:.61rem;letter-spacing:.1em}
-#secBukti .tbl-wrap tbody tr{transition:background .12s ease}
-#secBukti .tbl-wrap tbody tr:hover{background:#F4F6F9}
-#secBukti .tbl-wrap tbody td{background:transparent;border:0;border-bottom:1px solid rgba(19,49,77,.16);padding:10px 14px;font-size:.8rem;line-height:1.3}
-/* Desktop: pill status & tombol aksi tetap tampil icon+teks seperti biasa;
-   status ganda yang disisipkan di kolom Aksi (buat mobile) disembunyikan. */
-#secBukti .pill .pill-ic{display:none}
-#secBukti .mini{display:inline-flex;align-items:center;gap:6px}
-#secBukti .mini .mini-ic{display:none}
-/* Icon status ganda yang disisipkan di kolom Aksi (khusus mobile) -> class
-   sendiri, TIDAK numpang di ".pill" supaya tidak ikut kebawa padding/
-   border/background bawaan ".pill"/".pill.ok" dari tempat lain di app. */
-#secBukti .bukti-status-ico{display:none}
-@media(max-width:760px){
-  #secBukti .bukti-head{align-items:flex-start}
-  #secBukti .bukti-head-mark{display:none}
-  #secBukti .bukti-toolbar{padding:8px;flex-wrap:wrap}
-  #secBukti .bukti-search{min-width:100%}
-  #secBukti .bukti-filter{min-width:100%}
-  /* 3 kartu stat (Menunggu/Disetujui/Ditolak) -> sejajar 1 baris di mobile,
-     bukan 2+1 seperti grid ".stats" default. Font & padding dikecilkan
-     dikit supaya angka & label tetap muat di kartu yang lebih sempit. */
-  #secBukti .stats{grid-template-columns:repeat(3,1fr);gap:8px}
-  #secBukti .stats .stat{padding:12px 10px}
-  #secBukti .stats .stat b{font-size:1.5rem}
-  #secBukti .stats .stat span{font-size:.6rem;line-height:1.3}
-
-  /* Reset: tabel Bukti Pembayaran di mobile disamakan dengan Data Peserta/
-     Data Master/Adm Peserta — tampil sebagai tabel biasa (bukan kartu
-     stacked tanpa label) dengan scroll horizontal, bukan ditimpa aturan
-     generik "thead{display:none} table,tbody,tr,td{display:block}" yang
-     bikin tiap sel cuma numpuk ke bawah tanpa nama kolom sama sekali. */
-  #secBukti .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:13px}
-  /* Aturan generik ".tbl-wrap table{min-width:760px}" juga ikut kena ke
-     wrapper ini (sama-sama punya class "tbl-wrap") — timpa balik ke 0. */
-  #secBukti .tbl-wrap table{display:table;width:100%;min-width:0}
-  #secBukti .tbl-wrap thead{display:table-header-group}
-  #secBukti .tbl-wrap thead tr{display:table-row}
-  #secBukti .tbl-wrap tbody{display:table-row-group}
-  #secBukti .tbl-wrap tbody tr{display:table-row;border-bottom:0;padding:0}
-  #secBukti .tbl-wrap tbody td{display:table-cell;width:auto;padding:8px 10px}
-  /* Sembunyikan kolom "Diunggah" (ke-5) di mobile supaya tabel tidak
-     terlalu lebar — tetap tampil normal di desktop. */
-  #secBukti .tbl-wrap thead th:nth-child(5),
-  #secBukti .tbl-wrap tbody td:nth-child(5){display:none}
-  #secBukti .tbl-wrap thead th{padding:9px 10px}
-  #secBukti .tbl-wrap .pill{white-space:nowrap}
-  /* Kolom Nominal (ke-4) -> "Rp 850.000" jangan sampai kepisah jadi 2 baris
-     ("Rp" lalu "850.000" menumpuk) yang bikin baris tabel jadi tinggi.
-     Dibuat 1 baris rapat, font sedikit dikecilkan; kalau tetap kepanjangan
-     wrapper tabel sudah overflow-x:auto jadi tidak overflow ke luar layar. */
-  #secBukti .tbl-wrap tbody td:nth-child(4){font-size:.76rem}
-  #secBukti .tbl-wrap tbody td:nth-child(4) .bukti-nominal{white-space:nowrap;display:inline-block}
-  /* Kolom Kode & Peserta -> font dikecilkan + dibuat 1 baris (nowrap) biar
-     tidak menumpuk turun ("JR-" lalu "F8E18E25" di baris terpisah dsb).
-     Wrapper tabel sudah overflow-x:auto jadi tetap aman kalau kepanjangan. */
-  #secBukti .tbl-wrap td.kode{font-size:.7rem;white-space:nowrap}
-  #secBukti .tbl-wrap td.nama b{font-size:.76rem;white-space:nowrap;line-height:1.2}
-  #secBukti .tbl-wrap td.nama span{font-size:.62rem;white-space:nowrap}
-
-  /* Satukan kolom Status ke kolom Aksi -> kolom Status terpisah disembunyikan,
-     pill status ganda yang sudah disisipkan di sel Aksi (bukti-status-mobile)
-     ditampilkan berdampingan dengan tombol-tombol aksi. */
-  #secBukti .tbl-wrap thead th:nth-child(6),
-  #secBukti .tbl-wrap tbody td.status-cell{display:none}
-  #secBukti .aksi-cell-in{gap:6px;justify-content:flex-start;align-items:center;flex-wrap:nowrap}
-  #secBukti .bukti-status-ico{display:inline-flex;align-items:center;justify-content:center;flex-shrink:0;width:18px;height:18px}
-  #secBukti .bukti-status-ico svg{width:16px;height:16px;display:block}
-  #secBukti .bukti-status-ico.st-disetujui{color:#0E8F55}
-  #secBukti .bukti-status-ico.st-ditolak{color:#B32C2C}
-  #secBukti .bukti-status-ico.st-menunggu{color:#B37A16}
-
-  /* Pill status & tombol aksi -> icon SVG saja, teks disembunyikan. */
-  #secBukti .pill{width:auto;min-width:0;padding:7px;border-radius:9px;justify-content:center}
-  #secBukti .pill .pill-txt{display:none}
-  #secBukti .pill .pill-ic{display:inline-flex}
-  #secBukti .pill.ok .pill-ic{color:#0E8F55}
-  #secBukti .pill.bad .pill-ic{color:#B32C2C}
-  #secBukti .pill.wait .pill-ic{color:#B37A16}
-  #secBukti .mini{width:34px;height:34px;padding:0;justify-content:center;border-radius:9px;gap:0}
-  #secBukti .mini .mini-ic{display:inline-flex}
-  #secBukti .mini .mini-txt{display:none}
-}
-#secSekolah .sekolah-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;margin:0 0 18px;padding:0 4px}
-#secSekolah .sekolah-head h2{margin-top:6px;font:800 1.65rem/1.15 var(--disp);letter-spacing:-.03em;color:var(--navy)}
-#secSekolah .sekolah-head p{margin-top:5px;font:600 .78rem/1.5 var(--body);color:var(--mut)}
-#secSekolah .sekolah-head-mark{text-align:right;padding-bottom:2px}
-#secSekolah .sekolah-head-mark span{display:block;font:800 .58rem var(--body);letter-spacing:.14em;color:var(--mut);margin-bottom:2px}
-#secSekolah .sekolah-head-mark b{font:800 .72rem var(--disp);letter-spacing:.12em;color:var(--navy);opacity:.72}
-#secSekolah .sekolah-toolbar{margin-bottom:14px;background:rgba(255,255,255,.66);border:1px solid rgba(217,227,239,.95);border-radius:16px;padding:9px;gap:9px;box-shadow:0 8px 22px rgba(27,58,102,.055);backdrop-filter:blur(10px);display:flex;flex-wrap:wrap;align-items:center}
-#secSekolah .sekolah-search{display:flex;align-items:center;gap:9px;flex:1;min-width:260px;background:#fff;border:1.5px solid #D5DFEA;border-radius:11px;padding:0 13px;height:46px;transition:.18s}
-#secSekolah .sekolah-search:focus-within{border-color:var(--gold);box-shadow:0 0 0 3px rgba(190,129,70,.11)}
-#secSekolah .sekolah-search svg{width:17px;height:17px;stroke:#718198;fill:none;stroke-width:2;flex-shrink:0}
-#secSekolah .sekolah-search input{width:100%;height:100%;border:0;outline:0;background:transparent;padding:0;font:600 .83rem var(--body);color:var(--ink)}
-#secSekolah .sekolah-search input::placeholder{color:#93A0B1}
-#secSekolah .sekolah-add{display:flex;gap:9px;flex:1;min-width:280px;align-items:center}
-#secSekolah .sekolah-add input[type="text"]{flex:1;height:46px;border:1.5px solid #D5DFEA;border-radius:11px;padding:0 14px;font:600 .83rem var(--body);outline:0;transition:.18s;background:#fff;color:var(--ink)}
-#secSekolah .sekolah-add input[type="text"]:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(190,129,70,.11)}
-#secSekolah .sekolah-add input[type="text"]::placeholder{color:#93A0B1}
-#secSekolah .sekolah-add .btn{height:46px;padding:0 18px;white-space:nowrap;border-radius:11px}
-#secSekolah .tbl-wrap{background:transparent;border:0;border-radius:0;overflow:visible}
-#secSekolah .tbl-wrap table{border-collapse:collapse;border-spacing:0}
-#secSekolah .tbl-wrap thead th{background:var(--navy);color:#E7DCC4;border:0;padding:11px 14px;font-size:.61rem;letter-spacing:.1em}
-#secSekolah .tbl-wrap tbody tr{transition:background .12s ease}
-#secSekolah .tbl-wrap tbody tr:hover{background:#F4F6F9}
-#secSekolah .tbl-wrap tbody td{background:transparent;border:0;border-bottom:1px solid rgba(19,49,77,.16);padding:10px 14px;font-size:.8rem;line-height:1.3}
-#secSekolah .tbl-wrap td:first-child b{font:800 .82rem var(--body);color:#14233A}
-#secSekolah .mini{display:inline-flex;align-items:center;gap:6px}
-#secSekolah .mini .mini-ic{display:none}
-#secSekolah .aksi-cell-in{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-start}
-#secSekolah .pill .pill-ic{display:none}
-#secSekolah .tgl-short{display:none}
-@media(max-width:760px){
-  #secSekolah .sekolah-head{align-items:flex-start}
-  #secSekolah .sekolah-head-mark{display:none}
-  #secSekolah .sekolah-toolbar{padding:8px;flex-wrap:wrap}
-  #secSekolah .sekolah-search{min-width:100%}
-  #secSekolah .sekolah-add{min-width:100%}
-  /* Timpa balik aturan generik "thead{display:none} table,tbody,tr,td{display:block}"
-     supaya tabel Sekolah Mitra tetap tampil sebagai tabel asli (header + kolom
-     sejajar) persis seperti di desktop, bukan tumpukan kartu per-baris. Kolomnya
-     cuma 4 dan ringkas, jadi scroll horizontal (kalau memang kepepet) sudah cukup. */
-  #secSekolah .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:13px}
-  #secSekolah table{display:table;width:100%;min-width:0;table-layout:auto;border-spacing:0;border-collapse:collapse}
-  #secSekolah thead{display:table-header-group}
-  #secSekolah thead tr{display:table-row}
-  #secSekolah tbody{display:table-row-group}
-  #secSekolah tbody tr{display:table-row}
-  #secSekolah tbody td{display:table-cell;width:auto;padding:6px 8px;font-size:.8rem;line-height:1.2;white-space:nowrap}
-  #secSekolah thead th{padding:7px 8px;font-size:.61rem;letter-spacing:.1em;white-space:nowrap}
-  #secSekolah tbody td:last-child{white-space:normal}
-  /* Supaya tabel muat penuh di layar mobile (tidak overflow/kepotong ke
-     kanan): nama sekolah boleh membungkus 2 baris (bukan dipaksa 1 baris
-     panjang), dan kolom "Ditambahkan" pakai format tanggal singkat tanpa
-     jam (lihat .tgl-full/.tgl-short) — dua-duanya membebaskan ruang buat
-     kolom Status & Aksi tanpa perlu geser layar ke samping. */
-  #secSekolah tbody td:first-child{white-space:normal;max-width:120px}
-  #secSekolah .tgl-full{display:none}
-  #secSekolah .tgl-short{display:inline;font-size:.74rem;white-space:nowrap}
-  /* Pill status "Aktif"/"Nonaktif" diringkas jadi icon saja di mobile —
-     bentuk pill (background, border, teks) dilepas, cuma sisa ikon
-     centang (aktif) / silang (nonaktif) supaya kolom Status hemat tempat. */
-  #secSekolah .pill{background:transparent!important;border:0!important;padding:0!important;min-width:0!important;box-shadow:none!important}
-  #secSekolah .pill .pill-txt{display:none}
-  #secSekolah .pill .pill-ic{display:inline-flex}
-  #secSekolah .pill.ok .pill-ic{color:#0E8F55}
-  #secSekolah .pill.bad .pill-ic{color:#B32C2C}
-  /* Tombol Aksi jadi icon-only (ikon dari CAT_ICO_*) supaya kolom Aksi
-     ringkas dan tidak perlu scroll horizontal jauh-jauh cuma buat lihat
-     "Nonaktifkan"/"Hapus". Judul tombol tetap ada lewat atribut title
-     (muncul sbg tooltip) + aria-label bawaan HTML. */
-  #secSekolah .mini{width:36px;height:36px;padding:0;justify-content:center;border-radius:10px;gap:0}
-  #secSekolah .mini .mini-ic{display:inline-flex}
-  #secSekolah .mini .mini-txt{display:none}
-  /* Kolom Aksi diberi lebar tetap lewat width langsung di th/td (bukan lewat
-     <colgroup><col> — kombinasi col + visibility:collapse ternyata bikin
-     Safari/iOS salah render sampai kolom Aksi ikut hilang). Dua tombolnya
-     direnggangkan ke ujung kiri-kanan lewat wrapper .aksi-cell-in supaya
-     jelas terpisah dan tidak "berdempet". */
-  #secSekolah thead th:nth-child(4),
-  #secSekolah tbody td:nth-child(4){width:132px;padding-left:10px;padding-right:10px}
-  #secSekolah .aksi-cell-in{width:100%;flex-wrap:nowrap;justify-content:space-between;gap:0}
-}
-#secPeserta .peserta-table-wrap tbody tr:hover{background:#F4F6F9}
-#secPeserta .peserta-table-wrap tbody td{background:transparent;border:0;border-bottom:1px solid rgba(19,49,77,.16);padding:6px 14px;height:auto;font-size:.8rem;line-height:1.2}
-#secPeserta .peserta-table-wrap tbody td:first-child{color:#8390A0;font:800 .72rem var(--mono)}
-/* Dot bulat berwarna sebelum nomor urut -> penanda status cepat (Siap Convert,
-   Menunggu Verifikasi, Belum Unggah Dokumen), warna sama persis dengan legend
-   di atas tabel. Tampil di desktop & mobile. */
-#secPeserta .row-status-dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:7px;vertical-align:middle;flex-shrink:0}
-#secPeserta .row-status-dot.dot-none{background:transparent;box-shadow:none}
-#secPeserta .row-status-dot.dot-ready{background:#3F9E6E;box-shadow:0 0 0 3px #DDF5E7}
-#secPeserta .row-status-dot.dot-verif{background:#D6A426;box-shadow:0 0 0 3px #FBEECB}
-#secPeserta .row-status-dot.dot-empty{background:#D65C5C;box-shadow:0 0 0 3px #FBDCDC}
-/* Aksen garis kiri & warna teks nama untuk row-ready/row-empty sudah dihapus —
-   sekarang penanda status cukup lewat dot bulat di kolom No (lihat .row-status-dot). */
-#secPeserta .peserta-table-wrap td.kode{font-size:.75rem;white-space:nowrap}
-#secPeserta .peserta-table-wrap .kode-del{color:#1B3A66;border-bottom:1px dashed #AAB8C8}
-#secPeserta .peserta-table-wrap td.nama b{font:800 .8rem var(--body);color:#14233A;line-height:1.25;display:inline-block;width:auto;cursor:pointer}
-#secPeserta .peserta-table-wrap tbody tr{cursor:default}
-#secPeserta .peserta-table-wrap tbody td.nama{cursor:default;padding-left:8px;padding-right:8px}
-#secPeserta .peserta-table-wrap td.nama span{font-size:.65rem;color:#8290A4;line-height:1.2}
-#secPeserta .peserta-table-wrap .stagebar{gap:7px}
-#secPeserta .peserta-table-wrap .stagebar .track{width:62px;height:6px;background:#E7E5DC}
-#secPeserta .peserta-table-wrap .stagebar .fill{background:#3F741A}
-#secPeserta .peserta-table-wrap .stagebar b{font-size:.69rem}
-#secPeserta .peserta-table-wrap .pill{width:235px;min-width:235px;padding:4px 9px;font-size:.61rem}
-#secPeserta .peserta-table-wrap .aksi-cell-in{gap:5px}
-#secPeserta .peserta-table-wrap .btn.sm{padding:5px 10px;font-size:.68rem;border-radius:8px}
-/* FIX: .aksi-mobile (tombol titik-tiga + popup Aksi) sebelumnya tidak
-   punya display:none default, jadi ikut tampil mentah di desktop
-   bertumpuk dengan tombol Convert versi desktop. Sembunyikan di sini;
-   baru dimunculkan lagi khusus di dalam media query mobile. */
-#secPeserta .peserta-table-wrap tbody .aksi-mobile{display:none}
-/* Kontrol pagination -> flat, senada tema, muncul di bawah tabel */
-#secPeserta .peserta-pagination{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding:2px 4px;flex-wrap:wrap}
-#secPeserta .peserta-pagination .pg-info{font:700 .68rem var(--body);color:var(--mut)}
-#secPeserta .peserta-pagination .pg-btns{display:flex;align-items:center;gap:6px}
-#secPeserta .peserta-pagination button{border:1.5px solid rgba(19,49,77,.22);background:transparent;color:var(--navy);font:800 .7rem var(--body);padding:7px 13px;border-radius:9px;cursor:pointer;transition:.15s}
-#secPeserta .peserta-pagination button:hover:not(:disabled){background:rgba(19,49,77,.08)}
-#secPeserta .peserta-pagination button:disabled{opacity:.4;cursor:not-allowed}
-#secPeserta .peserta-pagination button.pg-active{background:var(--navy);color:#E7DCC4;border-color:var(--navy)}
-#secPeserta .peserta-pagination .pg-size select{border:1.5px solid rgba(19,49,77,.22);background:#fff;color:var(--navy);font:800 .68rem var(--body);padding:8px 30px 8px 12px;border-radius:9px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231B3A66' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");background-repeat:no-repeat;background-position:right 9px center;background-size:13px;cursor:pointer;outline:0;transition:.18s}
-#secPeserta .peserta-pagination .pg-size select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(190,129,70,.11)}
-#secPeserta .empty-row td{background:transparent!important;border:0!important;border-bottom:1px solid rgba(19,49,77,.16)!important;border-radius:0!important;padding:36px 16px}
-@media(max-width:760px){
-  #secPeserta .peserta-head{align-items:flex-start}
-  #secPeserta .peserta-head-mark{display:none}
-  #secPeserta .peserta-toolbar{padding:8px}
-  #secPeserta .peserta-search{min-width:100%}
-  #secPeserta .peserta-filter{display:none}
-
-  /* Reset: tabel Data Peserta di mobile sekarang tampil sama persis seperti
-     desktop (semua kolom & tombol aksi inline apa adanya) — tidak lagi
-     diubah jadi kartu ringkas dengan kolom tersembunyi + menu "..." popup.
-     Supaya tetap bisa dilihat di layar sempit, tabel dibuat scroll horizontal
-     KALAU memang perlu — tapi tabel tidak lagi dipaksa lebar minimal 760px,
-     supaya kolom merapat mengikuti isi kontennya saja (tidak melar/renggang). */
-  #secPeserta .peserta-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:13px}
-  /* PENTING: ada aturan generik ".tbl-wrap table{min-width:760px}" (dipakai
-     tabel lain di app ini) yang ikut kena ke sini karena wrapper ini juga
-     punya class "tbl-wrap" — itu penyebab kolom selalu terlihat renggang
-     walau padding sudah dikecilkan. Timpa balik ke 0 di sini. */
-  #secPeserta .peserta-table-wrap table{display:table;width:100%;min-width:0}
-  #secPeserta .peserta-table-wrap thead{display:table-header-group}
-  #secPeserta .peserta-table-wrap thead tr{display:table-row}
-  #secPeserta .peserta-table-wrap tbody{display:table-row-group}
-  #secPeserta .peserta-table-wrap tbody tr{display:table-row}
-  #secPeserta .peserta-table-wrap tbody td{display:table-cell;width:auto}
-  /* Sembunyikan kolom Kota (ke-4) dan Tahap (ke-5) di tabel Data Peserta,
-     khusus di mobile — tetap tampil normal di desktop. */
-  #secPeserta .peserta-table-wrap thead th:nth-child(4),
-  #secPeserta .peserta-table-wrap thead th:nth-child(5),
-  #secPeserta .peserta-table-wrap tbody td:nth-child(4),
-  #secPeserta .peserta-table-wrap tbody td:nth-child(5){display:none}
-  /* Perkecil jarak antar kolom di mobile supaya tidak terlihat renggang */
-  #secPeserta .peserta-table-wrap thead th,
-  #secPeserta .peserta-table-wrap tbody td{padding-left:8px;padding-right:8px}
-  #secPeserta .peserta-table-wrap tbody td.nama{padding-left:6px;padding-right:6px}
-  /* Pill Dokumen didesain lebar tetap (235px) untuk desktop — di mobile
-     itu justru memaksa tabel melebar & bikin kolom terlihat renggang lagi,
-     jadi di sini dibuat menyesuaikan konten saja. */
-  #secPeserta .peserta-table-wrap .pill{width:auto;min-width:0}
-  /* Tombol pagination "Sebelumnya"/"Berikutnya" -> icon-only di mobile */
-  #secPeserta .peserta-pagination .pg-nav-label{display:none}
-  #secPeserta .peserta-pagination button[data-pg="prev"],
-  #secPeserta .peserta-pagination button[data-pg="next"]{padding:7px 11px}
-}
-/* ============ ADM PESERTA (KEUANGAN) — FORMAT KOLOM SELARAS DATA PESERTA & DATA MASTER ============ */
-#secKeuangan .toolbar{
-  align-items:center;gap:10px;margin-bottom:14px;padding:9px;
-  background:rgba(255,255,255,.66);border:1px solid rgba(217,227,239,.95);
-  border-radius:16px;box-shadow:0 8px 22px rgba(27,58,102,.055);backdrop-filter:blur(10px);
-}
-#secKeuangan .toolbar input[type="text"]{
-  flex:1;min-width:220px;height:46px;padding:0 15px;background:#fff;
-  border:1.5px solid #D5DFEA;border-radius:11px;outline:0;
-  font:600 .83rem var(--body);color:var(--ink);transition:.18s;
-}
-#secKeuangan .toolbar input[type="text"]::placeholder{color:#93A0B1}
-#secKeuangan .toolbar input[type="text"]:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(190,129,70,.11)}
-#secKeuangan .tbl-wrap{background:transparent;border:0;border-radius:0;overflow:visible}
-#secKeuangan .tbl-wrap table{border-collapse:collapse;border-spacing:0}
-#secKeuangan .tbl-wrap thead th{background:var(--navy);color:#E7DCC4;border:0;padding:7px 14px;font-size:.61rem;letter-spacing:.1em}
-#secKeuangan .tbl-wrap tbody tr{transition:background .12s ease;cursor:default}
-#secKeuangan .tbl-wrap tbody tr:hover td{background:#F4F6F9}
-#secKeuangan .tbl-wrap tbody td{background:transparent;border:0;border-bottom:1px solid rgba(19,49,77,.16);padding:6px 14px;height:auto;font-size:.8rem;line-height:1.2;vertical-align:middle}
-#secKeuangan .tbl-wrap tbody td:first-child{color:#8390A0;font:800 .72rem var(--mono)}
-#secKeuangan .tbl-wrap td.kode{font-size:.75rem}
-#secKeuangan .tbl-wrap .kode-del{color:var(--navy);border-bottom:1px dashed #AAB8C8}
-#secKeuangan .tbl-wrap td.nama b{font:800 .8rem var(--body);color:#14233A;line-height:1.25}
-#secKeuangan .tbl-wrap td.nama span{font-size:.65rem;color:#8290A4;line-height:1.2}
-#secKeuangan .tbl-wrap td:nth-child(5),
-#secKeuangan .tbl-wrap td:nth-child(6),
-#secKeuangan .tbl-wrap td:nth-child(7){font:800 .72rem var(--body);color:var(--navy)}
-#secKeuangan .tbl-wrap .aksi-cell-in{gap:5px}
-#secKeuangan .tbl-wrap .btn.sm{padding:5px 10px;font-size:.68rem;border-radius:8px}
-#secKeuangan .pill-ico{display:flex;flex-shrink:0}
-#secKeuangan .pill-ico svg{display:block}
-#secKeuangan .tbl-wrap .btn.b-navy{box-shadow:none}
-#secKeuangan .tbl-wrap .empty-row td{background:transparent!important;border:0!important;border-bottom:1px solid rgba(19,49,77,.16)!important;border-radius:0!important;padding:36px 16px}
-/* Tombol Kelola versi ringkas yang nempel di kolom Status -> disembunyikan
-   di desktop (desktop tetap pakai tombol "Kelola" penuh di kolom Aksi). */
-#secKeuangan .btn-fin-inline{display:none}
-/* Kode di bawah nama peserta -> hanya tampil di mobile (lihat media query
-   di bawah); desktop tetap pakai kolom Kode terpisah seperti biasa. */
-#secKeuangan td.nama span.nama-kode{display:none}
-/* Sisa disisipkan sebagai sub-teks di dalam kolom Terbayar (sama seperti
-   Kode disisipkan di bawah nama peserta) -> hanya tampil di mobile lewat
-   media query di bawah; desktop tetap pakai kolom Sisa terpisah seperti
-   biasa. */
-#secKeuangan td.bayar span.bayar-sisa{display:none}
-@media(max-width:760px){
-  #secKeuangan .toolbar{padding:8px;flex-wrap:nowrap;gap:8px}
-  #secKeuangan .toolbar input[type="text"]{min-width:0;flex:1}
-  /* Tombol "Kelola Kategori Biaya" jadi icon-only di mobile, sejajar
-     langsung di samping kolom pencarian (bukan turun ke baris baru). */
-  #secKeuangan .kk-label{display:none}
-  #secKeuangan #btnKelolaKategori{flex-shrink:0;padding:0;width:40px;height:40px;justify-content:center;gap:0;border-radius:11px;margin-left:0}
-  /* Sama seperti Data Peserta & Data Master: timpa balik aturan generik
-     "thead{display:none} table,tbody,tr,td{display:block}" (dipakai tabel
-     lain di app ini) supaya ADM Peserta tetap tampil sebagai tabel asli
-     (header + baris + kolom sejajar), bukan tumpukan blok per-kolom.
-     Kolomnya ada 9 (lebih banyak dari Data Peserta/Master), jadi dibuat
-     scroll horizontal supaya tetap rapi & semua kolom kebaca di layar sempit. */
-  #secKeuangan .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:13px}
-  /* SAMA seperti bug yg sudah diperbaiki di Data Peserta & Data Master
-     (lihat komentar "PENTING" di #secPeserta): tabel ini sempat dipaksa
-     min-width 700px lalu ditimpa lagi jadi 560px di bawah (lihat versi
-     lama) -- itu penyebab kolom kelihatan renggang/melar walau kontennya
-     pendek (mis. kolom No, Total Tagihan, Status yg cuma icon). table-
-     layout:auto + min-width:0 bikin kolom merapat mengikuti isi konten
-     asli, scroll horizontal cuma aktif kalau memang kepepet (9 kolom). */
-  #secKeuangan table{display:table;width:100%;min-width:0;table-layout:auto}
-  #secKeuangan thead{display:table-header-group}
-  #secKeuangan thead tr{display:table-row}
-  #secKeuangan tbody{display:table-row-group}
-  #secKeuangan tbody tr{display:table-row;border-bottom:0}
-  #secKeuangan tbody td{display:table-cell;width:auto;padding:8px 4px}
-  /* Perkecil jarak antara kolom No dan Peserta khusus di mobile supaya
-     lebih pas di layar sempit (kolom lain tidak berubah). */
-  #secKeuangan tbody td:first-child{padding-right:2px}
-  #secKeuangan td.nama{padding-left:2px}
-  #secKeuangan td.kode{order:initial;white-space:nowrap}
-  #secKeuangan td.nama{order:initial;margin-bottom:0}
-  #secKeuangan td.nama b{white-space:nowrap;display:block}
-  #secKeuangan .pill{white-space:nowrap}
-  #secKeuangan .aksi-cell-in{flex-wrap:nowrap}
-  /* Ringkas tampilan mobile: kolom Kode terpisah (ke-2) disembunyikan --
-     kodenya dipindah tampil sebagai sub-teks di bawah nama peserta.
-     Nomor telepon di kolom Peserta tetap disembunyikan, dan kolom Kota
-     (ke-4) dihilangkan sepenuhnya (header + isi). */
-  #secKeuangan td.nama span.tel{display:none}
-  #secKeuangan td.nama span.nama-kode{display:block;font:800 .68rem var(--mono);color:#8390A0;margin-top:2px;white-space:nowrap}
-  #secKeuangan thead th:nth-child(2),
-  #secKeuangan tbody td:nth-child(2){display:none}
-  #secKeuangan thead th:nth-child(4),
-  #secKeuangan tbody td:nth-child(4){display:none}
-  /* Angka rupiah (Tagihan, Terbayar, Sisa) dibuat 1 baris supaya tidak
-     bertumpuk/patah ke bawah di kolom sempit. Font-size diperkecil khusus
-     di mobile (dari .72rem baseline jadi .64rem) supaya nominal sampai
-     puluhan juta (mis. "Rp 99.999.999", 13 karakter) masih muat 1 baris
-     tanpa bikin tabel melebar/scroll berlebihan di layar sempit. */
-  #secKeuangan tbody td:nth-child(5),
-  #secKeuangan tbody td:nth-child(6){white-space:nowrap;font-size:.6rem;letter-spacing:-.02em;padding-left:3px;padding-right:3px}
-  /* Kolom Terbayar & Sisa digabung jadi 1 kolom (atas-bawah) sama seperti
-     Kode yang disisipkan di bawah nama pada kolom Peserta: kolom Sisa
-     terpisah (ke-7) disembunyikan total, nilainya dipindah tampil sebagai
-     sub-teks di bawah nilai Terbayar (di dalam td.bayar, kolom ke-6). */
-  #secKeuangan thead th:nth-child(7),
-  #secKeuangan tbody td.sisa-col{display:none}
-  #secKeuangan td.bayar{white-space:normal;line-height:1.3}
-  #secKeuangan td.bayar span.bayar-sisa{display:block;font:800 .58rem var(--body);color:#8390A0;margin-top:1px;white-space:nowrap}
-  /* Kolom Status jadi icon-only (pill tanpa background/teks), dan tombol
-     "Kelola" dari kolom Aksi dipindah masuk ke sini juga sebagai icon --
-     supaya kolom Aksi bisa disembunyikan total dan tabel tidak makan
-     tempat banyak. */
-  #secKeuangan .pill-txt{display:none}
-  #secKeuangan .pill{width:auto;height:auto;min-width:0;padding:0;border-radius:0;border:0;background:transparent!important;box-shadow:none}
-  #secKeuangan .status-cell .pill{width:auto;min-width:0}
-  #secKeuangan .pill-ico svg{width:17px;height:17px}
-  /* AKAR MASALAH garis "patah": display:flex sempat dipasang LANGSUNG di
-     <td class="status-cell">. Itu bikin <td> tsb lepas dari model layout
-     table-cell normal (browser mem-blockify-nya jadi flex container),
-     sehingga saat border-collapse menghitung border-bottom per baris, sel
-     ini dibulatkan ke sub-pixel yang beda sendiri dari td tetangga yang
-     masih table-cell murni -> border-bottom-nya jadi tidak sejajar/"patah".
-     Fix: <td class="status-cell"> DIBIARKAN table-cell biasa (tidak diberi
-     display apa pun di sini), dan flex-nya dipindah ke wrapper
-     <span class="status-cell-inner"> di DALAM td (lihat markup JS pembuat
-     baris tabel, var FIN_STATUS_ICON / render row ADM Peserta). Dengan
-     begini td tetap ikut grid table asli & border-nya balik lurus,
-     sementara tampilan icon-icon di dalamnya tetap center pakai flex. */
-  #secKeuangan .status-cell{min-height:20px;padding-left:3px;padding-right:3px}
-  #secKeuangan .status-cell-inner{display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap}
-  #secKeuangan .btn-fin-inline{display:inline-flex;align-items:center;justify-content:center;background:transparent;border:0;padding:0;color:var(--navy);cursor:pointer}
-  #secKeuangan .btn-fin-inline .btn-fin-ico{width:18px;height:18px}
-  #secKeuangan thead th:nth-child(8),
-  #secKeuangan tbody td:nth-child(8){text-align:center}
-  /* Kolom Aksi (ke-9) disembunyikan total di mobile -- icon Kelola-nya
-     sudah dipindah ke kolom Status di atas. */
-  #secKeuangan thead th:nth-child(9),
-  #secKeuangan tbody td:nth-child(9){display:none}
-}
-
-/* ============ DASHBOARD ============ */
-.main-content{padding:26px 0 60px}
+/* ============ EMAIL APP SHELL ============ */
 body{overflow-x:hidden}
 .tab-panel{display:none}
 .tab-panel.active{display:block;animation:tabIn .2s ease}
 @keyframes tabIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:22px}
-.stats-3col{grid-template-columns:repeat(3,1fr)}
-.stat-clickable{cursor:pointer;transition:.2s}
-.stat-clickable:hover{border-color:var(--gold);box-shadow:0 4px 14px rgba(0,0,0,.08);transform:translateY(-1px)}
-.nav-cards-wrap{display:flex;flex-direction:column;gap:12px}
-.nav-row{display:grid;gap:12px}
-.nav-row-2{grid-template-columns:repeat(2,1fr)}
-.nav-row-3{grid-template-columns:repeat(3,1fr)}
-.nav-row-1{grid-template-columns:1fr}
-.nav-bento{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.nav-bento .span-2{grid-column:span 2}
-.nav-bento .span-1{grid-column:span 1}
-.nav-card{
-  position:relative;overflow:hidden;cursor:pointer;border-radius:16px;padding:22px 24px;display:flex;flex-direction:column;gap:10px;justify-content:center;
-  background:linear-gradient(135deg,#1E4478 0%,#0B1F3A 100%);
-  color:#fff;transition:.2s;border:1.5px solid rgba(255,255,255,.08);min-height:148px;
-}
-.nav-card:hover{transform:translateY(-2px);box-shadow:0 10px 26px rgba(11,31,58,.35);border-color:var(--gold)}
-.nav-card:hover .wm{opacity:.18;transform:scale(1.06) rotate(var(--wm-rot,0deg))}
-.nav-card .ic{width:32px;height:32px;display:inline-flex;align-items:center;justify-content:center;color:var(--gold);position:relative;z-index:1}
-.nav-card .ic svg{width:28px;height:28px;stroke:currentColor;fill:none}
-.nav-card-label{font:800 .92rem var(--body);letter-spacing:.01em;position:relative;z-index:1}
-.nc-badge{position:absolute;top:12px;right:12px;z-index:2;background:var(--red);color:#fff;
-  font:800 .72rem var(--body);min-width:22px;height:22px;padding:0 6px;border-radius:999px;
-  display:none;align-items:center;justify-content:center;line-height:1;box-shadow:0 2px 8px rgba(0,0,0,.25);
-  animation:ncPulse 1.8s ease-in-out infinite}
-@keyframes ncPulse{0%,100%{box-shadow:0 0 0 0 rgba(211,47,47,.55)}50%{box-shadow:0 0 0 6px rgba(211,47,47,0)}}
-/* Varian gold untuk badge yang sifatnya informasi (bukan urgent/menunggu
-   approval seperti nc-badge merah) — dipakai badge jumlah peserta dengan
-   tagihan kolektif di card ADM Peserta. Tidak pakai animasi pulse supaya
-   nggak terkesan "butuh aksi segera" seperti Bukti Pembayaran. */
-.nc-badge.nc-badge-gold{background:var(--gold,#c9a227);color:#1a1a2e;animation:none;box-shadow:0 2px 8px rgba(0,0,0,.18)}
-/* Watermark: ikon besar transparan di balik konten kartu, posisi & rotasi
-   berbeda-beda per kartu supaya tidak terasa berulang/monoton. */
-.nav-card .wm{position:absolute;opacity:.10;pointer-events:none;color:#fff;transition:.3s;--wm-rot:0deg}
-.nav-card .wm svg{width:100%;height:100%;stroke:currentColor;fill:none;display:block}
-.wm-br{right:-20px;bottom:-24px;width:128px;height:128px;--wm-rot:-10deg;transform:rotate(-10deg)}
-.wm-tr{right:-16px;top:-22px;width:110px;height:110px;--wm-rot:10deg;transform:rotate(10deg)}
-.wm-bl{left:-18px;bottom:-22px;width:118px;height:118px;--wm-rot:8deg;transform:rotate(8deg)}
-.wm-center{right:6%;bottom:-34px;width:160px;height:160px;--wm-rot:-6deg;transform:rotate(-6deg);opacity:.07}
-.nav-card-stat{padding:22px 26px;flex-direction:row;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;min-height:0}
-.nav-stat-main{display:flex;flex-direction:column;gap:6px;position:relative;z-index:1}
-.nav-stat-num{font:800 2.4rem var(--body);color:#fff;line-height:1}
-.nav-stat-label{font:700 .78rem var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--gold)}
-.nav-stat-mini-row{display:flex;gap:14px;flex-wrap:wrap;position:relative;z-index:1}
-.nav-stat-mini{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px 16px;min-width:140px}
-.nav-stat-mini b{display:block;font:800 1.3rem var(--body);color:#fff;line-height:1.2}
-.nav-stat-mini span{display:block;font:700 .62rem var(--body);letter-spacing:.04em;text-transform:uppercase;color:#B9C6DC;margin-top:3px}
-@media(max-width:760px){ .nav-card-stat{flex-direction:column;align-items:flex-start} .nav-stat-mini-row{width:100%} .nav-stat-mini{flex:1;min-width:120px} }
-@media(max-width:760px){ .nav-row-2,.nav-row-3{grid-template-columns:1fr 1fr} .nav-bento{grid-template-columns:repeat(2,1fr)} .nav-bento .span-1,.nav-bento .span-2{grid-column:span 1}
-  .nav-bento .span-2:nth-child(1),.nav-bento .span-2:nth-child(2),.nav-bento .span-2:nth-child(5){grid-column:span 2} }
-@media(max-width:480px){ .nav-row-2,.nav-row-3{grid-template-columns:1fr} .nav-bento{grid-template-columns:1fr} .nav-bento .span-1,.nav-bento .span-2{grid-column:span 1} }
-.stat{background:var(--card);border-radius:16px;border:1.5px solid var(--line);padding:18px 20px}
-.stat b{display:block;font:800 1.9rem var(--disp);color:var(--navy)}
-.stat span{font:700 .72rem var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
-.stat.warn b{color:var(--gold)}
-.stat.bad b{color:var(--red)}
-.stat.ok b{color:var(--green)}
-/* Kartu ringkasan di tab Kelola Keuangan dibuat lebih ringkas (padding & font lebih
-   kecil) dibanding kartu statistik lain (Ringkasan, Bukti Pembayaran) — jadi discope
-   khusus ke #secKeuangan supaya tab lain tidak ikut berubah. */
-#secKeuangan .stats{gap:12px;margin-bottom:18px}
-#secKeuangan .stat{padding:12px 16px;border-radius:13px}
-#secKeuangan .stat b{font-size:1.3rem}
-#secKeuangan .stat span{font-size:.62rem}
-
-.toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:16px;background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:12px 14px}
-.toolbar input[type=text]{flex:1;min-width:180px;border:2px solid var(--line);border-radius:10px;padding:10px 14px;font:600 .9rem var(--body)}
-.toolbar input[type=text]:focus{outline:none;border-color:var(--navy)}
-.toolbar .csel{min-width:280px;flex:1;max-width:360px}
-/* Dropdown kategori di form "+ Tambah Kategori Tagihan" (Catat Pembayaran)
-   dibuat memenuhi sisa lebar toolbar penuh di desktop, tidak dibatasi
-   360px seperti dropdown csel lain -> tidak ada ruang kosong di kanan. */
-.toolbar .csel:has(#finAddBillCat){max-width:none}
-@media(max-width:760px){
-  /* Toolbar "+ Tambah Kategori Tagihan" (form Catat Pembayaran) -> di
-     mobile tombolnya jadi icon-only persegi dan disejajarkan satu baris
-     dengan dropdown kategori di atasnya (bukan turun ke baris baru). */
-  .toolbar:has(#finAddBillCat){flex-wrap:nowrap}
-  .toolbar:has(#finAddBillCat) .csel{min-width:0;flex:1}
-  #btnAddBillCat{flex-shrink:0;padding:0;width:40px;height:40px;display:inline-flex;align-items:center;justify-content:center;gap:0;border-radius:10px}
-  #btnAddBillCat .abc-label{display:none}
-}
-.search-wrap{position:relative;flex:1;min-width:180px;display:flex}
-.search-wrap input[type=text]{width:100%;padding-right:38px}
-.search-clear-btn{display:none;position:absolute;right:8px;top:50%;transform:translateY(-50%);width:24px;height:24px;border:none;border-radius:50%;background:var(--line);color:var(--ink,#1a1a2e);font-size:.85rem;font-weight:800;line-height:1;cursor:pointer;align-items:center;justify-content:center}
-.search-clear-btn:hover{background:#fff;color:var(--navy);border:1px solid var(--line)}
-.search-wrap.has-value .search-clear-btn{display:flex}
-
 /* ============ CUSTOM DROPDOWN (csel) ============ */
 .csel{position:relative;user-select:none}
 .csel select{display:none}
@@ -713,46 +182,9 @@ body{overflow-x:hidden}
 .csel-opt.sel .csel-opt-price{color:#cfe0f5}
 .csel-opt:hover,.csel-opt.hi{background:#EEF3FA}
 .csel-opt.sel{background:var(--navy);color:#fff;font-weight:700}
-.stage-row .csel{flex:1}
 .fld .csel-btn{padding:13px 15px;border-radius:11px;font:600 .88rem var(--body)}
 
-.tbl-wrap{background:var(--card);border-radius:16px;border:1.5px solid var(--line);overflow:hidden}
 table{width:100%;border-collapse:collapse}
-thead th{text-align:center;font:800 .68rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);padding:8px 16px;background:#F7F5EF;border-bottom:1.5px solid var(--line)}
-tbody td{padding:6px 16px;border-bottom:1px solid var(--line);font-size:.88rem;vertical-align:middle;text-align:center}
-tbody tr:last-child td{border-bottom:none}
-tbody tr:hover{background:#FBFAF6}
-tbody tr{cursor:pointer}
-td.kode{font:700 .82rem var(--mono);color:var(--navy)}
-.kode-del{cursor:pointer;border-bottom:1.5px dashed rgba(27,58,102,.4);transition:.15s;padding:2px 0}
-.kode-del:hover{color:var(--red);border-bottom-color:var(--red)}
-td.nama b{display:block;color:var(--ink);font-weight:700}
-td.nama span{color:var(--mut);font-size:.78rem}
-.pill{display:inline-flex;align-items:center;justify-content:center;gap:5px;font:700 .68rem var(--body);letter-spacing:.03em;
-  padding:5px 11px;border-radius:100px;border:1.5px solid var(--line);white-space:nowrap;min-width:118px}
-.pill.ok{background:#E9FBF2;border-color:#B7EED2;color:#0E8F55}
-.pill.wait{background:rgba(255,255,255,.55);border-color:#111111;color:#111111}
-.pill.bad{background:#FDEAEA;border-color:#F5C2C2;color:#B32C2C}
-.pill.kolektif{background:#EAF4FD;border-color:#BFDCF5;color:#1B6FB3}
-.doc-status-icons{display:inline-flex;align-items:center;gap:8px;font:700 .68rem var(--body);letter-spacing:.03em;white-space:nowrap}
-.doc-status-icons .pill-ico{display:inline-flex;align-items:center;gap:4px}
-.doc-status-icons .pill-ico svg{flex-shrink:0;display:block}
-.doc-status-icons .pill-sep{opacity:.35;font-weight:400}
-.doc-status-icons.ok{color:#0E8F55}
-.doc-status-icons.wait{color:#4B5766}
-.doc-status-icons.kolektif{color:#1B6FB3}
-.stagebar{display:flex;align-items:center;justify-content:center;gap:8px}
-.stagebar .track{width:70px;height:7px;border-radius:99px;background:#EDEAE0;overflow:hidden}
-.stagebar .fill{height:100%;background:#3B6D11;border-radius:99px}
-.stagebar b{font:700 .74rem var(--body);color:var(--navy);white-space:nowrap}
-.empty-row td{text-align:center;color:var(--mut);padding:40px 16px}
-
-.devnote{background:var(--card);border:1.5px solid var(--line);border-radius:16px;
-  padding:60px 24px;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  text-align:center;gap:6px;color:var(--mut)}
-.devnote svg{color:var(--gold);margin-bottom:6px}
-.devnote h3{font:800 1.15rem var(--disp);color:var(--navy)}
-.devnote p{font:600 .85rem var(--body);color:var(--mut)}
 
 /* ============ KELOLA EMAIL (gaya Gmail — flat, tanpa card) ============ */
 .mail-shell{border:none;border-radius:0}
@@ -895,48 +327,10 @@ td.nama span{color:var(--mut);font-size:.78rem}
 .box-body{padding:22px 26px 26px;max-height:70vh;overflow-y:auto}
 .box-sec{margin-bottom:22px}
 .box-sec h4{font:800 .78rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--navy);margin-bottom:12px;display:flex;align-items:center;gap:8px}
-/* Header "Data Pribadi" yang bisa dibuka/tutup (collapsible) lewat panah kecil,
-   supaya admin bisa langsung loncat ke bagian Dokumen tanpa scroll panjang. */
-.box-sec-head{display:flex;align-items:center;justify-content:space-between;gap:10px;cursor:pointer;margin-bottom:12px}
-.box-sec-head h4{margin-bottom:0}
-.sec-toggle{width:30px;height:30px;flex-shrink:0;border-radius:9px;border:1.5px solid #D5DFEA;background:#F6F8FB;color:var(--navy);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.15s}
-.sec-toggle:hover{background:#EAF0F8;border-color:var(--gold)}
-.sec-toggle .chev{transition:transform .2s}
-.box-sec-head[aria-expanded="false"] .chev{transform:rotate(-90deg)}
-.box-sec-body{overflow:hidden}
-.box-sec-body.collapsed{display:none}
 .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .info-grid .full{grid-column:1/-1}
 .info-grid .fld input,.info-grid .fld select,.info-grid .fld textarea{padding:10px 12px;font-size:.86rem}
 .info-grid .fld label{font-size:.65rem}
-.stage-row{display:flex;gap:10px;align-items:center}
-.doc{display:flex;align-items:flex-start;gap:12px;padding:12px 0;border-bottom:1px solid var(--line)}
-.doc:last-child{border-bottom:none}
-.doc .ic{width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
-.doc .ic svg{width:22px;height:22px}
-.doc-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:8px}
-.doc-body h5{font:700 .86rem var(--body);color:var(--ink);display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-.doc-body h5 .req,.doc-body h5 .opt{font:800 .58rem var(--body);letter-spacing:.06em;padding:2px 7px;border-radius:6px}
-.doc-body h5 .req{background:rgba(229,72,77,.1);color:#C0392B}
-.doc-body h5 .opt{background:rgba(120,130,145,.12);color:#5C6B7A}
-.doc .act{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-start}
-.mini{font:700 .66rem var(--body);padding:6px 8px;border-radius:8px;border:1.5px solid var(--navy);background:#fff;color:var(--navy);transition:.2s;white-space:nowrap}
-.mini:hover{background:var(--navy);color:#fff}
-.mini.g{border-color:var(--green);color:var(--green)} .mini.g:hover{background:var(--green);color:#fff}
-.mini.r{border-color:var(--red);color:var(--red)} .mini.r:hover{background:var(--red);color:#fff}
-.mini[disabled]{opacity:.4;pointer-events:none}
-/* Tombol icon-only (dipakai kartu Kelola Kategori Biaya: Edit, Simpan,
-   Aktifkan/Nonaktifkan, Hapus) -> sama tampilannya di mobile & desktop. */
-.mini-ico{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;padding:0;flex-shrink:0}
-.mini-ico svg{display:block;width:15px;height:15px}
-
-/* Detail peserta sebagai panel samping kiri, tinggi penuh */
-#detailModal{justify-content:flex-start;align-items:stretch;padding:0}
-#detailModal .box{max-width:520px;width:100%;height:calc(var(--app-vh, 1vh) * 100);border-radius:0;display:flex;flex-direction:column;animation:panelIn .22s ease-out}
-#detailModal .box-body{max-height:none;flex:1;overflow-y:auto}
-@keyframes panelIn{from{transform:translateX(-24px);opacity:0}to{transform:translateX(0);opacity:1}}
-@media(max-width:560px){#detailModal .box{max-width:100%}}
-
 /* Tulis Email Baru sebagai panel samping kanan, tinggi penuh. */
 #mailComposeModal{
   justify-content:flex-end;
@@ -1051,136 +445,11 @@ td.nama span{color:var(--mut);font-size:.78rem}
 .confirm-actions{display:flex;gap:10px;justify-content:center}
 .confirm-actions .btn{flex:1;justify-content:center}
 .confirm-box p{white-space:pre-line}
-#promptModal .fld{margin-bottom:20px;text-align:left}
 @keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 
-.hint{background:#FFF6E9;border:1px solid #F3D9A6;border-radius:12px;padding:12px 14px;color:var(--navy);font-size:.78rem;line-height:1.5;margin-bottom:18px}
-
-.aksi-cell{text-align:center}
-.aksi-cell-in{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
-
-.convert-progress{display:flex;align-items:center;gap:8px;width:150px;max-width:100%}
-.convert-progress .cp-track{flex:1;height:9px;background:#EAE6DA;border-radius:99px;overflow:hidden;position:relative}
-.convert-progress .cp-fill{height:100%;width:0%;border-radius:99px;background:#3B6D11;position:relative;transition:width .1s linear}
-.convert-progress .cp-fill::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.5),transparent);width:40px;animation:cp-shine 1.1s linear infinite}
-.convert-progress .cp-pct{font:800 .72rem var(--body);color:var(--navy);min-width:34px;text-align:right;flex-shrink:0;font-variant-numeric:tabular-nums}
-/* Popup Aksi (mobile): tombol Convert diganti isinya jadi loading bar yang
-   sama persis dengan versi desktop, cuma dibuat full-width & teks persen
-   putih supaya kebaca di atas latar navy tombolnya. */
-.aksi-row .convert-progress{width:100%}
-.aksi-row .convert-progress .cp-pct{color:#fff}
-@keyframes cp-shine{0%{transform:translateX(-40px)}100%{transform:translateX(150px)}}
-
-.doc-empty{margin:auto;text-align:center;color:var(--mut);font-size:.78rem;padding:20px 10px}
-
 @media(max-width:760px){
-  .stats{grid-template-columns:1fr 1fr}
   .info-grid{grid-template-columns:1fr}
-  thead{display:none}
-  table,tbody,tr,td{display:block;width:100%}
-  tbody tr{border-bottom:1px solid var(--line);padding:12px 16px}
-  tbody td{border:none;padding:4px 0}
-  td.kode{order:1} td.nama{order:0;margin-bottom:4px}
 }
-
-/* ============ KELOLA KEUANGAN ============ */
-#financeModal{justify-content:flex-start;align-items:stretch;padding:0}
-#financeModal .box{max-width:780px;width:100%;height:calc(var(--app-vh, 1vh) * 100);border-radius:0;display:flex;flex-direction:column;animation:panelIn .22s ease-out}
-#financeModal .box-body{max-height:70vh;overflow-y:auto}
-@media(max-width:860px){#financeModal .box{max-width:100%}}
-
-#finCatModal{justify-content:flex-start;align-items:stretch;padding:0}
-#finCatModal .box{max-width:600px;width:100%;height:calc(var(--app-vh, 1vh) * 100);border-radius:0;display:flex;flex-direction:column;animation:panelIn .22s ease-out}
-#finCatModal .box-body{max-height:none;flex:1;overflow-y:auto}
-@media(max-width:640px){#finCatModal .box{max-width:100%}}
-.fin-cat-list{display:flex;flex-direction:column;gap:12px}
-.fin-cat-card{background:var(--card);border:1.5px solid var(--line);border-radius:14px;padding:16px}
-.fin-cat-top{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:14px;flex-wrap:wrap}
-.fin-cat-top b{font:800 .95rem var(--disp);color:var(--ink)}
-.fin-cat-row{margin-bottom:14px}
-.fin-cat-row label{display:block;font:800 .66rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:7px}
-.fin-cat-row-in{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-.fin-cat-row-in .fin-bill-input{flex:1;min-width:0}
-.fin-cat-row-in .fin-bill-input.fin-cat-input-sm{flex:0 1 110px;min-width:70px}
-.fin-cat-row-in .fin-bill-input[readonly]{background:#f4f5f7;color:var(--mut);cursor:default}
-.fin-cat-row-in .fin-bill-input.editing{background:#fff;color:var(--ink);border-color:var(--navy)}
-.fin-cat-sep{width:1.5px;align-self:stretch;min-height:30px;background:var(--line);flex-shrink:0;margin-left:auto}
-.fp-cat-list{display:flex;flex-direction:column;gap:8px}
-.fp-cat-item{display:flex;align-items:center;justify-content:space-between;gap:12px;
-  border:2px solid var(--line);border-radius:12px;padding:12px 14px;cursor:pointer;background:#fff}
-.fp-cat-item-l{display:flex;align-items:center;gap:10px;min-width:0}
-.fp-cat-name{font:700 .88rem var(--body);color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.fp-cat-item-r{display:flex;align-items:center;gap:10px;flex-shrink:0}
-.fp-cat-price{flex-shrink:0;font:700 .8rem var(--body);color:var(--mut);font-variant-numeric:tabular-nums}
-.fp-cat-del{flex-shrink:0;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line);background:#fff;
-  color:var(--mut);font-size:.7rem;line-height:1;display:flex;align-items:center;justify-content:center;transition:.15s}
-.fp-cat-del:hover{border-color:var(--red);color:var(--red);background:#FDECEC}
-.fp-cat-total{display:flex;align-items:center;justify-content:space-between;gap:12px;
-  margin-top:8px;padding:10px 14px;border-radius:12px;background:var(--navy);border:1.5px solid var(--navy)}
-.fp-cat-total b{font:800 .78rem var(--body);letter-spacing:.03em;text-transform:uppercase;color:#fff}
-.fp-cat-total span{font:800 .95rem var(--body);color:#fff;font-variant-numeric:tabular-nums}
-/* Riwayat Pembayaran -> list kartu (bukan tabel) supaya rapi & konsisten
-   di mobile maupun desktop, tidak ada lagi kolom yang berantakan turun
-   satu-satu tanpa label saat layar sempit. */
-.fp-hist-list{display:flex;flex-direction:column;gap:8px}
-.fp-hist-empty{font:600 .82rem var(--body);color:var(--mut);padding:14px 2px}
-.fp-hist-item{display:flex;align-items:center;justify-content:space-between;gap:12px;
-  border:1.5px solid var(--line);border-radius:12px;padding:11px 14px;background:#fff;flex-wrap:wrap}
-.fp-hist-l{display:flex;flex-direction:column;gap:2px;min-width:0}
-.fp-hist-l b{font:800 .88rem var(--body);color:var(--ink)}
-.fp-hist-l span{font:600 .74rem var(--body);color:var(--mut)}
-.fp-hist-actions{display:flex;gap:8px;flex-shrink:0}
-.fp-catatan-row{display:flex;gap:10px}
-/* Tanggal & Metode selalu sejajar (2 kolom) baik di mobile maupun
-   desktop -> tidak ikut aturan info-grid yang jadi 1 kolom di mobile. */
-.fp-two-col{display:flex;gap:12px}
-.fp-two-col-item{flex:1;min-width:0}
-.fp-two-col-item label{display:block}
-.fp-catatan-row input{width:100%}
-.fp-catatan-row #btnSavePayment{flex-shrink:0;width:46px;padding:0;display:inline-flex;align-items:center;justify-content:center;border-radius:11px}
-.fp-catatan-row #fpCatatanNominal{background:#f4f5f7;color:var(--mut);cursor:default}
-.fp-catatan-row input:disabled{background:#f4f5f7;color:#b9c0cc;cursor:not-allowed;border-color:var(--line)}
-.fin-cat-actions{display:flex;gap:8px;flex-wrap:wrap}
-.fin-bill-input{width:120px;border:1.5px solid var(--line);border-radius:8px;padding:7px 9px;font:600 .82rem var(--body);color:var(--ink)}
-.fin-bill-input:focus{outline:none;border-color:var(--navy)}
-#finBillList .tbl-wrap{font-size:.86rem}
-#finBillList .tbl-wrap{overflow-x:auto}
-#finBillList table{min-width:620px}
-#finBillList thead th{padding:9px 8px;font-size:.6rem;white-space:nowrap}
-#finBillList tbody td{padding:8px 8px;font-size:.76rem}
-#finBillList thead th:first-child,#finBillList tbody td:first-child{text-align:left}
-#finBillList .fin-bill-input{width:90px;padding:6px 7px;font-size:.74rem}
-#finBillList .pill{font-size:.64rem;padding:4px 9px;white-space:nowrap}
-#finBillList tbody td:last-child{white-space:nowrap;text-align:left}
-#finBillList .mini{padding:5px 7px;font-size:.6rem}
-#secKeuangan .tbl-wrap{overflow-x:auto}
-/* Ini sumber utama kolom ADM Peserta kelihatan renggang di SEMUA ukuran
-   layar (aturan ini tidak dibungkus media query, jadi kena ke desktop
-   juga): tabel dipaksa min-width 760px meski konten aslinya (angka, icon
-   status) jauh lebih ringkas dari itu. table-layout:auto lalu menyebar
-   sisa ruang kosong itu jadi jarak antar-kolom yang lebar. Data Peserta
-   & Data Master tidak punya aturan setara ini sama sekali -- makanya
-   kolomnya rapat. Dihapus min-width-nya supaya tabel mengikuti lebar
-   konten aslinya, sama seperti 2 tab referensi itu. */
-#secKeuangan table{min-width:0}
-#secKeuangan thead th{padding:11px 10px;font-size:.62rem}
-#secKeuangan tbody td{padding:11px 10px;font-size:.8rem}
-#secKeuangan td.kode{white-space:nowrap;font-size:.74rem}
-#secKeuangan td.nama b{font-size:.82rem;white-space:nowrap}
-#secKeuangan td.nama span{font-size:.72rem}
-#secKeuangan .pill{font-size:.68rem;padding:5px 10px;white-space:nowrap}
-/* Pill Status disamakan lebarnya (mengikuti pola Data Peserta) supaya tidak
-   mengikuti panjang teks masing-masing status -> baris jadi rapi & rata.
-   Dibungkus media(min-width:761px) supaya TIDAK menimpa balik aturan
-   icon-only mobile di atas (sebelumnya bikin kolom Status merenggang lagi
-   di HP karena pill dipaksa lebar 150px juga di layar sempit). */
-@media(min-width:761px){
-  #secKeuangan td.status-cell{text-align:center}
-  #secKeuangan .status-cell .pill{width:150px;min-width:150px}
-}
-
-/* ============ RIWAYAT PEMBAYARAN ============ */
-.ico-finance{width:16px;height:16px;flex-shrink:0;vertical-align:-3px}
 
 /* =========================================================
    JUARA ADMIN — VISUAL REDESIGN
@@ -1260,21 +529,6 @@ header{
   align-items:stretch;
 }
 
-/* Main canvas */
-.main-content{
-  padding:30px 0 70px;
-}
-.main-content > .wrap{
-  position:relative;
-}
-.tab-panel{
-  animation:tabIn .24s ease;
-}
-@keyframes tabIn{
-  from{opacity:0;transform:translateY(7px)}
-  to{opacity:1;transform:translateY(0)}
-}
-
 /* Login — visual DNA portal peserta */
 #loginView{
   min-height:calc((var(--app-vh, 1vh) * 100) - 76px);
@@ -1335,91 +589,6 @@ header{
   border-color:#ffc33c;
 }
 
-/* Statistik utama */
-.nav-card{
-  background:linear-gradient(135deg,#0b2a4c 0%,#071f3b 62%,#04101f 100%);
-  border:1px solid rgba(255,255,255,.09);
-  border-radius:18px;
-  box-shadow:none;
-}
-.nav-card:hover{
-  transform:translateY(-2px);
-  border-color:rgba(245,182,43,.75);
-  box-shadow:0 12px 28px rgba(7,31,59,.18);
-}
-.nav-card .ic{
-  color:var(--gold);
-}
-.nav-card-label{
-  font-family:var(--body);
-  font-size:.9rem;
-}
-.nav-stat-num{
-  font-family:var(--disp);
-  letter-spacing:-.03em;
-}
-.nav-stat-label{
-  color:var(--gold);
-  letter-spacing:.1em;
-}
-.nav-stat-mini{
-  background:rgba(255,255,255,.065);
-  border:1px solid rgba(255,255,255,.11);
-  border-radius:11px;
-  backdrop-filter:blur(4px);
-}
-.nav-stat-mini span{
-  color:#aebfd4;
-}
-.nav-card .wm{
-  color:#fff;
-  opacity:.075;
-}
-
-/* Stat cards yang muncul di halaman lain */
-.stat{
-  background:#fff;
-  border:1.5px solid var(--line);
-  border-radius:16px;
-  box-shadow:none;
-  position:relative;
-  overflow:hidden;
-}
-.stat::before{
-  content:"";
-  position:absolute;
-  left:0;
-  top:0;
-  width:100%;
-  height:3px;
-  background:var(--gold);
-}
-.stat b{
-  color:var(--navy);
-  font-family:var(--disp);
-}
-.stat span{
-  color:var(--mut);
-  letter-spacing:.1em;
-}
-
-/* Toolbar & filter */
-.toolbar{
-  background:rgba(255,255,255,.94);
-  border:1.5px solid var(--line);
-  border-radius:15px;
-  padding:13px;
-  box-shadow:none;
-}
-.toolbar input[type=text]{
-  border:1.5px solid var(--line);
-  border-radius:10px;
-}
-.toolbar input[type=text]:focus{
-  border-color:var(--navy);
-  box-shadow:0 0 0 3px rgba(7,31,59,.06);
-}
-
 /* Dropdown */
 .csel-btn{
   border:1.5px solid var(--line);
@@ -1441,52 +610,9 @@ header{
   background:var(--navy);
 }
 
-/* Tables — lebih dekat ke panel data portal */
-.tbl-wrap{
-  background:#fff;
-  border:1.5px solid var(--line);
-  border-radius:16px;
-  box-shadow:none;
-}
-thead th{
-  background:#F4F7FA;
-  color:var(--navy);
-  border-bottom:1.5px solid var(--line);
-  padding:12px 16px;
-  letter-spacing:.1em;
-}
-tbody td{
-  padding:10px 16px;
-  border-bottom:1px solid #E6ECF3;
-}
-tbody tr:hover{
-  background:#F8FAFC;
-}
-td.kode{
-  color:var(--navy);
-}
-.pill{
-  border-radius:100px;
-  font-weight:800;
-}
-
-/* Panel / modal family — konsisten dengan portal */
-.panel,.modal .box,.devnote{
+/* Modal family */
+.modal .box{
   border-radius:18px;
-}
-.panel{
-  border:1.5px solid var(--line);
-  box-shadow:none;
-}
-.panel h4{
-  color:var(--navy);
-}
-.devnote{
-  border:1.5px solid var(--line);
-  background:#fff;
-}
-.devnote svg{
-  color:var(--gold);
 }
 
 /* Email panel — menyatu dengan background halaman, tanpa card putih (gaya Gmail) */
@@ -1543,10 +669,6 @@ td.kode{
   padding:0;
   box-sizing:border-box;
   margin-top:0;
-}
-/* Saat tab email aktif, garis atas panel menempel langsung di bawah header. */
-body:not(.menu-tab-active) .main-content{
-  padding-top:0;
 }
 #secEmail .mail-topbar{
   padding-left:20px;
@@ -1639,9 +761,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 
 /* Responsive header and content */
 @media(max-width:860px){
-  .main-content{
-    padding-top:22px;
-  }
   .hd-in{
     min-height:70px;
   }
@@ -1673,19 +792,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   }
   .gate-logo img{
     width:195px !important;
-  }
-  .main-content{
-    padding-bottom:40px;
-  }
-  .toolbar{
-    border-radius:13px;
-  }
-  .tbl-wrap{
-    border-radius:13px;
-    overflow-x:auto;
-  }
-  .tbl-wrap table{
-    min-width:760px;
   }
 }
 @media(max-width:420px){
