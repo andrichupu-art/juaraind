@@ -85,12 +85,13 @@ header{position:sticky;top:0;z-index:50;background:#13314D;border-bottom:3px sol
 .who-block .who-email{font:700 .62rem var(--body);color:#cfe0f4;max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .who-caret{width:10px;height:10px;stroke:#cfe0f4;fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;margin-top:1px;transition:transform .15s ease}
 .who-block.open .who-caret{transform:rotate(180deg)}
-.who-dropdown-email{display:none}
+.who-dropdown-email{display:block;padding:8px 10px 9px;margin-bottom:4px;border-bottom:1px solid #E5EAF0;font:700 .72rem var(--body);color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .who-dropdown{position:absolute;top:100%;right:0;margin-top:10px;min-width:160px;background:#fff;border-radius:12px;box-shadow:0 12px 28px rgba(19,49,77,.28);padding:6px;display:none;z-index:80}
 .who-block.open .who-dropdown{display:block}
 .who-dropdown-item{display:flex;align-items:center;gap:8px;width:100%;padding:9px 10px;background:none;border:none;border-radius:8px;color:var(--navy);font:700 .8rem var(--body);cursor:pointer;text-align:left}
 .who-dropdown-item svg{width:16px;height:16px;flex-shrink:0}
 .who-dropdown-item:hover{background:#f1f3f6}
+.who-dropdown-item.logout{color:var(--red)}
 
 .hamburger{display:none;background:transparent;border:2px solid rgba(255,255,255,.4);color:#fff;width:40px;height:40px;border-radius:9px;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;transition:.2s}
 .hamburger:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.7)}
@@ -2087,17 +2088,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .who-dropdown{
     min-width:170px;
   }
-  .who-dropdown-email{
-    display:block;
-    padding:8px 10px 9px;
-    margin-bottom:4px;
-    border-bottom:1px solid #E5EAF0;
-    font:700 .72rem var(--body);
-    color:var(--navy);
-    white-space:nowrap;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
   #loginView{
     padding:28px 14px 50px;
   }
@@ -2286,31 +2276,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 #appShell.email-only .jd-card[data-target]:not([data-target="secEmail"]){display:none!important}
 #appShell.email-only #secEmail{position:relative;display:flex;flex-direction:column;margin-top:0;min-height:calc((var(--app-vh, 1vh) * 100) - 76px)}
 #appShell.email-only #secEmail .mail-shell{flex:1;min-height:0}
-
-/* Tombol keluar melayang di pojok kanan bawah. */
-.floating-logout{
-  position:fixed;
-  right:24px;
-  bottom:24px;
-  z-index:180;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  width:48px;
-  height:48px;
-  padding:0;
-  border:2px solid #fff;
-  border-radius:50%;
-  background:var(--red);
-  color:#fff;
-  box-shadow:0 8px 20px rgba(229,72,77,.32);
-  cursor:pointer;
-  transition:transform .15s ease,background .15s ease,box-shadow .15s ease;
-}
-.floating-logout.show{display:flex}
-.floating-logout:hover{background:#c9363d;transform:translateY(-2px);box-shadow:0 11px 24px rgba(229,72,77,.4)}
-.floating-logout svg{width:21px;height:21px}
-@media(max-width:520px){.floating-logout{right:16px;bottom:16px;width:44px;height:44px}}
 
 /* ============ LIGHTBOX (Preview Gambar Email) ============ */
 .mail-lightbox-overlay{position:fixed;inset:0;background:rgba(8,21,39,.86);z-index:9999;display:none;align-items:center;justify-content:center;padding:24px;backdrop-filter:blur(2px)}
@@ -2650,6 +2615,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
         </button>
         <div class="who-dropdown" id="whoDropdown">
           <div class="who-dropdown-email" id="whoDropdownEmail">—</div>
+          <button class="who-dropdown-item logout" id="btnLogout" type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            Keluar
+          </button>
         </div>
       </div>
     </div>
@@ -3301,10 +3270,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   </div>
 </div>
 
-<button class="floating-logout" id="btnLogout" type="button" title="Keluar" aria-label="Keluar">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-</button>
-
 <script>
 /* ============ KONFIGURASI SUPABASE — sama dengan portal pendaftaran ============ */
 const SUPABASE_URL = 'https://lbnsteamnwxietquhmvn.supabase.co';
@@ -3609,14 +3574,13 @@ async function checkSession(){
 }
 function showLogin(){
   $('#loginView').style.display='flex'; $('#appShell').classList.remove('show','email-only'); $('#hdRight').style.display='none'; document.querySelector('header').style.display='none';
-  $('#btnLogout')?.classList.remove('show');
+  closeWhoDropdown();
   ADMIN_LOGIN_PASSWORD='';
   $('#btnSidebarToggle').style.display='none';
   closeSidebar();
 }
 function enterDashboard(user){
   $('#loginView').style.display='none'; $('#appShell').classList.add('show','email-only'); $('#hdRight').style.display='flex'; document.querySelector('header').style.display='';
-  $('#btnLogout')?.classList.add('show');
   $('#btnSidebarToggle').style.display='none';
   $('#whoEmail').textContent=user.email||'-';
   $('#whoDropdownEmail').textContent=user.email||'-';
