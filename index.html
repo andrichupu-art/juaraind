@@ -1807,6 +1807,7 @@ async function loadMailAccounts(){
   }else{
     $('#mailList').innerHTML='<div class="mail-empty">Belum ada akun email.<br>Klik "⚙ Kelola Akun" untuk menambahkan.</div>';
   }
+  startMailWatch();
 }
 
 // FIX: dipanggil sekali saat pertama kali membuka tab "Kelola Email". Menampilkan
@@ -1817,7 +1818,6 @@ async function loadMailAccounts(){
 async function initMailPanel(){
   $('#mailShellLoading').style.display='none';
   $('#mailShell').style.display='';
-  startMailWatch();
   try{
     await loadMailAccounts();
   }catch(err){
@@ -1912,20 +1912,37 @@ async function toggleMailWatch(id){
   const acc=MAIL_ACCOUNTS.find(a=>a.id===id);
   if(!acc)return;
   const next=!acc.watch_notif;
+  let permissionRequest=null;
+  if(next && window.Notification && Notification.permission==='default'){
+    try{
+      permissionRequest=Notification.requestPermission();
+    }catch(err){
+      console.warn('Permintaan izin notifikasi desktop gagal:',err);
+    }
+  }
   acc.watch_notif=next; // update optimis dulu supaya tombol langsung berubah
   renderMailAccList();
   try{
     const {data,error}=await sb.functions.invoke('email-accounts',{body:{action:'toggle_watch',id,watch_notif:next}});
     if(error)throw new Error(error.message||'Gagal menyimpan');
     if(data?.error)throw new Error(data.error);
-    toast(next?`Notifikasi diaktifkan untuk ${acc.email}`:`Notifikasi dimatikan untuk ${acc.email}`,'ok');
     if(next){
-      // Minta izin notifikasi browser (opsional) supaya toast juga bisa muncul
-      // sebagai notifikasi desktop selagi admin sedang buka tab lain.
-      if(window.Notification && Notification.permission==='default') Notification.requestPermission();
-      MAIL_WATCH_BASELINED=false; // akun baru dipantau -> ambil baseline unseen-nya dulu
+      MAIL_WATCH_BASELINE.delete(id); // akun baru dipantau -> ambil baseline unseen-nya dulu
       startMailWatch();
+      let permission=window.Notification?.permission||'unsupported';
+      if(permissionRequest){
+        try{
+          permission=await permissionRequest;
+        }catch(err){
+          console.warn('Permintaan izin notifikasi desktop ditolak:',err);
+        }
+      }
+      toast(permission==='granted'
+        ? `Notifikasi diaktifkan untuk ${acc.email}`
+        : `Notifikasi dalam aplikasi aktif untuk ${acc.email}; izin notifikasi desktop belum diberikan`,
+      'ok');
     }else{
+      toast(`Notifikasi dimatikan untuk ${acc.email}`,'ok');
       MAIL_WATCH_UNSEEN.delete(id);
       MAIL_WATCH_BASELINE.delete(id);
       renderMailAccList();
@@ -2035,7 +2052,7 @@ async function checkMailNotifications(){
 }
 
 function startMailWatch(){
-  if(document.hidden || !document.querySelector('#appShell')?.classList.contains('show') || !document.querySelector('#secEmail')?.classList.contains('active')) return;
+  if(document.hidden || !document.querySelector('#appShell')?.classList.contains('show') || !document.querySelector('#secEmail')?.classList.contains('active') || !MAIL_ACCOUNTS.length) return;
   checkMailNotifications();
   if(MAIL_WATCH_TIMER)return;
   MAIL_WATCH_TIMER=setInterval(checkMailNotifications, MAIL_WATCH_INTERVAL_MS);
