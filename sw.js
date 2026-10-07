@@ -2,7 +2,7 @@
    Meng-cache app shell (HTML, manifest, ikon) supaya bisa dibuka lagi
    tanpa koneksi, dan halaman terbuka lebih cepat. Data peserta sendiri
    tetap selalu diambil langsung dari Supabase (butuh internet). */
-const CACHE_NAME = 'juara-admin-v7'; // <== dinaikkan tiap kali index.html/app shell diubah, biar cache lama dibuang
+const CACHE_NAME = 'juara-admin-v8'; // <== dinaikkan tiap kali index.html/app shell diubah, biar cache lama dibuang
 const APP_SHELL = [
   './index.html',
   './manifest.json',

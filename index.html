@@ -2923,6 +2923,7 @@ async function checkSession(){
   } else { showLogin(); }
 }
 function showLogin(){
+  stopMailWatch();
   $('#loginView').style.display='flex'; $('#appShell').classList.remove('show','email-only'); $('#hdRight').style.display='none'; document.querySelector('header').style.display='none';
   closeWhoDropdown();
 }
@@ -5234,7 +5235,7 @@ async function probeLatestInbox(){
 // watch_notif-nya aktif (supaya tidak spam toast untuk akun yang memang
 // sengaja tidak mau dipantau notifikasinya).
 async function checkMailNotifications(){
-  if(MAIL_WATCH_CHECKING || document.hidden || !document.querySelector('#secEmail')?.classList.contains('active') || !MAIL_ACCOUNTS.length)return;
+  if(MAIL_WATCH_CHECKING || document.hidden || !document.querySelector('#appShell')?.classList.contains('show') || !document.querySelector('#secEmail')?.classList.contains('active') || !MAIL_ACCOUNTS.length)return;
   MAIL_WATCH_CHECKING=true;
   try{
     const isFirstRun=!MAIL_WATCH_BASELINED;
@@ -5268,7 +5269,7 @@ async function checkMailNotifications(){
 }
 
 function startMailWatch(){
-  if(document.hidden || !document.querySelector('#secEmail')?.classList.contains('active')) return;
+  if(document.hidden || !document.querySelector('#appShell')?.classList.contains('show') || !document.querySelector('#secEmail')?.classList.contains('active')) return;
   checkMailNotifications();
   if(MAIL_WATCH_TIMER)return;
   MAIL_WATCH_TIMER=setInterval(checkMailNotifications, MAIL_WATCH_INTERVAL_MS);
