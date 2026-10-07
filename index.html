@@ -3556,88 +3556,6 @@ whoTrigger.addEventListener('click', e=>{ e.stopPropagation(); toggleWhoDropdown
 document.addEventListener('click', e=>{ if(!whoBlock.contains(e.target)) closeWhoDropdown(); });
 document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeWhoDropdown(); });
 
-/* ============ LOAD DATA ============ */
-/*
-   Ambil data secara bertahap agar dashboard tidak bergantung pada satu
-   response Supabase yang sangat besar. Semua baris tetap dikumpulkan di
-   client karena statistik, pencarian, dan beberapa alur bisnis memakai
-   keseluruhan dataset, tetapi setiap request dibatasi ke satu batch.
-*/
-async function fetchAllRows(queryFactory, batchSize=500){
-  const rows=[];
-  try{
-    for(let from=0;;from+=batchSize){
-      const {data,error}=await queryFactory().range(from,from+batchSize-1);
-      if(error)return {data:[],error};
-      const batch=data||[];
-      rows.push(...batch);
-      if(batch.length<batchSize)break;
-    }
-    return {data:rows,error:null};
-  }catch(error){
-    return {data:[],error};
-  }
-}
-
-async function loadAll(){
-  $('#tblBody').innerHTML='<tr class="empty-row"><td colspan="5">Memuat data…</td></tr>';
-  try{
-    const [pRes,dRes,sRes,mRes,skRes,fcRes,fbRes,fpRes,ppRes]=await Promise.all([
-      fetchAllRows(()=>sb.from('participants_v2').select('*').order('created_at',{ascending:false})),
-      fetchAllRows(()=>sb.from('documents_v2').select('*')),
-      fetchAllRows(()=>sb.from('progress_v2').select('*')),
-      fetchAllRows(()=>sb.from('master_data_v2').select('*').order('converted_at',{ascending:false})),
-      fetchAllRows(()=>sb.from('sekolah_mitra').select('*').order('nama',{ascending:true})),
-      fetchAllRows(()=>sb.from('finance_categories_v2').select('*').order('urutan',{ascending:true})),
-      fetchAllRows(()=>sb.from('finance_bills_v2').select('*')),
-      fetchAllRows(()=>sb.from('finance_payments_v2').select('*').order('tanggal',{ascending:false})),
-      fetchAllRows(()=>sb.from('payment_proofs_v2').select('*').order('created_at',{ascending:false}))
-    ]);
-    if(pRes.error)throw pRes.error;
-    if(dRes.error)throw dRes.error;
-    if(sRes.error)throw sRes.error;
-
-    PARTICIPANTS=pRes.data||[];
-    DOCS_BY_PID={};
-    (dRes.data||[]).forEach(d=>{ (DOCS_BY_PID[d.participant_id]=DOCS_BY_PID[d.participant_id]||{})[d.jenis]=d; });
-    STAGE_BY_PID={};
-    PELATIHAN_SELESAI_BY_PID={};
-    MCU_STATUS_BY_PID={};
-    (sRes.data||[]).forEach(s=>{ STAGE_BY_PID[s.participant_id]=s.tahap??0; PELATIHAN_SELESAI_BY_PID[s.participant_id]=!!s.pelatihan_selesai; MCU_STATUS_BY_PID[s.participant_id]=s.mcu_status||null; });
-
-    if(mRes.error){ console.warn('Tabel master_data_v2 belum tersedia:',mRes.error.message); }
-    if(skRes.error){ console.warn('Tabel sekolah_mitra belum tersedia:',skRes.error.message); }
-    if(fcRes.error){ console.warn('Tabel finance_categories_v2 belum tersedia:',fcRes.error.message); }
-    if(fbRes.error){ console.warn('Tabel finance_bills_v2 belum tersedia:',fbRes.error.message); }
-    if(fpRes.error){ console.warn('Tabel finance_payments_v2 belum tersedia:',fpRes.error.message); }
-    if(ppRes.error){ console.warn('Tabel payment_proofs_v2 belum tersedia:',ppRes.error.message); }
-    MASTER_ROWS=mRes.data||[]; MASTER_IDS=new Set(MASTER_ROWS.map(r=>r.participant_id));
-    SEKOLAH_MITRA=skRes.data||[];
-    FIN_CATS=fcRes.data||[];
-    FIN_BILLS=fbRes.data||[];
-    FIN_PAYMENTS=fpRes.data||[];
-    PAY_PROOFS=ppRes.data||[];
-
-    renderStats();
-    renderTable();
-    renderMasterTable();
-    renderSekolahTable();
-    fillAsalSekolahDatalist();
-    renderFinanceTable();
-    renderBuktiTable();
-    renderAllStageSections();
-    refreshFpCategoryOptions();
-    sweepStaleStages();
-    sweepPelatihanStage();
-    sweepPenempatanStage();
-    sweepVisaMcuStage();
-  }catch(err){
-    console.error(err);
-    $('#tblBody').innerHTML='<tr class="empty-row"><td colspan="5">Gagal memuat data: '+(err.message||'periksa koneksi/izin akses')+'</td></tr>';
-    toast('Gagal memuat data: '+(err.message||'terjadi kesalahan'),'err');
-  }
-}
-
 function renderStats(){
   let wait=0,reject=0,done=0,pria=0,wanita=0,verified=0;
   const reqKeys=DOCS.filter(d=>d.req).map(d=>d.k);
@@ -3816,9 +3734,8 @@ async function checkPelatihanAutoAdvance(pid){
   const nama=PARTICIPANTS.find(p=>p.id===pid)?.nama||'Peserta';
   toast(`${nama}: sertifikat lengkap & pelatihan selesai — tahap otomatis naik ke "Penempatan & Perusahaan" ✓`,'ok');
 }
-/* Dijalankan tiap loadAll(): menyisir peserta yang syaratnya sudah lengkap dari
-   sebelumnya (mis. sertifikat diunggah & dicentang selesai sebelum fitur ini ada)
-   tapi tahapnya masih nyangkut di 2. Tidak menampilkan toast per-peserta. */
+/* Memperbaiki tahap peserta lama yang sertifikat dan pelatihannya sudah lengkap,
+   tetapi tahapnya masih tertinggal di 2. Tidak menampilkan toast per-peserta. */
 async function sweepPelatihanStage(){
   const ready=PARTICIPANTS.map(p=>p.id).filter(pid=>{
     if((STAGE_BY_PID[pid]??0)!==2)return false;
@@ -3886,8 +3803,8 @@ async function checkPenempatanAutoAdvance(pid){
   const nama=PARTICIPANTS.find(p=>p.id===pid)?.nama||'Peserta';
   toast(`${nama}: dokumen PK lengkap — tahap otomatis naik ke "Visa & MCU" ✓`,'ok');
 }
-/* Dijalankan tiap loadAll(): menyisir peserta yang syaratnya sudah lengkap dari
-   sebelumnya tapi tahapnya masih nyangkut di 3. Tidak menampilkan toast per-peserta. */
+/* Memperbaiki tahap peserta lama yang dokumen penempatannya sudah lengkap,
+   tetapi tahapnya masih tertinggal di 3. Tidak menampilkan toast per-peserta. */
 async function sweepPenempatanStage(){
   const ready=PARTICIPANTS.map(p=>p.id).filter(pid=>{
     if((STAGE_BY_PID[pid]??0)!==3)return false;
@@ -5624,8 +5541,8 @@ async function maybeAdvanceStage(pid){
   renderTable(); renderStats(); renderAllStageSections();
   toast('Semua dokumen terverifikasi — tahap otomatis naik ke "Pelatihan & Pembekalan" ✓','ok');
 }
-/* Dijalankan sekali tiap loadAll(): menyisir peserta LAMA yang berkasnya sudah
-   lengkap terverifikasi dari sebelumnya (mis. sebelum fitur auto-advance ini
+/* Menyisir peserta LAMA yang berkasnya sudah lengkap terverifikasi dari
+   sebelumnya (mis. sebelum fitur auto-advance ini
    ada, atau sebelum perbaikan target tahapnya) tapi tahapnya masih nyangkut
    di 0/1, lalu menaikkannya juga. Juga menurunkan kembali peserta yang
    sebelumnya kepalang naik ke tahap 2 hanya gara-gara dokumen kolektif
