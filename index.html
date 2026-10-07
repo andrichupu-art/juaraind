@@ -48,7 +48,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
 /* Aksen fokus input pencarian dibuat putih sesuai tema header/panel.
    Bayangan navy tetap dipertahankan agar batas fokus tidak hilang di atas
    latar putih dan tetap mudah terlihat saat navigasi keyboard. */
-.peserta-search:focus-within,.bukti-search:focus-within,.sekolah-search:focus-within,.master-search:focus-within{border-color:#fff!important;box-shadow:0 0 0 3px rgba(27,58,102,.2)!important}
+.peserta-search:focus-within,.bukti-search:focus-within,.sekolah-search:focus-within{border-color:#fff!important;box-shadow:0 0 0 3px rgba(27,58,102,.2)!important}
 ::selection{background:var(--orange);color:#fff}
 .box-h ::selection,header ::selection{background:var(--gold);color:var(--navy)}
 .wrap{width:min(1180px,94%);margin:0 auto}
@@ -453,197 +453,6 @@ header{position:sticky;top:0;z-index:50;background:#13314D;border-bottom:3px sol
   #secPeserta .peserta-pagination button[data-pg="prev"],
   #secPeserta .peserta-pagination button[data-pg="next"]{padding:7px 11px}
 }
-
-
-/* ============ PREMIUM DATA MASTER REDESIGN ============ */
-#secMaster{padding-top:4px;margin-top:-18px}
-#secMaster .master-head{
-  display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
-  margin:0 0 18px;padding:0 4px;
-}
-#secMaster .master-eyebrow{
-  display:inline-flex;align-items:center;gap:8px;
-  font:800 .64rem var(--body);letter-spacing:.16em;color:var(--gold);
-  text-transform:uppercase;
-}
-#secMaster .master-eyebrow span{
-  width:24px;height:2px;background:var(--gold);border-radius:2px;
-}
-#secMaster .master-head h2{
-  margin-top:6px;font:800 1.65rem/1.15 var(--disp);
-  letter-spacing:-.03em;color:var(--navy);
-}
-#secMaster .master-head p{
-  margin-top:5px;font:600 .78rem/1.5 var(--body);color:var(--mut);
-}
-#secMaster .master-head-mark{text-align:right;padding-bottom:2px}
-#secMaster .master-head-mark span{
-  display:block;font:800 .58rem var(--body);letter-spacing:.14em;
-  color:var(--mut);margin-bottom:2px;
-}
-#secMaster .master-head-mark b{
-  font:800 .72rem var(--disp);letter-spacing:.12em;
-  color:var(--navy);opacity:.72;
-}
-
-#secMaster .master-toolbar{
-  display:flex;align-items:center;gap:10px;
-  margin-bottom:14px;padding:9px;
-  background:rgba(255,255,255,.66);
-  border:1px solid rgba(217,227,239,.95);
-  border-radius:16px;
-  box-shadow:0 8px 22px rgba(27,58,102,.055);
-  backdrop-filter:blur(10px);
-}
-#secMaster .master-search{
-  display:flex;align-items:center;gap:9px;flex:1;min-width:260px;
-  height:46px;padding:0 13px;background:#fff;
-  border:1.5px solid #D5DFEA;border-radius:11px;
-  transition:.18s;position:relative;
-}
-#secMaster .master-search:focus-within{
-  border-color:var(--gold);
-  box-shadow:0 0 0 3px rgba(190,129,70,.11);
-}
-#secMaster .master-search>svg{
-  width:17px;height:17px;stroke:#718198;fill:none;
-  stroke-width:2;flex-shrink:0;
-}
-#secMaster .master-search input{
-  width:100%;height:100%;border:0;outline:0;background:transparent;
-  padding:0;font:600 .83rem var(--body);color:var(--ink);
-}
-#secMaster .master-search input::placeholder{color:#93A0B1}
-#secMaster .master-search .search-clear-btn{
-  position:static;transform:none;flex-shrink:0;
-}
-#secMaster .master-search.has-value .search-clear-btn{display:flex}
-#secMaster .master-toolbar-note{
-  display:inline-flex;align-items:center;gap:7px;
-  height:46px;padding:0 14px;
-  border:1.5px solid #D5DFEA;border-radius:11px;
-  background:#fff;color:var(--mut);
-  font:700 .68rem var(--body);white-space:nowrap;
-}
-#secMaster .master-dot{
-  width:7px;height:7px;border-radius:50%;background:var(--green);
-  box-shadow:0 0 0 4px rgba(23,178,106,.10);
-}
-
-#secMaster .master-table-wrap{background:transparent;border:0}
-#secMaster .master-table-topline{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:2px 6px 7px;color:#7A8798;
-}
-#secMaster .master-table-topline span:first-child{
-  font:800 .61rem var(--body);letter-spacing:.14em;color:var(--navy);
-}
-#secMaster .master-table-topline span:last-child{
-  font:600 .62rem var(--body);color:#8B96A5;
-}
-#secMaster .master-table-card{
-  background:transparent;border:0;border-radius:0;overflow:visible;
-}
-#secMaster .master-table-card table{
-  border-collapse:collapse;border-spacing:0;
-  table-layout:auto;width:100%;
-}
-#secMaster .master-table-card thead th{
-  background:var(--navy);color:#E7DCC4;border:0;
-  padding:7px 14px;font-size:.61rem;letter-spacing:.1em;
-}
-#secMaster .master-table-card tbody tr{
-  transition:background .12s ease;
-}
-#secMaster .master-table-card tbody tr:hover{
-  background:#F4F6F9;
-}
-#secMaster .master-table-card tbody td{
-  background:transparent;
-  border:0;border-bottom:1px solid rgba(19,49,77,.16);
-  padding:6px 14px;height:auto;font-size:.8rem;line-height:1.2;
-}
-#secMaster .master-table-card tbody td:first-child{
-  color:#8390A0;font:800 .72rem var(--mono);
-}
-#secMaster .master-table-card tbody tr:hover td{background:#F4F6F9}
-#secMaster .master-table-card td.kode{
-  font-size:.75rem;white-space:nowrap;
-}
-#secMaster .master-table-card .kode-del{
-  color:var(--navy);border-bottom:1px dashed #AAB8C8;
-}
-#secMaster .master-table-card td.nama b{
-  font:800 .8rem var(--body);color:#14233A;line-height:1.25;
-}
-#secMaster .master-table-card td.nama span{
-  font-size:.65rem;color:#8290A4;line-height:1.2;
-}
-#secMaster .master-table-card td:nth-child(5){
-  font:800 .72rem var(--body);color:var(--navy);
-}
-#secMaster .master-table-card td:nth-child(6){
-  color:#65748A;font:700 .7rem var(--body);
-}
-#secMaster .master-table-card .aksi-cell-in{gap:5px}
-/* Sembunyikan kolom Kota (kolom ke-4) dan Dikonversi (kolom ke-6) di tabel
-   Data Master — baik di header maupun isi baris, di semua ukuran layar. */
-#secMaster .master-table-card thead th:nth-child(4),
-#secMaster .master-table-card thead th:nth-child(6),
-#secMaster .master-table-card tbody td:nth-child(4),
-#secMaster .master-table-card tbody td:nth-child(6){display:none}
-#secMaster .master-table-card .btn.sm{
-  padding:5px 10px;font-size:.68rem;border-radius:8px;
-}
-#secMaster .master-table-card .btn.b-navy{
-  box-shadow:none;
-}
-#secMaster .master-table-card .empty-row td{
-  background:transparent!important;
-  border:0!important;border-bottom:1px solid rgba(19,49,77,.16)!important;
-  border-radius:0!important;padding:36px 16px;
-}
-@media(max-width:760px){
-  #secMaster .master-head{align-items:flex-start}
-  #secMaster .master-head-mark{display:none}
-  #secMaster .master-toolbar{padding:8px;flex-wrap:wrap}
-  #secMaster .master-search{min-width:100%}
-  #secMaster .master-toolbar-note{display:none}
-
-  /* Reset: tabel Data Master di mobile sekarang tampil sama persis seperti
-     desktop (semua kolom & tombol aksi apa adanya), bukan kartu stacked.
-     Ada aturan global (table,tbody,tr,td{display:block}) yang dipakai
-     tabel lain di app ini untuk mode "kartu" mobile — timpa balik ke
-     display tabel normal di sini supaya Data Master tidak ikut kena,
-     dan kasih scroll horizontal supaya tetap bisa diakses di layar sempit. */
-  #secMaster .master-table-card{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:13px}
-  /* Sama seperti Data Peserta: timpa balik aturan generik ".tbl-wrap table{min-width:760px}"
-     yang ikut kena ke wrapper ini (juga punya class "tbl-wrap"). */
-  #secMaster .master-table-card table{display:table;width:100%;min-width:0;table-layout:auto}
-  #secMaster .master-table-card thead{display:table-header-group}
-  #secMaster .master-table-card thead tr{display:table-row}
-  #secMaster .master-table-card tbody{display:table-row-group}
-  #secMaster .master-table-card tbody tr{display:table-row}
-  #secMaster .master-table-card tbody td{display:table-cell;width:auto}
-  /* Perkecil jarak antar kolom di mobile supaya tidak terlihat renggang */
-  #secMaster .master-table-card thead th,
-  #secMaster .master-table-card tbody td{padding-left:8px;padding-right:8px}
-  /* Tombol pagination "Sebelumnya"/"Berikutnya" -> icon-only di mobile */
-  #secMaster .master-pagination .pg-nav-label{display:none}
-  #secMaster .master-pagination button[data-pg="prev"],
-  #secMaster .master-pagination button[data-pg="next"]{padding:7px 11px}
-}
-/* Kontrol pagination Data Master -> style sama dengan pagination Data Peserta */
-#secMaster .master-pagination{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:12px;padding:2px 4px;flex-wrap:wrap}
-#secMaster .master-pagination .pg-info{font:700 .68rem var(--body);color:var(--mut)}
-#secMaster .master-pagination .pg-btns{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
-#secMaster .master-pagination button{border:1.5px solid rgba(19,49,77,.22);background:transparent;color:var(--navy);font:800 .7rem var(--body);padding:7px 13px;border-radius:9px;cursor:pointer;transition:.15s}
-#secMaster .master-pagination button:hover:not(:disabled){background:rgba(19,49,77,.08)}
-#secMaster .master-pagination button:disabled{opacity:.4;cursor:not-allowed}
-#secMaster .master-pagination button.pg-active{background:var(--navy);color:#E7DCC4;border-color:var(--navy)}
-#secMaster .master-pagination .pg-size select{border:1.5px solid rgba(19,49,77,.22);background:#fff;color:var(--navy);font:800 .68rem var(--body);padding:8px 30px 8px 12px;border-radius:9px;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231B3A66' stroke-width='2.6' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");background-repeat:no-repeat;background-position:right 9px center;background-size:13px;cursor:pointer;outline:0;transition:.18s}
-#secMaster .master-pagination .pg-size select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(190,129,70,.11)}
-
 /* ============ ADM PESERTA (KEUANGAN) — FORMAT KOLOM SELARAS DATA PESERTA & DATA MASTER ============ */
 #secKeuangan .toolbar{
   align-items:center;gap:10px;margin-bottom:14px;padding:9px;
@@ -4354,7 +4163,7 @@ function renderTable(){
     const acceptedAll=verifiedAll+kolektifAll;
     let aksiHtml;
     if(isMaster){
-      aksiHtml=`<button type="button" class="icon-plain-btn" data-goto-master="${p.id}" title="Sudah ada di Data Master — klik untuk buka" style="color:#3F9E6E">${MASTER_CHECK_SVG}</button>`;
+      aksiHtml=`<button type="button" class="icon-plain-btn" disabled title="Sudah ada di Data Master" style="color:#3F9E6E">${MASTER_CHECK_SVG}</button>`;
     }else if(isComplete){
       aksiHtml=`<button class="icon-plain-btn" data-convert="${p.id}" title="Pindahkan ke Data Master">${CONVERT_SVG}</button>`;
     }else{
@@ -4380,7 +4189,7 @@ function renderTable(){
        baris lain di popup (aksi-row), terpisah dari aksiHtml versi desktop. */
     let convertRowMobile;
     if(isMaster){
-      convertRowMobile=`<button type="button" class="aksi-row aksi-row-navy" data-goto-master="${p.id}" title="Sudah ada di Data Master — klik untuk buka" style="justify-content:center">${MASTER_CHECK_SVG}</button>`;
+      convertRowMobile=`<button type="button" class="aksi-row aksi-row-navy" disabled title="Sudah ada di Data Master" style="justify-content:center">${MASTER_CHECK_SVG}</button>`;
     }else if(isComplete){
       convertRowMobile=`<button type="button" class="aksi-row aksi-row-navy" data-convert="${p.id}" title="Pindahkan ke Data Master">${CONVERT_SVG}</button>`;
     }else{
@@ -4469,8 +4278,6 @@ function initPesertaTableEvents(){
   body.addEventListener('click', e=>{
     const delBtn=e.target.closest('[data-delpid]');
     if(delBtn){ e.stopPropagation(); deleteParticipant(delBtn.dataset.delpid); return; }
-    const gotoBtn=e.target.closest('[data-goto-master]');
-    if(gotoBtn){ e.stopPropagation(); closeAllAksiMenus(); gotoMasterParticipant(gotoBtn.dataset.gotoMaster); return; }
     const convertBtn=e.target.closest('[data-convert]');
     if(convertBtn){
       e.stopPropagation();
@@ -4867,29 +4674,6 @@ $('#qSearchMasterClear')?.addEventListener('click', ()=>{
   el.focus();
 });
 initMasterTableEvents();
-
-/* Klik pill "✓ Di Data Master" di tabel Data Peserta -> lompat ke tab Data Master,
-   filter otomatis ke peserta tsb dan sorot barisnya. */
-function gotoMasterParticipant(pid){
-  const r=MASTER_ROWS.find(x=>x.participant_id===pid);
-  goToTab('secMaster');
-  const searchEl=$('#qSearchMaster');
-  if(searchEl){
-    searchEl.value = r ? (r.kode_peserta||r.nama||'') : '';
-    $('#qSearchMasterWrap')?.classList.toggle('has-value', searchEl.value.trim().length>0);
-    renderMasterTable();
-  }
-  requestAnimationFrame(()=>{
-    const tr=document.querySelector(`#tblMasterBody tr[data-pid="${pid}"]`);
-    if(tr){
-      tr.scrollIntoView({behavior:'smooth', block:'center'});
-      tr.style.transition='background-color .3s';
-      tr.style.backgroundColor='var(--gold-10, rgba(201,162,39,.25))';
-      setTimeout(()=>{ tr.style.backgroundColor=''; }, 1600);
-    }
-  });
-}
-window.gotoMasterParticipant=gotoMasterParticipant;
 
 /* ============ DETAIL MODAL ============ */
 function setProfilSecCollapsed(collapsed){
