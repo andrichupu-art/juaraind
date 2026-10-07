@@ -1275,36 +1275,26 @@ td.nama span{color:var(--mut);font-size:.78rem}
 .aksi-row .convert-progress .cp-pct{color:#fff}
 @keyframes cp-shine{0%{transform:translateX(-40px)}100%{transform:translateX(150px)}}
 
-/* ============ DATA MASTER — PANEL PILIH DOKUMEN (DRAG & DROP) ============ */
-.dnd-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+/* ============ DATA MASTER — PANEL DOKUMEN ============ */
+.dnd-wrap{display:grid;grid-template-columns:1fr;gap:16px}
 .dnd-col{background:#F7F5EF;border:1.5px solid var(--line);border-radius:14px;padding:14px;min-height:260px;display:flex;flex-direction:column}
 .dnd-col h4{font:800 .74rem var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:7px}
 .dnd-col h4 small{font:600 .68rem var(--body);text-transform:none;letter-spacing:0;color:var(--mut)}
 .dnd-list{flex:1;display:flex;flex-direction:column;gap:8px;border-radius:10px;transition:.15s;padding:2px}
-.dnd-list.drag-over{background:#FFF6E9;outline:2px dashed var(--gold);outline-offset:2px}
-.dnd-target .dnd-list{border:2px dashed var(--line)}
-.dnd-target .dnd-list.drag-over{border-color:var(--gold)}
-.dnd-item{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;cursor:grab;transition:.15s;user-select:none}
+.dnd-item{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;transition:.15s}
 .dnd-item:hover{border-color:var(--gold);box-shadow:0 2px 8px rgba(190,129,70,.14)}
-.dnd-item:active{cursor:grabbing}
-.dnd-item.dragging{opacity:.35}
 .dnd-item .dnd-ic{width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .dnd-item .dnd-ic svg{width:19px;height:19px}
 .dnd-item .dnd-lbl{flex:1;min-width:0;display:flex;align-items:center;gap:8px}
 .dnd-item .dnd-lbl b{font:700 .82rem var(--body);color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dnd-dot{width:9px;height:9px;border-radius:99px;flex-shrink:0;background:#D9D2BE}
 .dnd-dot.ok{background:var(--green)} .dnd-dot.wait{background:#E3A93B} .dnd-dot.bad{background:var(--red)}
-.dnd-rm{flex-shrink:0;width:24px;height:24px;border-radius:7px;border:1.5px solid var(--line);background:#fff;color:var(--mut);font-size:.72rem;display:none;align-items:center;justify-content:center;transition:.15s}
-.dnd-rm:hover{border-color:var(--red);color:var(--red)}
 .dnd-del{flex-shrink:0;width:24px;height:24px;border-radius:7px;border:1.5px solid var(--line);background:#fff;color:var(--red);font-size:.78rem;display:flex;align-items:center;justify-content:center;transition:.15s;cursor:pointer}
 .dnd-del:hover{background:var(--red);border-color:var(--red);color:#fff}
 .dnd-upload{flex-shrink:0;width:24px;height:24px;border-radius:7px;border:1.5px solid var(--gold,#c9a227);background:#FFF8EA;color:var(--navy);font-size:.72rem;display:flex;align-items:center;justify-content:center;transition:.15s;cursor:pointer}
 .dnd-upload:hover{background:var(--gold,#c9a227);color:#fff}
 .dnd-add-extra{margin-top:10px;width:100%;justify-content:center;border-style:dashed}
 .dnd-empty{margin:auto;text-align:center;color:var(--mut);font-size:.78rem;padding:20px 10px}
-.dnd-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
-.dnd-actions .btn{flex:1;justify-content:center}
-@media(max-width:640px){ .dnd-wrap{grid-template-columns:1fr} }
 
 @media(max-width:760px){
   .stats{grid-template-columns:1fr 1fr}
@@ -2635,7 +2625,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   </div>
 </div>
 
-<!-- ============ MODAL PILIH DOKUMEN — DATA MASTER ============ -->
+<!-- ============ MODAL KELOLA DOKUMEN — DATA MASTER ============ -->
 <div class="modal" id="masterDocModal">
   <div class="box" style="max-width:900px">
     <div class="box-h">
@@ -2647,31 +2637,14 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
     </div>
     <div class="box-body">
       <div class="dnd-wrap">
-        <div class="dnd-col dnd-source">
+        <div class="dnd-col">
           <h4>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-3px;margin-right:2px">
-              <path d="M3 7.5C3 6.67157 3.67157 6 4.5 6H9.17157C9.70201 6 10.2107 6.21071 10.5858 6.58579L11.9142 7.91421C12.2893 8.28929 12.798 8.5 13.3284 8.5H19.5C20.3284 8.5 21 9.17157 21 10V17.5C21 18.3284 20.3284 19 19.5 19H4.5C3.67157 19 3 18.3284 3 17.5V7.5Z" stroke="var(--navy)" stroke-width="1.6" stroke-linejoin="round"/>
-            </svg>
             Dokumen Peserta
           </h4>
           <div class="dnd-list" id="dndSource"></div>
           <button type="button" class="btn b-ghost sm dnd-add-extra" id="btnAddExtraDoc">+ Upload Dokumen Tambahan</button>
           <input type="file" id="extraDocFileInput" style="display:none" accept="image/*,.pdf">
           <input type="file" id="kolektifFileInput" style="display:none" accept="image/*,.pdf">
-        </div>
-        <div class="dnd-col dnd-target">
-          <h4>
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-3px;margin-right:2px">
-              <path d="M4.5 10.5 12 3l7.5 7.5" stroke="var(--navy)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M12 3v11" stroke="var(--gold)" stroke-width="1.7" stroke-linecap="round"/>
-              <path d="M4.5 14v4.5A1.5 1.5 0 0 0 6 20h12a1.5 1.5 0 0 0 1.5-1.5V14" stroke="var(--navy)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Dokumen Terpilih <small id="dndCount"></small>
-          </h4>
-          <div class="dnd-list" id="dndTarget"><div class="dnd-empty" id="dndEmptyMsg">Seret dokumen ke sini</div></div>
-          <div class="dnd-actions">
-            <button class="btn b-navy sm" id="btnDownloadPicked" disabled>⬇ Download Terpilih</button>
-          </div>
         </div>
       </div>
     </div>
@@ -5278,7 +5251,7 @@ $('#btnSaveStage').addEventListener('click', async ()=>{
   toast('Tahap peserta diperbarui ✓','ok');
 });
 
-/* ============ DATA MASTER: PANEL PILIH DOKUMEN (DRAG & DROP) ============ */
+/* ============ DATA MASTER: PANEL KELOLA DOKUMEN ============ */
 let DND_PID=null;
 
 const EXTRA_DOC_ICON=`<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 3H7.5A1.5 1.5 0 0 0 6 4.5v15A1.5 1.5 0 0 0 7.5 21h9a1.5 1.5 0 0 0 1.5-1.5V8l-4-5Z" stroke="var(--navy)" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 3v4.5A1.5 1.5 0 0 0 15.5 9H18" stroke="var(--navy)" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 13h6M9 16.5h6" stroke="var(--navy)" stroke-width="1.4" stroke-linecap="round"/></svg>`;
@@ -5295,12 +5268,11 @@ function dndItemHtml(d,up){
   // Dokumen tambahan (di luar 7 tipe standar) boleh dihapus manual oleh admin,
   // beda dengan dokumen wajib yang cuma bisa dipilih/dikembalikan ke daftar.
   const delBtn=d.extra?`<button type="button" class="dnd-del" data-del="${d.k}" title="Hapus dokumen tambahan ini">🗑</button>`:'';
-  return `<div class="dnd-item" draggable="true" data-key="${d.k}">
+  return `<div class="dnd-item" data-key="${d.k}">
     <span class="dnd-ic">${d.ic}</span>
     <div class="dnd-lbl"><b>${d.t}</b><span class="dnd-dot ${dot}" title="${dotTitle}"></span></div>
     ${uploadBtn}
     ${delBtn}
-    <button class="dnd-rm" data-rm="${d.k}" title="Kembalikan ke daftar dokumen">✕</button>
   </div>`;
 }
 
@@ -5315,14 +5287,11 @@ async function openMasterDoc(pid){
 
   const docs=DOCS_BY_PID[pid]||{};
   const uploaded=DOCS.filter(d=>docs[d.k]);
-  // Dokumen tambahan = baris documents_v2 dengan jenis di luar 7 tipe standar
-  // (diinsert lewat tombol "+ Upload Dokumen Tambahan").
+  // Dokumen tambahan disimpan di documents_v2 dengan jenis di luar 7 tipe standar.
   const extraKeys=Object.keys(docs).filter(k=>!DOCS.some(d=>d.k===k));
   const extraDefs=extraKeys.map(k=>({k,ic:EXTRA_DOC_ICON,t:docs[k].file_name||'Dokumen Tambahan',extra:true}));
   const allDefs=[...uploaded,...extraDefs];
   $('#dndSource').innerHTML=allDefs.length?allDefs.map(d=>dndItemHtml(d,docs[d.k])).join(''):'<div class="dnd-empty">Peserta ini belum mengunggah dokumen apa pun.</div>';
-  $('#dndTarget').innerHTML='<div class="dnd-empty" id="dndEmptyMsg">Seret dokumen ke sini</div>';
-  updateDndCount();
   $('#masterDocModal').classList.add('show');
 
   const fotoDoc=docs.foto;
@@ -5336,70 +5305,18 @@ function closeMasterDoc(){ $('#masterDocModal').classList.remove('show'); DND_PI
 $('#btnCloseMasterDoc').addEventListener('click', closeMasterDoc);
 $('#masterDocModal').addEventListener('click', e=>{ if(e.target.id==='masterDocModal')closeMasterDoc(); });
 
-function updateDndCount(){
-  const n=$('#dndTarget').querySelectorAll('.dnd-item').length;
-  $('#dndCount').textContent=n?`(${n} dipilih)`:'';
-  $('#btnDownloadPicked').disabled=n===0;
-}
-
-function moveDndToTarget(key){
-  const src=$('#dndSource'), tgt=$('#dndTarget');
-  const item=src.querySelector(`.dnd-item[data-key="${key}"]`); if(!item)return;
-  $('#dndEmptyMsg')?.remove();
-  item.querySelector('.dnd-rm').style.display='flex';
-  tgt.appendChild(item);
-  if(!src.querySelector('.dnd-item')) src.innerHTML='<div class="dnd-empty">Semua dokumen sudah dipilih.</div>';
-  updateDndCount();
-}
-function moveDndToSource(key){
-  const tgt=$('#dndTarget'), src=$('#dndSource');
-  const item=tgt.querySelector(`.dnd-item[data-key="${key}"]`); if(!item)return;
-  item.querySelector('.dnd-rm').style.display='none';
-  src.querySelector('.dnd-empty')?.remove();
-  const order=DOCS.map(d=>d.k);
-  const after=[...src.querySelectorAll('.dnd-item')].find(it=>order.indexOf(it.dataset.key)>order.indexOf(key));
-  after?src.insertBefore(item,after):src.appendChild(item);
-  if(!tgt.querySelector('.dnd-item')) tgt.innerHTML='<div class="dnd-empty" id="dndEmptyMsg">Seret dokumen ke sini</div>';
-  updateDndCount();
-}
-
-function initDndLists(){
-  [['#dndSource',false],['#dndTarget',true]].forEach(([sel,isTarget])=>{
-    const list=$(sel);
-    list.addEventListener('dragstart', e=>{
-      const item=e.target.closest('.dnd-item'); if(!item)return;
-      e.dataTransfer.setData('text/plain',item.dataset.key);
-      e.dataTransfer.effectAllowed='move';
-      item.classList.add('dragging');
-    });
-    list.addEventListener('dragend', e=>{ e.target.closest('.dnd-item')?.classList.remove('dragging'); });
-    list.addEventListener('dragover', e=>{ e.preventDefault(); list.classList.add('drag-over'); });
-    list.addEventListener('dragleave', ()=> list.classList.remove('drag-over'));
-    list.addEventListener('drop', e=>{
-      e.preventDefault(); list.classList.remove('drag-over');
-      const key=e.dataTransfer.getData('text/plain'); if(!key)return;
-      isTarget?moveDndToTarget(key):moveDndToSource(key);
-    });
-    list.addEventListener('click', e=>{
-      const rm=e.target.closest('.dnd-rm');
-      if(rm){ moveDndToSource(rm.dataset.rm); return; }
-      const del=e.target.closest('.dnd-del');
-      if(del){ e.stopPropagation(); deleteExtraDoc(DND_PID, del.dataset.del); return; }
-      const up=e.target.closest('.dnd-upload');
-      if(up){ e.stopPropagation(); PENDING_KOLEKTIF_KEY=up.dataset.kolektifUpload; $('#kolektifFileInput').click(); return; }
-      const item=e.target.closest('.dnd-item'); if(!item)return;
-      if(!isTarget) moveDndToTarget(item.dataset.key);
-    });
-  });
-}
-initDndLists();
+$('#dndSource').addEventListener('click', e=>{
+  const del=e.target.closest('[data-del]');
+  if(del){ e.stopPropagation(); deleteExtraDoc(DND_PID, del.dataset.del); return; }
+  const up=e.target.closest('[data-kolektif-upload]');
+  if(up){ e.stopPropagation(); PENDING_KOLEKTIF_KEY=up.dataset.kolektifUpload; $('#kolektifFileInput').click(); }
+});
 
 /* ---- Upload Dokumen Tambahan: lampirkan berkas ekstra di luar 7 tipe standar
    (mis. Surat Keterangan Domisili, dokumen tambahan lain) langsung dari sini,
    tanpa perlu ubah alur upload peserta. Disimpan sebagai baris documents_v2
    biasa dengan jenis unik "tambahan_<timestamp>" supaya tidak bentrok dengan
-   tipe standar & tetap ikut ke-hitung sebagai berkas yang bisa dipilih/diunduh/
-   dikirim email. */
+   tipe standar. */
 $('#btnAddExtraDoc')?.addEventListener('click', ()=>{
   if(!DND_PID)return;
   $('#extraDocFileInput').click();
@@ -5491,59 +5408,8 @@ $('#kolektifFileInput')?.addEventListener('change', async e=>{
   }
 });
 
-function sanitizeName(s){ return String(s||'').trim().replace(/[^\w\-]+/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'')||'file'; }
-
-async function downloadPickedZip(){
-  const pid=DND_PID; if(!pid)return;
-  const keys=[...$('#dndTarget').querySelectorAll('.dnd-item')].map(el=>el.dataset.key);
-  if(!keys.length)return;
-
-  const docs=DOCS_BY_PID[pid]||{};
-  const p=PARTICIPANTS.find(x=>x.id===pid);
-  const mrow=MASTER_ROWS.find(r=>r.participant_id===pid);
-  const nama=p?.nama||mrow?.nama||'Peserta';
-  const kode=mrow?.kode_peserta||(p?participantCode(p):'-');
-
-  const btn=$('#btnDownloadPicked');
-  const orig=btn.innerHTML;
-  btn.disabled=true; btn.innerHTML='⏳ Menyiapkan ZIP…';
-
-  try{
-    const zip=new JSZip();
-    let ok=0, used=new Set();
-    for(const key of keys){
-      const doc=docs[key]; const meta=DOCS.find(d=>d.k===key);
-      if(!doc?.storage_path){ console.warn('Tidak ada berkas untuk',key); continue; }
-      const {data:signed,error:sErr}=await sb.storage.from('juara-v2-documents').createSignedUrl(doc.storage_path,120);
-      if(sErr||!signed){ console.warn('Gagal signed url',key,sErr); continue; }
-      const res=await fetch(signed.signedUrl);
-      if(!res.ok){ console.warn('Gagal mengunduh berkas',key); continue; }
-      const blob=await res.blob();
-      const ext=(doc.file_name||'').includes('.')?doc.file_name.split('.').pop():'';
-      let base=sanitizeName(meta?.t||(doc.file_name||'').replace(/\.[^.]+$/,'')||key), fname=base+(ext?'.'+ext:'');
-      let n=2; while(used.has(fname)){ fname=`${base}_${n}${ext?'.'+ext:''}`; n++; }
-      used.add(fname);
-      zip.file(fname, blob);
-      ok++;
-    }
-    if(!ok){ toast('Tidak ada berkas yang berhasil diunduh','err'); return; }
-    const content=await zip.generateAsync({type:'blob'});
-    const zipName=`${sanitizeName(nama)}_${sanitizeName(kode)}.zip`;
-    const url=URL.createObjectURL(content);
-    const a=document.createElement('a'); a.href=url; a.download=zipName;
-    document.body.appendChild(a); a.click(); a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),4000);
-    toast(ok<keys.length?`ZIP dibuat: ${ok}/${keys.length} dokumen berhasil diunduh`:'ZIP berhasil diunduh ✓','ok');
-  }catch(err){
-    console.error(err);
-    toast('Gagal membuat ZIP: '+(err.message||'terjadi kesalahan'),'err');
-  }finally{
-    btn.disabled=false; btn.innerHTML=orig;
-  }
-}
-$('#btnDownloadPicked').addEventListener('click', downloadPickedZip);
-
 /* ============ KELOLA EMAIL (IMAP/SMTP terintegrasi) ============ */
+function sanitizeName(s){ return String(s||'').trim().replace(/[^\w\-]+/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'')||'file'; }
 function escapeHtml(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function fmtMailDate(d){ if(!d)return '-'; const dt=new Date(d); if(isNaN(dt))return '-'; return dt.toLocaleDateString('id-ID',{day:'2-digit',month:'short'})+' '+dt.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}); }
 /* Versi ringkas (tanggal saja, tanpa jam) — dipakai khusus di layar mobile
