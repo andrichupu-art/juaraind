@@ -2670,7 +2670,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
    kelihatan "login" padahal semua request sudah jalan sebagai anon dan
    ditolak RLS. Begitu sesi hilang di luar alur logout manual, langsung
    balik ke layar login dengan pesan yang jelas. */
-let SB_MANUAL_SIGNOUT=false, ADMIN_LOGIN_PASSWORD='';
+let SB_MANUAL_SIGNOUT=false;
 /* app_metadata hanya dapat diubah oleh server/Supabase Admin API. Akses ditolak
    jika akun tidak memiliki claim admin yang eksplisit; Edge Function juga
    memvalidasi claim ini di server sebelum menjalankan aksi email. */
@@ -2931,7 +2931,6 @@ async function checkSession(){
 function showLogin(){
   $('#loginView').style.display='flex'; $('#appShell').classList.remove('show','email-only'); $('#hdRight').style.display='none'; document.querySelector('header').style.display='none';
   closeWhoDropdown();
-  ADMIN_LOGIN_PASSWORD='';
 }
 function enterDashboard(user){
   $('#loginView').style.display='none'; $('#appShell').classList.add('show','email-only'); $('#hdRight').style.display='flex'; document.querySelector('header').style.display='';
@@ -2962,7 +2961,6 @@ $('#frmLogin').addEventListener('submit', async e=>{
     $('#loginErr').textContent='Akun ini tidak memiliki akses admin.';
     return;
   }
-  ADMIN_LOGIN_PASSWORD=pass;
   enterDashboard(data.user);
 });
 const toggleLoginPass=$('#toggleLoginPass');
@@ -5323,10 +5321,8 @@ async function deleteMailAccount(id){
   });
 });
 $('#btnMailAccAdd').addEventListener('click', async ()=>{
-  // FIX: sebelumnya field ini memakai ADMIN_LOGIN_PASSWORD (password login admin ke
-  // dashboard ini), padahal itu BUKAN password mailbox cPanel yang sebenarnya —
-  // akibatnya akun IMAP gagal auth terus meski password mailbox tidak pernah diubah.
-  // Sekarang wajib diisi manual lewat field #maPassword (password mailbox asli).
+  // Password mailbox cPanel harus diisi terpisah; password login admin aplikasi
+  // tidak digunakan untuk autentikasi IMAP/SMTP.
   const label=$('#maLabel').value.trim(), email=$('#maEmail').value.trim(), password=$('#maPassword').value;
   const imap_host=$('#maImapHost').value.trim()||'toscana.id.rapidplex.com';
   const imap_port=parseInt($('#maImapPort').value)||993;
