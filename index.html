@@ -3216,20 +3216,6 @@ async function checkPenempatanAutoAdvance(pid){
   const nama=PARTICIPANTS.find(p=>p.id===pid)?.nama||'Peserta';
   toast(`${nama}: dokumen PK lengkap — tahap otomatis naik ke "Visa & MCU" ✓`,'ok');
 }
-/* Memperbaiki tahap peserta lama yang dokumen penempatannya sudah lengkap,
-   tetapi tahapnya masih tertinggal di 3. Tidak menampilkan toast per-peserta. */
-async function sweepPenempatanStage(){
-  const ready=PARTICIPANTS.map(p=>p.id).filter(pid=>{
-    if((STAGE_BY_PID[pid]??0)!==3)return false;
-    return !!(DOCS_BY_PID[pid]?.pk?.storage_path);
-  });
-  if(!ready.length)return;
-  const rows=ready.map(pid=>({participant_id:pid,tahap:4,updated_at:new Date().toISOString()}));
-  const {error}=await sb.from('progress_v2').upsert(rows,{onConflict:'participant_id'});
-  if(error){console.error('Gagal menyisir tahap penempatan:',error);return;}
-  ready.forEach(pid=>{ STAGE_BY_PID[pid]=4; });
-  renderTable(); renderStats(); renderAllStageSections();
-}
 let PENDING_PK_PID=null;
 $('#pkFileInput')?.addEventListener('change', async e=>{
   const file=e.target.files?.[0]; e.target.value='';
@@ -3280,18 +3266,6 @@ async function checkVisaMcuAutoAdvance(pid){
   renderTable(); renderStats(); renderAllStageSections();
   const nama=PARTICIPANTS.find(p=>p.id===pid)?.nama||'Peserta';
   toast(`${nama}: MCU Fit & Visa lengkap — tahap otomatis naik ke "Tiket & Keberangkatan" ✓`,'ok');
-}
-async function sweepVisaMcuStage(){
-  const ready=PARTICIPANTS.map(p=>p.id).filter(pid=>{
-    if((STAGE_BY_PID[pid]??0)!==4)return false;
-    return !!(DOCS_BY_PID[pid]?.visa?.storage_path)&&MCU_STATUS_BY_PID[pid]==='fit';
-  });
-  if(!ready.length)return;
-  const rows=ready.map(pid=>({participant_id:pid,tahap:5,updated_at:new Date().toISOString()}));
-  const {error}=await sb.from('progress_v2').upsert(rows,{onConflict:'participant_id'});
-  if(error){console.error('Gagal menyisir tahap visa&mcu:',error);return;}
-  ready.forEach(pid=>{ STAGE_BY_PID[pid]=5; });
-  renderTable(); renderStats(); renderAllStageSections();
 }
 let PENDING_MCU_PID=null;
 $('#hasilMcuFileInput')?.addEventListener('change', async e=>{
