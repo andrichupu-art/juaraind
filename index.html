@@ -1277,16 +1277,6 @@ td.nama span{color:var(--mut);font-size:.78rem}
 
 /* ============ DATA MASTER — PANEL PILIH DOKUMEN (DRAG & DROP) ============ */
 .dnd-wrap{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.email-log-wrap{margin-top:18px;border-top:1.5px dashed var(--line);padding-top:16px}
-.email-log-wrap h4{display:flex;align-items:center;font:800 .88rem var(--disp);color:var(--navy);margin-bottom:10px}
-.email-log-list{display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto}
-.email-log-item{display:flex;align-items:flex-start;gap:10px;background:var(--paper,#F7F3E9);border:1.5px solid var(--line);border-radius:10px;padding:10px 12px}
-.email-log-item .eli-dot{width:9px;height:9px;border-radius:50%;margin-top:5px;flex-shrink:0;background:var(--green,#17B26A)}
-.email-log-item.failed .eli-dot{background:var(--red)}
-.email-log-item .eli-body{min-width:0;flex:1}
-.email-log-item .eli-to{font:700 .82rem var(--body);color:var(--ink);word-break:break-all}
-.email-log-item .eli-meta{font:600 .72rem var(--body);color:var(--mut);margin-top:2px}
-.email-log-item .eli-err{font:600 .72rem var(--body);color:var(--red);margin-top:2px}
 .dnd-col{background:#F7F5EF;border:1.5px solid var(--line);border-radius:14px;padding:14px;min-height:260px;display:flex;flex-direction:column}
 .dnd-col h4{font:800 .74rem var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:7px}
 .dnd-col h4 small{font:600 .68rem var(--body);text-transform:none;letter-spacing:0;color:var(--mut)}
@@ -2680,51 +2670,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
           </h4>
           <div class="dnd-list" id="dndTarget"><div class="dnd-empty" id="dndEmptyMsg">Seret dokumen ke sini</div></div>
           <div class="dnd-actions">
-            <button class="btn b-ghost sm" id="btnSendEmail" disabled>✉️ Kirim via Email</button>
             <button class="btn b-navy sm" id="btnDownloadPicked" disabled>⬇ Download Terpilih</button>
           </div>
         </div>
       </div>
-      <div class="email-log-wrap" id="emailLogWrap">
-        <h4>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:-3px;margin-right:2px">
-            <circle cx="12" cy="12" r="9" stroke="var(--navy)" stroke-width="1.7"/>
-            <path d="M12 7v5l3.5 2" stroke="var(--navy)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-          Riwayat Pengiriman Email
-        </h4>
-        <div id="emailLogList" class="email-log-list"><div class="dnd-empty">Memuat riwayat…</div></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal" id="emailModal">
-  <div class="box" style="max-width:480px">
-    <div class="box-h">
-      <div style="min-width:0"><h3>✉️ Kirim Dokumen via Email</h3><p id="emFor">-</p></div>
-      <button class="x" id="btnCloseEmail">✕</button>
-    </div>
-    <div class="box-body">
-      <div class="fld">
-        <label>Kirim Dari</label>
-        <select id="emFrom"></select>
-      </div>
-      <div class="fld">
-        <label>Kirim Ke</label>
-        <input type="email" id="emTo" placeholder="contoh@perusahaan.com" required>
-      </div>
-      <div class="fld">
-        <label>Subjek</label>
-        <input type="text" id="emSubject">
-      </div>
-      <div class="fld">
-        <label>Pesan</label>
-        <input type="text" id="emMessage" placeholder="Pesan singkat (opsional)">
-      </div>
-      <p id="emDocCount" style="font:600 .78rem var(--body);color:var(--mut);margin-bottom:14px"></p>
-      <button class="btn b-pri" id="btnEmailSend" style="width:100%;justify-content:center">Kirim Sekarang</button>
-      <p class="err-txt" id="emErr"></p>
     </div>
   </div>
 </div>
@@ -3138,13 +3087,6 @@ const PROVINSI_LIST=['Aceh','Sumatera Utara','Sumatera Barat','Riau','Kepulauan 
   const sel=document.getElementById('eProvinsi'); if(!sel)return;
   PROVINSI_LIST.forEach(p=>{const o=document.createElement('option');o.value=p;o.textContent=p;sel.appendChild(o);});
 })();
-
-/* Daftar akun pengirim email (juaraXXX@juaraind.com). Tambah/kurangi sesuai akun yang sudah
-   dibuat di cPanel DomainEsia. Password TIDAK disimpan di sini — hanya di secret Edge Function. */
-const EMAIL_SENDERS=[
-  'juara199@juaraind.com',
-  'juara200@juaraind.com'
-];
 
 function toast(msg,type='ok'){
   const el=document.createElement('div');
@@ -5181,9 +5123,9 @@ async function cancelKolektif(pid,jenis){
   toast('Penandaan kolektif dibatalkan ✓','ok');
 }
 
-/* Cache signed URL per storage_path supaya buka pratinjau berulang (atau setelah
-   di-hover/prefetch) terasa instan, tidak perlu nunggu round-trip ke Supabase
-   tiap kali. TTL signed URL 1 jam, kita anggap valid selama masih ada sisa
+/* Cache signed URL per storage_path supaya buka dokumen berulang terasa instan,
+   tidak perlu nunggu round-trip ke Supabase tiap kali. TTL signed URL 1 jam,
+   kita anggap valid selama masih ada sisa
    >15 detik biar aman dari race condition pas dipakai. */
 const DOC_URL_TTL=3600;
 const SIGNED_URL_CACHE=new Map();
@@ -5196,8 +5138,6 @@ async function getSignedDocUrl(storage_path,forceFresh){
   SIGNED_URL_CACHE.set(storage_path,{url:data.signedUrl,exp:now+DOC_URL_TTL*1000});
   return data.signedUrl;
 }
-function prefetchDocUrl(storage_path){ if(storage_path) getSignedDocUrl(storage_path).catch(()=>{}); }
-
 async function viewDoc(pid,jenis){
   const doc=(DOCS_BY_PID[pid]||{})[jenis]; if(!doc?.storage_path)return toast('Berkas tidak ditemukan','err');
   const newTab=window.open('','_blank'); // dibuka LANGSUNG saat klik, sebelum await, biar tidak diblokir Safari
@@ -5384,7 +5324,6 @@ async function openMasterDoc(pid){
   $('#dndTarget').innerHTML='<div class="dnd-empty" id="dndEmptyMsg">Seret dokumen ke sini</div>';
   updateDndCount();
   $('#masterDocModal').classList.add('show');
-  renderEmailLog(pid);
 
   const fotoDoc=docs.foto;
   if(fotoDoc?.storage_path){
@@ -5392,47 +5331,15 @@ async function openMasterDoc(pid){
     if(!error&&data&&DND_PID===pid) $('#mdAva').innerHTML=`<img src="${data.signedUrl}" alt="">`;
   }
 
-  // Siapkan lebih dulu (di latar belakang) signed URL semua dokumen yang punya
-  // berkas, supaya begitu admin klik ikon mata untuk pratinjau, gambarnya
-  // langsung tampil tanpa nunggu round-trip ke Supabase.
-  allDefs.forEach(d=>prefetchDocUrl(docs[d.k]?.storage_path));
 }
 function closeMasterDoc(){ $('#masterDocModal').classList.remove('show'); DND_PID=null; }
 $('#btnCloseMasterDoc').addEventListener('click', closeMasterDoc);
 $('#masterDocModal').addEventListener('click', e=>{ if(e.target.id==='masterDocModal')closeMasterDoc(); });
 
-/* Riwayat pengiriman email dokumen — tabel document_email_log_v2 */
-async function renderEmailLog(pid){
-  const box=$('#emailLogList'); if(!box)return;
-  box.innerHTML='<div class="dnd-empty">Memuat riwayat…</div>';
-  const {data,error}=await sb.from('document_email_log_v2')
-    .select('*').eq('participant_id',pid)
-    .order('created_at',{ascending:false}).limit(20);
-  if(DND_PID!==pid)return;
-  if(error){ box.innerHTML=`<div class="dnd-empty">Gagal memuat riwayat: ${error.message}</div>`; return; }
-  if(!data?.length){ box.innerHTML='<div class="dnd-empty">Belum ada email yang pernah dikirim untuk peserta ini.</div>'; return; }
-  const docs=DOCS_BY_PID[pid]||{};
-  box.innerHTML=data.map(row=>{
-    const dt=new Date(row.created_at).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'});
-    const failed=row.status==='gagal';
-    const docNames=(row.doc_keys||[]).map(k=>DOCS.find(d=>d.k===k)?.t||docs[k]?.file_name||k).join(', ');
-    return `<div class="email-log-item${failed?' failed':''}">
-      <span class="eli-dot"></span>
-      <div class="eli-body">
-        <div class="eli-to">${row.sent_to||'-'}</div>
-        <div class="eli-meta">${dt} · ${row.doc_count||0} dokumen${docNames?` (${docNames})`:''}${row.sent_from?` · dari ${row.sent_from}`:''}</div>
-        ${failed?`<div class="eli-err">Gagal: ${row.error_message||'tidak diketahui'}</div>`:''}
-      </div>
-    </div>`;
-  }).join('');
-}
-
 function updateDndCount(){
   const n=$('#dndTarget').querySelectorAll('.dnd-item').length;
   $('#dndCount').textContent=n?`(${n} dipilih)`:'';
-  const has=n>0;
-  $('#btnSendEmail').disabled=!has;
-  $('#btnDownloadPicked').disabled=!has;
+  $('#btnDownloadPicked').disabled=n===0;
 }
 
 function moveDndToTarget(key){
@@ -5583,90 +5490,6 @@ $('#kolektifFileInput')?.addEventListener('change', async e=>{
     toast('Gagal mengunggah dokumen: '+err.message,'err');
   }
 });
-
-/* ============ MODAL KIRIM EMAIL ============ */
-function openEmailModal(){
-  const pid=DND_PID; if(!pid)return;
-  const keys=[...$('#dndTarget').querySelectorAll('.dnd-item')].map(el=>el.dataset.key);
-  if(!keys.length)return;
-
-  const p=PARTICIPANTS.find(x=>x.id===pid);
-  const mrow=MASTER_ROWS.find(r=>r.participant_id===pid);
-  const nama=p?.nama||mrow?.nama||'-';
-  const kode=mrow?.kode_peserta||(p?participantCode(p):'-');
-
-  $('#emFor').textContent=`${nama} · ${kode}`;
-  $('#emFrom').innerHTML=EMAIL_SENDERS.map(e=>`<option value="${e}">${e}</option>`).join('');
-  ensureCsel($('#emFrom'));
-  $('#emTo').value='';
-  $('#emSubject').value=`Dokumen Peserta — ${nama} (${kode})`;
-  $('#emMessage').value='';
-  $('#emDocCount').textContent=`📎 ${keys.length} dokumen akan dilampirkan: `+keys.map(k=>DOCS.find(d=>d.k===k)?.t||(DOCS_BY_PID[pid]||{})[k]?.file_name||k).join(', ');
-  $('#emErr').textContent='';
-  $('#emailModal').classList.add('show');
-}
-function closeEmailModal(){ $('#emailModal').classList.remove('show'); }
-$('#btnCloseEmail').addEventListener('click', closeEmailModal);
-$('#emailModal').addEventListener('click', e=>{ if(e.target.id==='emailModal')closeEmailModal(); });
-$('#btnSendEmail').addEventListener('click', openEmailModal);
-
-$('#btnEmailSend').addEventListener('click', async ()=>{
-  const pid=DND_PID; if(!pid)return;
-  const from=$('#emFrom').value;
-  const to=$('#emTo').value.trim();
-  const subject=$('#emSubject').value.trim();
-  const message=$('#emMessage').value.trim();
-  $('#emErr').textContent='';
-  if(!to){ $('#emErr').textContent='Alamat tujuan wajib diisi.'; return; }
-
-  const docs=DOCS_BY_PID[pid]||{};
-  const keys=[...$('#dndTarget').querySelectorAll('.dnd-item')].map(el=>el.dataset.key);
-  const storage_paths=keys.map(k=>{
-    const doc=docs[k]; const meta=DOCS.find(d=>d.k===k);
-    if(!doc?.storage_path)return null;
-    const ext=(doc.file_name||'').includes('.')?doc.file_name.split('.').pop():'';
-    const label=meta?.t||(doc.file_name||'').replace(/\.[^.]+$/,'')||k;
-    return { path:doc.storage_path, filename:sanitizeName(label)+(ext?'.'+ext:'') };
-  }).filter(Boolean);
-  if(!storage_paths.length){ $('#emErr').textContent='Tidak ada berkas valid untuk dikirim.'; return; }
-
-  const btn=$('#btnEmailSend'); const orig=btn.textContent;
-  btn.disabled=true; btn.textContent='Mengirim…';
-  try{
-    const {data,error}=await sb.functions.invoke('send-email',{ body:{ from, to, subject, message, storage_paths } });
-    if(error) throw new Error(error.message||'Gagal memanggil layanan email');
-    if(data?.error) throw new Error(data.error);
-    toast(`Email terkirim ✓ (${data?.sent??storage_paths.length} lampiran)`,'ok');
-    await logEmailSend(pid,{from,to,subject,message,keys,status:'terkirim'});
-    closeEmailModal();
-  }catch(err){
-    console.error(err);
-    $('#emErr').textContent='Gagal mengirim: '+(err.message||'terjadi kesalahan');
-    await logEmailSend(pid,{from,to,subject,message,keys,status:'gagal',error:err.message});
-  }finally{
-    btn.disabled=false; btn.textContent=orig;
-  }
-});
-
-/* Simpan setiap percobaan kirim (sukses/gagal) ke document_email_log_v2,
-   lalu refresh daftar riwayat di panel Kelola Dokumen kalau modal masih terbuka. */
-async function logEmailSend(pid,{from,to,subject,message,keys,status,error}){
-  try{
-    await sb.from('document_email_log_v2').insert({
-      participant_id:pid,
-      sent_from:from||null,
-      sent_to:to,
-      subject:subject||null,
-      message:message||null,
-      doc_keys:keys||[],
-      doc_count:(keys||[]).length,
-      status,
-      error_message:error||null,
-      sent_by:(await sb.auth.getUser())?.data?.user?.email||null
-    });
-  }catch(e){ console.warn('Gagal menyimpan riwayat email:',e); }
-  if(DND_PID===pid) renderEmailLog(pid);
-}
 
 function sanitizeName(s){ return String(s||'').trim().replace(/[^\w\-]+/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'')||'file'; }
 
