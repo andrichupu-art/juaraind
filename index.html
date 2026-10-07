@@ -2690,10 +2690,6 @@ const $=s=>document.querySelector(s);
 /* Label tambahan untuk kontrol pencarian yang sebelumnya hanya mengandalkan
    placeholder agar tetap jelas bagi screen reader. */
 const ACCESSIBLE_LABELS={
-  qSearchMaster:'Cari Data Master', qSekolah:'Cari sekolah',
-  qSearchPelatihan:'Cari peserta pelatihan', qSearchPenempatan:'Cari peserta penempatan',
-  qSearchVisaMcu:'Cari peserta visa dan MCU', qSearchKeberangkatan:'Cari peserta keberangkatan',
-  qSearchFin:'Cari data keuangan', qSearchBukti:'Cari bukti pembayaran',
   mailSearch:'Cari email', maSearch:'Cari akun email'
 };
 Object.entries(ACCESSIBLE_LABELS).forEach(([id,label])=>{
@@ -2888,7 +2884,6 @@ function customPrompt(msg,expected,opts={}){
     document.addEventListener('keydown',onKey);
   });
 }
-function fmtSz(b){ if(!b)return '-'; if(b<1024)return b+' B'; if(b<1048576)return (b/1024).toFixed(0)+' KB'; return (b/1048576).toFixed(1)+' MB'; }
 function formatRupiah(n){ return 'Rp '+Math.round(Number(n||0)).toLocaleString('id-ID'); }
 function formatRupiahInput(v){ const digits=String(v||'').replace(/[^\d]/g,''); if(!digits)return ''; return Number(digits).toLocaleString('id-ID'); }
 function parseRupiahInput(v){ return Number(String(v||'').replace(/[^\d]/g,''))||0; }
@@ -2936,10 +2931,10 @@ function enterDashboard(user){
   $('#loginView').style.display='none'; $('#appShell').classList.add('show','email-only'); $('#hdRight').style.display='flex'; document.querySelector('header').style.display='';
   $('#whoEmail').textContent=user.email||'-';
   $('#whoDropdownEmail').textContent=user.email||'-';
-  goToTab('secEmail');
+  goToTab();
 }
 
-function goToTab(targetId){
+function goToTab(){
   const safeTarget = 'secEmail';
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active', p.id===safeTarget));
   document.querySelector('header').style.display = '';
