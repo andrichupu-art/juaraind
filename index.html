@@ -3562,7 +3562,7 @@ let MAIL_FOLDER_REQUEST_ID=0, MAIL_LIST_REQUEST_ID=0, MAIL_READ_REQUEST_ID=0;
 let MAIL_WATCH_UNSEEN=new Map(), MAIL_WATCH_BASELINE=new Map(), MAIL_WATCH_TIMER=null, MAIL_WATCH_BASELINED=false;
 let MAIL_WATCH_CHECKING=false;
 let MAIL_SEARCH_TIMER=null;
-const MAIL_WATCH_INTERVAL_MS=60000;
+const MAIL_WATCH_INTERVAL_MS=120000;
 
 async function checkSession(){
   const {data:{session}}=await sb.auth.getSession();

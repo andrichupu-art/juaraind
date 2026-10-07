@@ -208,12 +208,10 @@ Deno.serve(async (req: Request) => {
         let range: string | number[] | null = null;
         let useUid = false;
         if (query) {
-          const found = new Set<number>();
-          for (const criteria of [{ from: query }, { to: query }, { subject: query }]) {
-            const matches = await client.search(criteria, { uid: true });
-            if (matches) for (const uid of matches) found.add(uid);
-          }
-          const matchingUids = [...found].sort((a, b) => b - a);
+          const matchingUids: number[] = await client.search({
+            or: [{ from: query }, { to: query }, { subject: query }],
+          }, { uid: true }) || [];
+          matchingUids.sort((a, b) => b - a);
           total = matchingUids.length;
           const totalPages = Math.max(1, Math.ceil(total / pageSize));
           page = Math.min(requestedPage, totalPages);
