@@ -592,12 +592,6 @@ header{position:sticky;top:0;z-index:50;background:#13314D;border-bottom:3px sol
 #secMaster .master-table-card thead th:nth-child(6),
 #secMaster .master-table-card tbody td:nth-child(4),
 #secMaster .master-table-card tbody td:nth-child(6){display:none}
-@media(max-width:760px){
-  /* Mobile: tombol "Kelola Dokumen" jadi icon-only (teksnya disembunyikan),
-     samakan bentuknya dengan tombol icon-only di sebelahnya (tombol hapus). */
-  #secMaster .btn-manage-doc-label{display:none}
-  #secMaster .btn-manage-doc{padding:8px;width:34px;height:34px;justify-content:center;gap:0}
-}
 #secMaster .master-table-card .btn.sm{
   padding:5px 10px;font-size:.68rem;border-radius:8px;
 }
@@ -1231,12 +1225,6 @@ td.nama span{color:var(--mut);font-size:.78rem}
   to{transform:translateX(0);opacity:1}
 }
 
-/* Kelola Dokumen (data master) juga sebagai panel samping kiri, tinggi penuh */
-#masterDocModal{justify-content:flex-start;align-items:stretch;padding:0}
-#masterDocModal .box{height:calc(var(--app-vh, 1vh) * 100);border-radius:0;display:flex;flex-direction:column;animation:panelIn .22s ease-out}
-#masterDocModal .box-body{max-height:none;flex:1;overflow-y:auto}
-@media(max-width:940px){#masterDocModal .box{max-width:100%}}
-
 /* ============ TOAST ============ */
 #toastWrap{position:fixed;bottom:20px;right:20px;z-index:400;display:flex;flex-direction:column;gap:8px}
 .toast{background:var(--navy2);color:#fff;padding:13px 18px;border-radius:11px;font:600 .85rem var(--body);box-shadow:0 8px 24px rgba(0,0,0,.25);border-left:4px solid var(--gold);animation:tin .25s}
@@ -1275,26 +1263,7 @@ td.nama span{color:var(--mut);font-size:.78rem}
 .aksi-row .convert-progress .cp-pct{color:#fff}
 @keyframes cp-shine{0%{transform:translateX(-40px)}100%{transform:translateX(150px)}}
 
-/* ============ DATA MASTER — PANEL DOKUMEN ============ */
-.dnd-wrap{display:grid;grid-template-columns:1fr;gap:16px}
-.dnd-col{background:#F7F5EF;border:1.5px solid var(--line);border-radius:14px;padding:14px;min-height:260px;display:flex;flex-direction:column}
-.dnd-col h4{font:800 .74rem var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--navy);margin-bottom:10px;display:flex;align-items:center;gap:7px}
-.dnd-col h4 small{font:600 .68rem var(--body);text-transform:none;letter-spacing:0;color:var(--mut)}
-.dnd-list{flex:1;display:flex;flex-direction:column;gap:8px;border-radius:10px;transition:.15s;padding:2px}
-.dnd-item{display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:9px 11px;transition:.15s}
-.dnd-item:hover{border-color:var(--gold);box-shadow:0 2px 8px rgba(190,129,70,.14)}
-.dnd-item .dnd-ic{width:26px;height:26px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.dnd-item .dnd-ic svg{width:19px;height:19px}
-.dnd-item .dnd-lbl{flex:1;min-width:0;display:flex;align-items:center;gap:8px}
-.dnd-item .dnd-lbl b{font:700 .82rem var(--body);color:var(--ink);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.dnd-dot{width:9px;height:9px;border-radius:99px;flex-shrink:0;background:#D9D2BE}
-.dnd-dot.ok{background:var(--green)} .dnd-dot.wait{background:#E3A93B} .dnd-dot.bad{background:var(--red)}
-.dnd-del{flex-shrink:0;width:24px;height:24px;border-radius:7px;border:1.5px solid var(--line);background:#fff;color:var(--red);font-size:.78rem;display:flex;align-items:center;justify-content:center;transition:.15s;cursor:pointer}
-.dnd-del:hover{background:var(--red);border-color:var(--red);color:#fff}
-.dnd-upload{flex-shrink:0;width:24px;height:24px;border-radius:7px;border:1.5px solid var(--gold,#c9a227);background:#FFF8EA;color:var(--navy);font-size:.72rem;display:flex;align-items:center;justify-content:center;transition:.15s;cursor:pointer}
-.dnd-upload:hover{background:var(--gold,#c9a227);color:#fff}
-.dnd-add-extra{margin-top:10px;width:100%;justify-content:center;border-style:dashed}
-.dnd-empty{margin:auto;text-align:center;color:var(--mut);font-size:.78rem;padding:20px 10px}
+.doc-empty{margin:auto;text-align:center;color:var(--mut);font-size:.78rem;padding:20px 10px}
 
 @media(max-width:760px){
   .stats{grid-template-columns:1fr 1fr}
@@ -2620,32 +2589,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
       <div class="box-sec">
         <h4>📎 Data Tambahan (dari Peserta) <span id="extraDocCnt" style="font:700 .68rem var(--body);letter-spacing:0;text-transform:none;color:var(--mut)"></span></h4>
         <div id="extraDocList"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ============ MODAL KELOLA DOKUMEN — DATA MASTER ============ -->
-<div class="modal" id="masterDocModal">
-  <div class="box" style="max-width:900px">
-    <div class="box-h">
-      <div style="display:flex;align-items:center;gap:12px;min-width:0">
-        <div class="ava" id="mdAva">-</div>
-        <div style="min-width:0"><h3 id="mdNama" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">-</h3><p id="mdKode">-</p></div>
-      </div>
-      <button class="x" id="btnCloseMasterDoc">✕</button>
-    </div>
-    <div class="box-body">
-      <div class="dnd-wrap">
-        <div class="dnd-col">
-          <h4>
-            Dokumen Peserta
-          </h4>
-          <div class="dnd-list" id="dndSource"></div>
-          <button type="button" class="btn b-ghost sm dnd-add-extra" id="btnAddExtraDoc">+ Upload Dokumen Tambahan</button>
-          <input type="file" id="extraDocFileInput" style="display:none" accept="image/*,.pdf">
-          <input type="file" id="kolektifFileInput" style="display:none" accept="image/*,.pdf">
-        </div>
       </div>
     </div>
   </div>
@@ -4846,7 +4789,6 @@ function renderMasterTable(){
       <td>${(Number(r.tahap??0)+1)}/6</td>
       <td>${tgl}</td>
       <td class="aksi-cell"><div class="aksi-cell-in">
-        <button class="btn b-navy sm btn-manage-doc" data-manage="${r.participant_id}" title="Kelola Dokumen" aria-label="Kelola Dokumen"><svg class="ic-outbox" viewBox="0 0 24 24" width="16" height="16" xmlns="http://www.w3.org/2000/svg"><path d="M12 3v9" stroke="var(--red)" stroke-width="2.2" stroke-linecap="round"/><path d="M8 7l4-4 4 4" stroke="var(--red)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 13v5a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-5" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 13h4.5a1 1 0 0 1 .95.68 2.4 2.4 0 0 0 4.6 0 1 1 0 0 1 .95-.68H20" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="btn-manage-doc-label"> Kelola Dokumen</span></button>
         <button class="btn b-red sm icon-only" data-remove="${r.id}" data-pid="${r.participant_id}" title="Keluarkan dari Data Master" aria-label="Keluarkan dari Data Master"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9"/><line x1="10" y1="12" x2="21" y2="12"/><path d="m17 8 4 4-4 4"/></svg></button>
       </div></td>
     </tr>`;
@@ -4861,14 +4803,11 @@ function initMasterTableEvents(){
   if(!body||body._delegated)return;
   body._delegated=true;
   body.addEventListener('click', e=>{
-    const manageBtn=e.target.closest('[data-manage]');
-    if(manageBtn){ e.stopPropagation(); openMasterDoc(manageBtn.dataset.manage); return; }
     const removeBtn=e.target.closest('[data-remove]');
     if(removeBtn){ e.stopPropagation(); removeFromMaster(removeBtn.dataset.remove,removeBtn.dataset.pid); return; }
     const copyBtn=e.target.closest('[data-copy]');
     if(copyBtn){ e.stopPropagation(); copyToClipboard(copyBtn.dataset.copy,copyBtn); return; }
-    /* Klik di sembarang area baris TIDAK lagi membuka modal Dokumen ->
-       modal Dokumen hanya dibuka lewat tombol "Kelola Dokumen". */
+    /* Klik pada area baris tidak memicu tindakan. */
   });
 }
 /* Render kontrol pagination Data Master -> sama persis pola dgn Data Peserta. */
@@ -4930,7 +4869,7 @@ $('#qSearchMasterClear')?.addEventListener('click', ()=>{
 initMasterTableEvents();
 
 /* Klik pill "✓ Di Data Master" di tabel Data Peserta -> lompat ke tab Data Master,
-   filter otomatis ke peserta tsb, sorot barisnya, lalu buka detail dokumennya. */
+   filter otomatis ke peserta tsb dan sorot barisnya. */
 function gotoMasterParticipant(pid){
   const r=MASTER_ROWS.find(x=>x.participant_id===pid);
   goToTab('secMaster');
@@ -4949,7 +4888,6 @@ function gotoMasterParticipant(pid){
       setTimeout(()=>{ tr.style.backgroundColor=''; }, 1600);
     }
   });
-  if(typeof openMasterDoc==='function') openMasterDoc(pid);
 }
 window.gotoMasterParticipant=gotoMasterParticipant;
 
@@ -5053,7 +4991,7 @@ function renderExtraDocList(pid){
   const keys=Object.keys(docs).filter(k=>k.startsWith('extra_')).sort((a,b)=>new Date(docs[b].uploaded_at||0)-new Date(docs[a].uploaded_at||0));
   $('#extraDocCnt').textContent=keys.length?`${keys.length} berkas`:'';
   if(!keys.length){
-    box.innerHTML='<div class="dnd-empty" style="padding:10px 0">Peserta belum mengunggah berkas tambahan.</div>';
+    box.innerHTML='<div class="doc-empty" style="padding:10px 0">Peserta belum mengunggah berkas tambahan.</div>';
     return;
   }
   box.innerHTML=keys.map(k=>{
@@ -5145,9 +5083,8 @@ async function setDocStatus(pid,jenis,status){
    belum diunggah berkas aslinya belum benar-benar lengkap — akibatnya tahap
    bisa naik ke "Pelatihan & Pembekalan" padahal masih ada dokumen yang
    sebetulnya belum ada wujud fisiknya. Sekarang hanya status 'terverifikasi'
-   asli yang dihitung; begitu dokumen kolektif itu diunggah beneran (otomatis
-   berubah jadi 'terverifikasi', lihat listener #kolektifFileInput), barulah
-   tahap ini akan naik dengan sendirinya.
+   asli yang dihitung; tahap ini naik setelah seluruh berkas wajib yang ada
+   sudah ditandai terverifikasi.
    Hanya maju otomatis dari tahap 0 atau 1; tahap yang sudah lebih lanjut (mis.
    admin sudah geser manual ke tahap 3+) tidak diutak-atik oleh fungsi ini. */
 function isDocFullyVerified(docObj){ return docObj?.status==='terverifikasi'; }
@@ -5251,105 +5188,10 @@ $('#btnSaveStage').addEventListener('click', async ()=>{
   toast('Tahap peserta diperbarui ✓','ok');
 });
 
-/* ============ DATA MASTER: PANEL KELOLA DOKUMEN ============ */
-let DND_PID=null;
-
 const EXTRA_DOC_ICON=`<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M14 3H7.5A1.5 1.5 0 0 0 6 4.5v15A1.5 1.5 0 0 0 7.5 21h9a1.5 1.5 0 0 0 1.5-1.5V8l-4-5Z" stroke="var(--navy)" stroke-width="1.5" stroke-linejoin="round"/><path d="M14 3v4.5A1.5 1.5 0 0 0 15.5 9H18" stroke="var(--navy)" stroke-width="1.5" stroke-linejoin="round"/><path d="M9 13h6M9 16.5h6" stroke="var(--navy)" stroke-width="1.4" stroke-linecap="round"/></svg>`;
-
-function dndItemHtml(d,up){
-  const st=up?.status;
-  const dot=st==='terverifikasi'?'ok':st==='ditolak'?'bad':'wait';
-  const dotTitle=st==='terverifikasi'?'Terverifikasi':st==='ditolak'?'Ditolak':st==='kolektif'?'Kolektif — belum ada berkas asli':'Menunggu';
-  // Dokumen yg ditandai kolektif (diproses agensi) belum punya berkas fisik ->
-  // kasih tombol upload langsung di sini supaya admin bisa melengkapi begitu
-  // berkas aslinya sudah di tangan, tanpa perlu batalkan-kolektif dulu.
-  const canUploadDirect=st==='kolektif';
-  const uploadBtn=canUploadDirect?`<button type="button" class="dnd-upload" data-kolektif-upload="${d.k}" title="Lengkapi dokumen ini — unggah berkas asli sekarang">⬆</button>`:'';
-  // Dokumen tambahan (di luar 7 tipe standar) boleh dihapus manual oleh admin,
-  // beda dengan dokumen wajib yang cuma bisa dipilih/dikembalikan ke daftar.
-  const delBtn=d.extra?`<button type="button" class="dnd-del" data-del="${d.k}" title="Hapus dokumen tambahan ini">🗑</button>`:'';
-  return `<div class="dnd-item" data-key="${d.k}">
-    <span class="dnd-ic">${d.ic}</span>
-    <div class="dnd-lbl"><b>${d.t}</b><span class="dnd-dot ${dot}" title="${dotTitle}"></span></div>
-    ${uploadBtn}
-    ${delBtn}
-  </div>`;
-}
-
-async function openMasterDoc(pid){
-  DND_PID=pid;
-  const p=PARTICIPANTS.find(x=>x.id===pid);
-  const mrow=MASTER_ROWS.find(r=>r.participant_id===pid);
-  const nama=(p?.nama||mrow?.nama||'').trim()||'Tanpa Nama';
-  $('#mdAva').innerHTML=nama[0].toUpperCase();
-  $('#mdNama').textContent=nama;
-  $('#mdKode').textContent=mrow?.kode_peserta||(p?participantCode(p):'-');
-
-  const docs=DOCS_BY_PID[pid]||{};
-  const uploaded=DOCS.filter(d=>docs[d.k]);
-  // Dokumen tambahan disimpan di documents_v2 dengan jenis di luar 7 tipe standar.
-  const extraKeys=Object.keys(docs).filter(k=>!DOCS.some(d=>d.k===k));
-  const extraDefs=extraKeys.map(k=>({k,ic:EXTRA_DOC_ICON,t:docs[k].file_name||'Dokumen Tambahan',extra:true}));
-  const allDefs=[...uploaded,...extraDefs];
-  $('#dndSource').innerHTML=allDefs.length?allDefs.map(d=>dndItemHtml(d,docs[d.k])).join(''):'<div class="dnd-empty">Peserta ini belum mengunggah dokumen apa pun.</div>';
-  $('#masterDocModal').classList.add('show');
-
-  const fotoDoc=docs.foto;
-  if(fotoDoc?.storage_path){
-    const {data,error}=await sb.storage.from('juara-v2-documents').createSignedUrl(fotoDoc.storage_path,3600);
-    if(!error&&data&&DND_PID===pid) $('#mdAva').innerHTML=`<img src="${data.signedUrl}" alt="">`;
-  }
-
-}
-function closeMasterDoc(){ $('#masterDocModal').classList.remove('show'); DND_PID=null; }
-$('#btnCloseMasterDoc').addEventListener('click', closeMasterDoc);
-$('#masterDocModal').addEventListener('click', e=>{ if(e.target.id==='masterDocModal')closeMasterDoc(); });
-
-$('#dndSource').addEventListener('click', e=>{
-  const del=e.target.closest('[data-del]');
-  if(del){ e.stopPropagation(); deleteExtraDoc(DND_PID, del.dataset.del); return; }
-  const up=e.target.closest('[data-kolektif-upload]');
-  if(up){ e.stopPropagation(); PENDING_KOLEKTIF_KEY=up.dataset.kolektifUpload; $('#kolektifFileInput').click(); }
-});
-
-/* ---- Upload Dokumen Tambahan: lampirkan berkas ekstra di luar 7 tipe standar
-   (mis. Surat Keterangan Domisili, dokumen tambahan lain) langsung dari sini,
-   tanpa perlu ubah alur upload peserta. Disimpan sebagai baris documents_v2
-   biasa dengan jenis unik "tambahan_<timestamp>" supaya tidak bentrok dengan
-   tipe standar. */
-$('#btnAddExtraDoc')?.addEventListener('click', ()=>{
-  if(!DND_PID)return;
-  $('#extraDocFileInput').click();
-});
-$('#extraDocFileInput')?.addEventListener('change', async e=>{
-  const file=e.target.files?.[0]; e.target.value='';
-  const pid=DND_PID;
-  if(!file||!pid)return;
-  const label=window.prompt('Nama/keterangan dokumen tambahan ini:', file.name.replace(/\.[^.]+$/,''));
-  if(label===null)return; // dibatalkan
-  const jenisKey=`tambahan_${Date.now()}`;
-  const ext=(file.name.split('.').pop()||'bin').toLowerCase();
-  const path=`${pid}/${jenisKey}.${ext}`;
-  toast('Mengunggah dokumen tambahan…','ok');
-  try{
-    const {error:upErr}=await sb.storage.from('juara-v2-documents').upload(path, file, {contentType:file.type||'application/octet-stream', upsert:true});
-    if(upErr)throw new Error(upErr.message);
-    const {data:inserted,error:insErr}=await sb.from('documents_v2').insert({
-      participant_id:pid, jenis:jenisKey, file_name:(label.trim()||file.name), size:file.size, storage_path:path, status:'terverifikasi'
-    }).select().single();
-    if(insErr)throw new Error(insErr.message);
-    (DOCS_BY_PID[pid]=DOCS_BY_PID[pid]||{})[jenisKey]=inserted;
-    if(DND_PID===pid)openMasterDoc(pid);
-    toast('Dokumen tambahan berhasil diunggah ✓','ok');
-  }catch(err){
-    console.error(err);
-    toast('Gagal mengunggah dokumen tambahan: '+err.message,'err');
-  }
-});
-
 /* ---- Hapus Dokumen Tambahan: hanya berlaku utk dokumen dgn jenis "tambahan_*"
    (bukan 7 tipe standar). Menghapus berkas di storage + baris documents_v2,
-   lalu perbarui cache lokal & render ulang panel Kelola Dokumen. */
+   lalu perbarui cache lokal. */
 async function deleteExtraDoc(pid,key){
   if(!pid)return;
   const docs=DOCS_BY_PID[pid]||{};
@@ -5367,46 +5209,11 @@ async function deleteExtraDoc(pid,key){
     if(delErr)throw new Error(delErr.message);
     delete docs[key];
     toast('Dokumen tambahan dihapus ✓','ok');
-    if(DND_PID===pid)openMasterDoc(pid);
   }catch(err){
     console.error(err);
     toast('Gagal menghapus dokumen tambahan: '+err.message,'err');
   }
 }
-
-/* ---- Lengkapi dokumen berstatus "Kolektif": admin bisa unggah langsung
-   berkas aslinya di sini begitu sudah di tangan (mis. paspor/MCU yang tadinya
-   diproses agensi), tanpa perlu batalkan-kolektif dulu & minta peserta unggah
-   ulang dari portal. Diunggah lewat sini otomatis ditandai terverifikasi. */
-let PENDING_KOLEKTIF_KEY=null;
-$('#kolektifFileInput')?.addEventListener('change', async e=>{
-  const file=e.target.files?.[0]; e.target.value='';
-  const key=PENDING_KOLEKTIF_KEY; PENDING_KOLEKTIF_KEY=null;
-  const pid=DND_PID;
-  if(!file||!pid||!key)return;
-  const doc=(DOCS_BY_PID[pid]||{})[key];
-  if(!doc){ toast('Data dokumen tidak ditemukan','err'); return; }
-  const jenisLabel=DOCS.find(d=>d.k===key)?.t||key;
-  const ext=(file.name.split('.').pop()||'bin').toLowerCase();
-  const path=`${pid}/${key}_${Date.now()}.${ext}`;
-  toast(`Mengunggah ${jenisLabel}…`,'ok');
-  try{
-    const {error:upErr}=await sb.storage.from('juara-v2-documents').upload(path, file, {contentType:file.type||'application/octet-stream', upsert:true});
-    if(upErr)throw new Error(upErr.message);
-    const upd={storage_path:path, file_name:file.name, size:file.size, status:'terverifikasi'};
-    const {error:updErr}=await sb.from('documents_v2').update(upd).eq('id',doc.id);
-    if(updErr)throw new Error(updErr.message);
-    Object.assign(doc,upd);
-    if(DND_PID===pid)openMasterDoc(pid);
-    renderTable(); renderStats();
-    if(ACTIVE_PID===pid)renderDocList(pid);
-    await maybeAdvanceStage(pid);
-    toast(`${jenisLabel} berhasil dilengkapi & terverifikasi ✓`,'ok');
-  }catch(err){
-    console.error(err);
-    toast('Gagal mengunggah dokumen: '+err.message,'err');
-  }
-});
 
 /* ============ KELOLA EMAIL (IMAP/SMTP terintegrasi) ============ */
 function sanitizeName(s){ return String(s||'').trim().replace(/[^\w\-]+/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'')||'file'; }
