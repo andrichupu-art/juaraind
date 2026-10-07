@@ -139,8 +139,6 @@ header{position:sticky;top:0;z-index:50;background:#13314D;border-bottom:3px sol
 .fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--navy)}
 .fld textarea{resize:vertical;min-height:64px;font-family:inherit}
 .fld select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%231B3A66' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'><polyline points='6 9 12 15 18 9'></polyline></svg>");background-repeat:no-repeat;background-position:right 12px center;background-size:15px;padding-right:34px}
-.fld-sec{grid-column:1/-1;font:800 .68rem var(--body);letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin:4px 0 -2px;padding-top:12px;border-top:1px dashed var(--line)}
-.fld-sec:first-child{border-top:none;padding-top:0;margin-top:0}
 .fld-pass-wrap{position:relative}
 .fld-pass-wrap input{padding-right:44px!important}
 .fld-pass-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);width:26px;height:26px;display:flex;align-items:center;justify-content:center;color:var(--mut);cursor:pointer;border-radius:6px}
@@ -183,8 +181,6 @@ body{overflow-x:hidden}
 .csel-opt:hover,.csel-opt.hi{background:#EEF3FA}
 .csel-opt.sel{background:var(--navy);color:#fff;font-weight:700}
 .fld .csel-btn{padding:13px 15px;border-radius:11px;font:600 .88rem var(--body)}
-
-table{width:100%;border-collapse:collapse}
 
 /* ============ KELOLA EMAIL (gaya Gmail — flat, tanpa card) ============ */
 .mail-shell{border:none;border-radius:0}
@@ -328,7 +324,6 @@ table{width:100%;border-collapse:collapse}
 .box-sec{margin-bottom:22px}
 .box-sec h4{font:800 .78rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--navy);margin-bottom:12px;display:flex;align-items:center;gap:8px}
 .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.info-grid .full{grid-column:1/-1}
 .info-grid .fld input,.info-grid .fld select,.info-grid .fld textarea{padding:10px 12px;font-size:.86rem}
 .info-grid .fld label{font-size:.65rem}
 /* Tulis Email Baru sebagai panel samping kanan, tinggi penuh. */
@@ -422,11 +417,6 @@ table{width:100%;border-collapse:collapse}
   position:relative;
   z-index:2;
 }
-@keyframes composePanelIn{
-  from{transform:translateX(24px);opacity:0}
-  to{transform:translateX(0);opacity:1}
-}
-
 /* ============ TOAST ============ */
 #toastWrap{position:fixed;bottom:20px;right:20px;z-index:400;display:flex;flex-direction:column;gap:8px}
 .toast{background:var(--navy2);color:#fff;padding:13px 18px;border-radius:11px;font:600 .85rem var(--body);box-shadow:0 8px 24px rgba(0,0,0,.25);border-left:4px solid var(--gold);animation:tin .25s}
@@ -1769,10 +1759,6 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeWhoDropdown(
 function sanitizeName(s){ return String(s||'').trim().replace(/[^\w\-]+/g,'_').replace(/_+/g,'_').replace(/^_|_$/g,'')||'file'; }
 function escapeHtml(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function fmtMailDate(d){ if(!d)return '-'; const dt=new Date(d); if(isNaN(dt))return '-'; return dt.toLocaleDateString('id-ID',{day:'2-digit',month:'short'})+' '+dt.toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'}); }
-/* Versi ringkas (tanggal saja, tanpa jam) — dipakai khusus di layar mobile
-   supaya kolom "Ditambahkan" tidak makan banyak tempat & tabel tidak
-   overflow ke luar layar. */
-function fmtDateShort(d){ if(!d)return '-'; const dt=new Date(d); if(isNaN(dt))return '-'; return dt.toLocaleDateString('id-ID',{day:'2-digit',month:'short'}); }
 function mailInitial(s){ const t=String(s||'').trim(); const m=t.match(/[A-Za-z0-9]/); return m?m[0].toUpperCase():'?'; }
 
 // FIX: sidebar folder gaya Gmail butuh ikon per jenis folder (bukan cuma teks di
@@ -1855,8 +1841,6 @@ async function fnErrorMessage(error, fallback){
 
 const ACC_TRASH_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>';
 const ACC_BELL_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>';
-const ACC_KEY_SVG='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="7.5" cy="15.5" r="5.5"/><path d="m21 2-9.6 9.6"/><path d="m15.5 7.5 3 3L22 7l-3-3"/></svg>';
-
 function renderMailAccList(){
   const q=($('#maSearch')?.value||'').trim().toLowerCase();
   const wrap=$('#mailAccList');
