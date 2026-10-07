@@ -50,7 +50,7 @@ button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-vis
    latar putih dan tetap mudah terlihat saat navigasi keyboard. */
 .peserta-search:focus-within,.bukti-search:focus-within,.sekolah-search:focus-within,.master-search:focus-within{border-color:#fff!important;box-shadow:0 0 0 3px rgba(27,58,102,.2)!important}
 ::selection{background:var(--orange);color:#fff}
-.box-h ::selection,header ::selection,.sidebar ::selection{background:var(--gold);color:var(--navy)}
+.box-h ::selection,header ::selection{background:var(--gold);color:var(--navy)}
 .wrap{width:min(1180px,94%);margin:0 auto}
 
 /* ============ HEADER ============ */
@@ -92,33 +92,9 @@ header{position:sticky;top:0;z-index:50;background:#13314D;border-bottom:3px sol
 .who-dropdown-item:hover{background:#f1f3f6}
 .who-dropdown-item.logout{color:var(--red)}
 
-.hamburger{display:none;background:transparent;border:2px solid rgba(255,255,255,.4);color:#fff;width:40px;height:40px;border-radius:9px;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0;transition:.2s}
-.hamburger:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.7)}
-
-/* ============ SIDEBAR ============ */
 .app-shell{display:none}
 .app-shell.show{display:flex;align-items:flex-start}
-.sidebar{width:236px;flex-shrink:0;background:#13314D;border-right:3px solid var(--gold);
-  position:sticky;top:70px;height:calc((var(--app-vh, 1vh) * 100) - 70px);overflow-y:auto;
-  transition:margin-left .25s ease,transform .25s ease;
-  scrollbar-width:none;-ms-overflow-style:none}
-.sidebar::-webkit-scrollbar{display:none}
-.sidebar.hidden{margin-left:-239px}
-.sb-nav{display:flex;flex-direction:column;gap:4px;padding:18px 14px}
-.sb-nav .sb-label{font:800 .66rem var(--body);letter-spacing:.1em;text-transform:uppercase;color:#7c93b3;padding:8px 12px 4px}
-.sb-nav a{display:flex;align-items:center;gap:10px;padding:11px 13px;border-radius:10px;color:#cfe0f4;font:700 .85rem var(--body);transition:.2s;cursor:pointer}
-.sb-nav a:hover{background:rgba(255,255,255,.08);color:#fff}
-.sb-nav a.active{background:var(--gold);color:#fff}
-.sb-nav .ic{width:18px;text-align:center;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center}
-.sb-nav .ic svg{width:18px;height:18px;stroke:currentColor;fill:none}
-.sb-overlay{display:none;position:fixed;inset:0;background:rgba(8,21,39,.5);z-index:140}
-.sb-overlay.show{display:block}
 .main-content{flex:1;min-width:0}
-@media(max-width:860px){
-  .sidebar{position:fixed;left:0;top:70px;z-index:150;box-shadow:0 10px 30px rgba(0,0,0,.3)}
-  .sidebar.hidden{transform:translateX(-100%);margin-left:0}
-  .sidebar:not(.hidden){transform:translateX(0);margin-left:0}
-}
 
 /* ============ BUTTONS ============ */
 .btn{display:inline-flex;align-items:center;gap:8px;font:700 .88rem var(--body);
@@ -963,11 +939,6 @@ td.nama span{color:var(--mut);font-size:.78rem}
 .doc-status-icons.ok{color:#0E8F55}
 .doc-status-icons.wait{color:#4B5766}
 .doc-status-icons.kolektif{color:#1B6FB3}
-.sb-nav a{position:relative}
-.sb-badge{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:var(--red);color:#fff;
-  font:800 .66rem var(--body);min-width:19px;height:19px;padding:0 5px;border-radius:999px;
-  display:flex;align-items:center;justify-content:center;line-height:1}
-.sb-nav a.active .sb-badge{background:#fff;color:var(--gold)}
 .stagebar{display:flex;align-items:center;justify-content:center;gap:8px}
 .stagebar .track{width:70px;height:7px;border-radius:99px;background:#EDEAE0;overflow:hidden}
 .stagebar .fill{height:100%;background:#3B6D11;border-radius:99px}
@@ -1099,9 +1070,6 @@ td.nama span{color:var(--mut);font-size:.78rem}
 .mail-acc-key:hover{border-color:var(--navy);color:var(--navy)}
 .mail-acc-row-info{position:relative}
 .mail-acc-unread{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--red);color:#fff;font:800 .66rem var(--body);margin-left:7px;vertical-align:middle}
-.sb-link{position:relative}
-.sb-link-dot{position:absolute;top:6px;left:30px;width:9px;height:9px;border-radius:50%;background:var(--red);border:1.5px solid #fff;display:none}
-.sb-link-dot.show{display:block}
 .mail-acc-empty{color:var(--mut);font-size:.82rem;text-align:center;padding:20px 4px}
 .acc-toggle-h{cursor:pointer;user-select:none;justify-content:space-between!important}
 .acc-toggle-h svg{width:15px;height:15px;color:var(--navy);transition:transform .2s;flex-shrink:0}
@@ -1534,70 +1502,8 @@ header{
   border-color:var(--gold);
   color:var(--navy);
 }
-.hamburger{
-  border-color:rgba(255,255,255,.3);
-  border-radius:10px;
-}
-
-/* Sidebar */
 .app-shell.show{
   align-items:stretch;
-}
-.sidebar{
-  width:252px;
-  top:76px;
-  height:calc((var(--app-vh, 1vh) * 100) - 76px);
-  background:var(--navy);
-  border-right:2px solid var(--gold);
-  box-shadow:none;
-}
-.sidebar.hidden{
-  margin-left:-254px;
-}
-.sb-nav{
-  padding:22px 14px;
-  gap:5px;
-}
-.sb-nav .sb-label{
-  color:#7f96b5;
-  letter-spacing:.16em;
-  padding:13px 12px 7px;
-}
-.sb-nav a{
-  min-height:46px;
-  border-radius:11px;
-  color:#cfe0f4;
-  padding:11px 13px;
-  font-weight:700;
-  border:1px solid transparent;
-}
-.sb-nav a:hover{
-  background:rgba(255,255,255,.07);
-  color:#fff;
-  border-color:rgba(255,255,255,.08);
-}
-.sb-nav a.active{
-  background:var(--gold);
-  color:var(--navy);
-  border-color:var(--gold);
-  box-shadow:none;
-}
-.sb-nav a.active .ic{
-  color:var(--navy);
-}
-.sb-nav .ic{
-  color:#a9bfd9;
-}
-.sb-badge{
-  background:var(--red);
-  color:#fff;
-}
-.sb-nav a.active .sb-badge{
-  background:var(--navy);
-  color:var(--gold);
-}
-.sb-overlay{
-  background:rgba(4,16,31,.62);
 }
 
 /* Main canvas */
@@ -1998,21 +1904,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   outline-offset:2px;
 }
 
-/* Responsive — tetap mempertahankan flow lama */
+/* Responsive header and content */
 @media(max-width:860px){
-  .sidebar{
-    top:76px;
-    height:calc((var(--app-vh, 1vh) * 100) - 76px);
-    border-right:2px solid var(--gold);
-  }
-  .sidebar.hidden{
-    transform:translateX(-100%);
-    margin-left:0;
-  }
-  .sidebar:not(.hidden){
-    transform:translateX(0);
-    margin-left:0;
-  }
   .main-content{
     padding-top:22px;
   }
@@ -2213,15 +2106,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .login-footer img{width:24px}
 }
 
-/* Aplikasi ini dipersempit menjadi fokus email saja. Semua panel non-email
-   tetap ada di file legacy agar tidak mengganggu integrasi, tetapi disembunyikan
-   sepenuhnya dari UI dan tidak bisa diakses. */
-#appShell.email-only .sidebar{display:none}
-#appShell.email-only .hamburger{display:none!important}
-#appShell.email-only .main-content{width:100%}
-#appShell.email-only .sb-link:not([data-target="secEmail"]){display:none!important}
-#appShell.email-only .tab-panel:not(#secEmail){display:none!important}
-#appShell.email-only .jd-card[data-target]:not([data-target="secEmail"]){display:none!important}
+/* Email panel fills the available viewport below the header. */
 #appShell.email-only #secEmail{position:relative;display:flex;flex-direction:column;margin-top:0;min-height:calc((var(--app-vh, 1vh) * 100) - 76px)}
 #appShell.email-only #secEmail .mail-shell{flex:1;min-height:0}
 
