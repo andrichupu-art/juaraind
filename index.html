@@ -2549,7 +2549,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 <header>
   <div class="wrap hd-in">
     <div class="brand">
-      <button class="hamburger" id="btnSidebarToggle" aria-label="Buka/tutup menu" title="Buka/tutup menu">☰</button>
       <span class="logo-shine" style="--shine-mask:url('loogojuara.svg')"><img class="brand-logo" src="loogojuara.svg" alt="PT. Juara"></span>
       <span class="brand-tag">Admin Panel</span>
     </div>
@@ -2638,12 +2637,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 
 <!-- ============ DASHBOARD ============ -->
 <div class="app-shell" id="appShell">
-  <aside class="sidebar hidden" id="sidebar">
-    <nav class="sb-nav">
-      <span class="sb-label">Menu</span>
-      <a class="sb-link active" data-target="secEmail"><span class="ic"><svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2.4"/><path d="M3.5 6.5 12 13l8.5-6.5"/></svg></span> Kelola Email<span class="sb-link-dot" id="mailNavDot"></span></a>
-    </nav>
-  </aside>
   <div class="tab-panel active" id="secEmail">
         <!-- FIX: overlay ini menutupi seluruh panel Kelola Email selagi akun,
              folder, dan daftar email pertama disiapkan sekaligus di belakang layar.
@@ -3462,50 +3455,23 @@ function showLogin(){
   $('#loginView').style.display='flex'; $('#appShell').classList.remove('show','email-only'); $('#hdRight').style.display='none'; document.querySelector('header').style.display='none';
   closeWhoDropdown();
   ADMIN_LOGIN_PASSWORD='';
-  $('#btnSidebarToggle').style.display='none';
-  closeSidebar();
 }
 function enterDashboard(user){
   $('#loginView').style.display='none'; $('#appShell').classList.add('show','email-only'); $('#hdRight').style.display='flex'; document.querySelector('header').style.display='';
-  $('#btnSidebarToggle').style.display='none';
   $('#whoEmail').textContent=user.email||'-';
   $('#whoDropdownEmail').textContent=user.email||'-';
   goToTab('secEmail');
 }
 
-/* ============ SIDEBAR ============ */
-function openSidebar(){
-  const sidebar=$('#sidebar'); const overlay=$('#sbOverlay'); if(!sidebar)return;
-  sidebar.classList.remove('hidden');
-  if(window.innerWidth<=860 && overlay) overlay.classList.add('show');
-}
-function closeSidebar(){
-  const sidebar=$('#sidebar'); const overlay=$('#sbOverlay'); if(!sidebar) return;
-  sidebar.classList.add('hidden');
-  if(overlay) overlay.classList.remove('show');
-}
-function toggleSidebar(){
-  const sidebar=$('#sidebar'); if(!sidebar) return;
-  sidebar.classList.contains('hidden') ? openSidebar() : closeSidebar();
-}
-const sidebarToggle=$('#btnSidebarToggle');
-if(sidebarToggle){ sidebarToggle.addEventListener('click', toggleSidebar); }
-const sbOverlay=$('#sbOverlay');
-if(sbOverlay){ sbOverlay.addEventListener('click', closeSidebar); }
 function goToTab(targetId){
   const safeTarget = 'secEmail';
-  document.querySelectorAll('.sb-link').forEach(l=>l.classList.toggle('active', l.dataset.target===safeTarget));
   document.querySelectorAll('.tab-panel').forEach(p=>p.classList.toggle('active', p.id===safeTarget));
   document.querySelector('header').style.display = '';
   document.body.classList.toggle('menu-tab-active', false);
   window.scrollTo({top:0,behavior:'smooth'});
-  if(window.innerWidth<=860) closeSidebar();
   if(!MAIL_LOADED){ MAIL_LOADED=true; initMailPanel(); }
   startMailWatch();
 }
-document.querySelectorAll('.sb-link').forEach(link=>{
-  link.addEventListener('click', ()=>{ goToTab('secEmail'); });
-});
 $('#frmLogin').addEventListener('submit', async e=>{
   e.preventDefault();
   const email=$('#lgEmail').value.trim(), pass=$('#lgPass').value;
@@ -6197,7 +6163,6 @@ async function toggleMailWatch(id){
       MAIL_WATCH_BASELINE.delete(id);
       renderMailAccList();
       updateMailAccDropdownBadges();
-      updateMailNavDot();
     }
   }catch(err){
     console.error(err);
@@ -6215,11 +6180,6 @@ function updateMailAccDropdownBadges(){
     else delete opt.dataset.badge;
   });
   ensureCsel(sel);
-}
-
-function updateMailNavDot(){
-  const anyUnread=[...MAIL_WATCH_UNSEEN.values()].some(n=>n>0);
-  $('#mailNavDot')?.classList.toggle('show', anyUnread);
 }
 
 // Refresh hanya dipanggil berdasarkan perubahan jumlah email belum dibaca,
@@ -6302,7 +6262,6 @@ async function checkMailNotifications(){
     if(!isFirstRun) await probeLatestInbox();
     renderMailAccList();
     updateMailAccDropdownBadges();
-    updateMailNavDot();
   }finally{
     MAIL_WATCH_CHECKING=false;
   }
@@ -6698,7 +6657,6 @@ img:not(.mail-img-grid img){max-width:150px!important;max-height:130px!important
       if(cur>0) MAIL_WATCH_UNSEEN.set(MAIL_ACTIVE, cur-1);
       renderMailAccList();
       updateMailAccDropdownBadges();
-      updateMailNavDot();
     }
     checkMailNotifications();
   }catch(err){
