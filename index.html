@@ -20,7 +20,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
 <style>
 /* ============ TOKENS — disamakan persis dengan portal pendaftaran ============ */
 :root{
@@ -1476,41 +1475,10 @@ td.nama span{color:var(--mut);font-size:.78rem}
   body *{visibility:hidden}
   #kwitansiArea,#kwitansiArea *{visibility:visible}
   #kwitansiArea{position:absolute;left:0;top:0;width:100%}
-  #invoicePrintArea,#invoicePrintArea *{visibility:visible}
-  #invoicePrintArea{position:absolute;left:0;top:0;width:100%}
 }
 
 /* ============ INVOICE ============ */
-#invoiceModal .box{max-width:660px}
-.inv-box{background:#fff;border:1.5px solid var(--line);border-radius:14px;padding:26px 24px}
-.inv-head{display:flex;align-items:flex-start;justify-content:space-between;border-bottom:3px solid var(--gold);padding-bottom:16px;margin-bottom:18px;gap:12px}
-.inv-head b{font:800 1.15rem var(--disp);color:#000;display:block}
-.inv-head span{font:600 .8rem var(--body);color:#000}
-.inv-brand{display:flex;align-items:center;gap:10px}
-.inv-brand img{height:66px;width:auto;display:block;flex-shrink:0}
-.inv-no{font:700 .82rem var(--mono);color:var(--navy);text-align:right}
-.inv-no .inv-label{display:block;font:800 1.6rem var(--disp);letter-spacing:.06em;color:var(--navy);margin-bottom:2px}
-.inv-no small{display:block;font:600 .68rem var(--body);color:var(--mut);margin-top:2px}
 .ico-inv{width:16px;height:16px;flex-shrink:0;vertical-align:-3px}
-#btnOpenInvoice{font-size:1.05rem;padding:10px 20px;gap:10px;background:#fff;color:var(--navy);border-color:#fff}
-#btnOpenInvoice:hover{background:#f0f3f7}
-#btnOpenInvoice .ico-inv{width:22px;height:22px;vertical-align:-5px;color:var(--navy)}
-.inv-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px 18px;margin-bottom:20px}
-.inv-meta div{font:600 .82rem var(--body);color:var(--ink)}
-.inv-meta div b{display:block;font:800 .64rem var(--body);letter-spacing:.08em;text-transform:uppercase;color:var(--mut);margin-bottom:3px}
-.inv-table{width:100%;border-collapse:collapse;margin-bottom:18px}
-.inv-table th{text-align:left;font:800 .64rem var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--mut);padding:0 8px 8px;border-bottom:2px solid var(--line)}
-.inv-table td{padding:10px 8px;font:600 .84rem var(--body);border-bottom:1px solid var(--line);vertical-align:middle}
-.inv-table th:not(:first-child),.inv-table td:not(:first-child){text-align:right}
-.inv-total-row td{border-bottom:none;padding-top:14px}
-.inv-total-row.grand td{border-top:2px solid var(--navy);padding-top:12px;font:800 .92rem var(--body);color:var(--navy)}
-.inv-status{margin:4px 0 18px;text-align:center}
-.inv-status .pill{font-size:.76rem;padding:8px 20px;border-radius:999px}
-.inv-foot{display:flex;justify-content:space-between;margin-top:30px;gap:20px}
-.inv-foot>div{flex:1;text-align:center}
-.inv-foot p{font:600 .82rem var(--body);color:var(--mut);margin-bottom:50px}
-.inv-line{border-top:1.5px solid var(--ink);width:80%;margin:0 auto}
-@media(max-width:520px){.inv-meta{grid-template-columns:1fr}}
 
 /* =========================================================
    JUARA ADMIN — VISUAL REDESIGN
@@ -3101,7 +3069,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
         <div style="min-width:0"><h3 id="finNama" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">-</h3><p id="finKode">-</p></div>
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
-        <button class="btn b-pri sm" id="btnOpenInvoice"><svg class="ico-inv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12a1 1 0 0 1 1 1v18l-2.5-1.5L14 21l-2.5-1.5L9 21l-2.5-1.5L4 21V3a1 1 0 0 1 1-1Z"/><path d="M8 7h8M8 11h8M8 15h5"/></svg> Lihat Invoice</button>
         <button class="x" id="btnCloseFinance">✕</button>
       </div>
     </div>
@@ -3150,66 +3117,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   </div>
 </div>
 
-<!-- ============ MODAL INVOICE PESERTA ============ -->
-<div class="modal" id="invoiceModal">
-  <div class="box">
-    <div class="box-h">
-      <div style="min-width:0"><h3><svg class="ico-inv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12a1 1 0 0 1 1 1v18l-2.5-1.5L14 21l-2.5-1.5L9 21l-2.5-1.5L4 21V3a1 1 0 0 1 1-1Z"/><path d="M8 7h8M8 11h8M8 15h5"/></svg> Invoice Peserta</h3><p id="invSubtitle">Rincian tagihan &amp; pembayaran</p></div>
-      <button class="x" id="btnCloseInvoice">✕</button>
-    </div>
-    <div class="box-body">
-      <div id="invoiceArea"></div>
-      <div class="toolbar" style="margin-top:18px;gap:10px;flex-wrap:wrap">
-        <button class="btn b-navy sm" id="btnPrintInvoice" style="flex:1;justify-content:center;min-width:150px">🖨️ Cetak / Simpan PDF</button>
-        <a class="btn b-pri sm" id="btnShareInvoiceWA" href="#" target="_blank" rel="noopener" style="flex:1;justify-content:center;min-width:150px">📲 Kirim ke WhatsApp</a>
-        <button class="btn b-navy sm" id="btnOpenInvoiceEmail" style="flex:1;justify-content:center;min-width:150px">✉️ Kirim ke Email</button>
-      </div>
-      <p style="margin-top:8px;font:600 .74rem var(--body);color:var(--mut)">Tips: tahan <b>Ctrl</b> (Windows) / <b>Cmd</b> (Mac) saat klik "Kirim ke WhatsApp" supaya tab terbuka di background tanpa berpindah halaman.</p>
-      <p id="invWaWarn" style="display:none;margin-top:10px;font:600 .78rem var(--body);color:var(--red)">Nomor WhatsApp peserta belum terdaftar. Lengkapi data telepon peserta terlebih dahulu.</p>
-    </div>
-  </div>
-</div>
-
-<!-- ============ MODAL KIRIM INVOICE VIA EMAIL ============ -->
-<div class="modal" id="invoiceEmailModal">
-  <div class="box" style="max-width:480px">
-    <div class="box-h">
-      <div style="min-width:0"><h3>✉️ Kirim Invoice via Email</h3><p id="ivEmFor">-</p></div>
-      <button class="x" id="btnCloseInvoiceEmail">✕</button>
-    </div>
-    <div class="box-body">
-      <div class="fld">
-        <label>Kirim Dari</label>
-        <select id="ivEmFrom"></select>
-      </div>
-      <div class="fld">
-        <label>Kirim Ke</label>
-        <input type="email" id="ivEmTo" placeholder="contoh@perusahaan.com" required>
-      </div>
-      <div class="fld">
-        <label>Subjek</label>
-        <input type="text" id="ivEmSubject">
-      </div>
-      <div class="fld">
-        <label>Pesan</label>
-        <textarea id="ivEmMessage" rows="10" style="width:100%;border:2px solid var(--line);border-radius:11px;padding:12px 14px;font:600 .82rem var(--body);color:var(--ink);resize:vertical"></textarea>
-      </div>
-      <div class="fld">
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="ivEmAttachPdf" checked style="width:16px;height:16px">
-          <span>Lampirkan juga sebagai PDF</span>
-        </label>
-      </div>
-      <button class="btn b-pri" id="btnInvoiceEmailSend" style="width:100%;justify-content:center">Kirim Sekarang</button>
-      <p class="err-txt" id="ivEmErr"></p>
-    </div>
-  </div>
-</div>
-
 <!-- Area khusus cetak kwitansi (tidak tampil di layar, hanya saat print) -->
 <div id="kwitansiArea"></div>
-<!-- Area khusus cetak invoice (tidak tampil di layar, hanya saat print) -->
-<div id="invoicePrintArea" style="position:fixed;left:-9999px;top:0;width:560px"></div>
 
 <div id="toastWrap"></div>
 
