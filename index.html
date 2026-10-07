@@ -3161,20 +3161,6 @@ async function checkPelatihanAutoAdvance(pid){
   const nama=PARTICIPANTS.find(p=>p.id===pid)?.nama||'Peserta';
   toast(`${nama}: sertifikat lengkap & pelatihan selesai — tahap otomatis naik ke "Penempatan & Perusahaan" ✓`,'ok');
 }
-/* Memperbaiki tahap peserta lama yang sertifikat dan pelatihannya sudah lengkap,
-   tetapi tahapnya masih tertinggal di 2. Tidak menampilkan toast per-peserta. */
-async function sweepPelatihanStage(){
-  const ready=PARTICIPANTS.map(p=>p.id).filter(pid=>{
-    if((STAGE_BY_PID[pid]??0)!==2)return false;
-    return !!(DOCS_BY_PID[pid]?.sertifikat?.storage_path)&&!!PELATIHAN_SELESAI_BY_PID[pid];
-  });
-  if(!ready.length)return;
-  const rows=ready.map(pid=>({participant_id:pid,tahap:3,pelatihan_selesai:true,updated_at:new Date().toISOString()}));
-  const {error}=await sb.from('progress_v2').upsert(rows,{onConflict:'participant_id'});
-  if(error){console.error('Gagal menyisir tahap pelatihan:',error);return;}
-  ready.forEach(pid=>{ STAGE_BY_PID[pid]=3; });
-  renderTable(); renderStats(); renderAllStageSections();
-}
 let PENDING_SERTIFIKAT_PID=null;
 $('#sertifikatFileInput')?.addEventListener('change', async e=>{
   const file=e.target.files?.[0]; e.target.value='';
@@ -4869,51 +4855,6 @@ async function maybeAdvanceStage(pid){
   renderTable(); renderStats(); renderAllStageSections();
   toast('Semua dokumen terverifikasi — tahap otomatis naik ke "Pelatihan & Pembekalan" ✓','ok');
 }
-/* Menyisir peserta LAMA yang berkasnya sudah lengkap terverifikasi dari
-   sebelumnya (mis. sebelum fitur auto-advance ini
-   ada, atau sebelum perbaikan target tahapnya) tapi tahapnya masih nyangkut
-   di 0/1, lalu menaikkannya juga. Juga menurunkan kembali peserta yang
-   sebelumnya kepalang naik ke tahap 2 hanya gara-gara dokumen kolektif
-   (belum ada berkas asli) sempat ikut dihitung "selesai" — begitu ditemukan
-   masih ada dokumen wajib yang belum benar-benar terverifikasi, tahapnya
-   dikembalikan ke 1 (Verifikasi Dokumen). Peserta yang sudah digeser manual
-   ke tahap 3+ oleh admin tidak disentuh sama sekali oleh koreksi ini.
-   Tidak menampilkan toast per-peserta supaya tidak berisik saat halaman
-   dibuka. */
-async function sweepStaleStages(){
-  const stuckPids=PARTICIPANTS
-    .map(p=>p.id)
-    .filter(pid=>(STAGE_BY_PID[pid]??0)<2)
-    .filter(pid=>{
-      const docs=DOCS_BY_PID[pid]||{};
-      return DOCS.filter(d=>d.req).every(d=>isDocFullyVerified(docs[d.k]));
-    });
-  const overAdvancedPids=PARTICIPANTS
-    .map(p=>p.id)
-    .filter(pid=>(STAGE_BY_PID[pid]??0)===2)
-    .filter(pid=>{
-      const docs=DOCS_BY_PID[pid]||{};
-      return !DOCS.filter(d=>d.req).every(d=>isDocFullyVerified(docs[d.k]));
-    });
-  if(stuckPids.length){
-    const rows=stuckPids.map(pid=>({participant_id:pid,tahap:2,updated_at:new Date().toISOString()}));
-    const {error}=await sb.from('progress_v2').upsert(rows,{onConflict:'participant_id'});
-    if(error){console.error('Gagal menyisir tahap lama:',error);}
-    else stuckPids.forEach(pid=>{ STAGE_BY_PID[pid]=2; });
-  }
-  if(overAdvancedPids.length){
-    const rows=overAdvancedPids.map(pid=>({participant_id:pid,tahap:1,updated_at:new Date().toISOString()}));
-    const {error}=await sb.from('progress_v2').upsert(rows,{onConflict:'participant_id'});
-    if(error){console.error('Gagal mengoreksi tahap yang kepalang naik:',error);}
-    else overAdvancedPids.forEach(pid=>{ STAGE_BY_PID[pid]=1; });
-  }
-  if(!stuckPids.length&&!overAdvancedPids.length)return;
-  if(ACTIVE_PID&&(stuckPids.includes(ACTIVE_PID)||overAdvancedPids.includes(ACTIVE_PID))){
-    $('#eStage').value=String(STAGE_BY_PID[ACTIVE_PID]??0); ensureCsel($('#eStage'));
-  }
-  renderTable(); renderStats(); renderAllStageSections();
-}
-
 $('#btnSaveInfo').addEventListener('click', async ()=>{
   if(!ACTIVE_PID)return;
   const payload={
