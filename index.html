@@ -1457,26 +1457,6 @@ td.nama span{color:var(--mut);font-size:.78rem}
   #secKeuangan .status-cell .pill{width:150px;min-width:150px}
 }
 
-/* ============ KWITANSI CETAK ============ */
-#kwitansiArea{position:fixed;left:-9999px;top:0;width:560px}
-.kw-box{background:#fff;padding:30px;font-family:var(--body);color:var(--ink)}
-.kw-head{display:flex;align-items:flex-start;justify-content:space-between;border-bottom:3px solid var(--gold);padding-bottom:14px;margin-bottom:18px}
-.kw-head b{font:800 1.1rem var(--disp);color:var(--navy);display:block}
-.kw-head span{font:600 .8rem var(--body);color:var(--mut)}
-.kw-no{font:700 .82rem var(--mono);color:var(--navy)}
-.kw-table{width:100%;border-collapse:collapse;margin-bottom:26px}
-.kw-table td{padding:7px 0;font:600 .9rem var(--body);vertical-align:top}
-.kw-table td:first-child{width:150px;color:var(--mut)}
-.kw-sign{display:flex;justify-content:space-between;margin-top:34px;gap:20px}
-.kw-sign>div{flex:1;text-align:center}
-.kw-sign p{font:600 .82rem var(--body);color:var(--mut);margin-bottom:50px}
-.kw-line{border-top:1.5px solid var(--ink);width:80%;margin:0 auto}
-@media print{
-  body *{visibility:hidden}
-  #kwitansiArea,#kwitansiArea *{visibility:visible}
-  #kwitansiArea{position:absolute;left:0;top:0;width:100%}
-}
-
 /* ============ RIWAYAT PEMBAYARAN ============ */
 .ico-finance{width:16px;height:16px;flex-shrink:0;vertical-align:-3px}
 
@@ -3117,9 +3097,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   </div>
 </div>
 
-<!-- Area khusus cetak kwitansi (tidak tampil di layar, hanya saat print) -->
-<div id="kwitansiArea"></div>
-
 <div id="toastWrap"></div>
 
 <!-- ============ MODAL KONFIRMASI (pengganti confirm() bawaan browser) ============ -->
@@ -4690,7 +4667,6 @@ async function deleteBillCategory(catId){
 }
 $('#btnAddBillCat')?.addEventListener('click', addBillCategory);
 
-const FP_ICO_KWITANSI='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/><path d="M9 13h6"/><path d="M9 17h6"/></svg>';
 function renderFinPaymentList(){
   const body=$('#finPaymentBody'); if(!body)return;
   const pid=FIN_ACTIVE_PID;
@@ -4709,12 +4685,10 @@ function renderFinPaymentList(){
         <span>${tgl} &middot; ${escapeHtml(metodeInfo)}</span>
       </div>
       <div class="fp-hist-actions">
-        <button class="mini mini-ico" data-print="${pm.id}" title="Kwitansi" aria-label="Kwitansi">${FP_ICO_KWITANSI}</button>
         <button class="mini mini-ico r" data-del-pay="${pm.id}" title="Hapus" aria-label="Hapus">${CAT_ICO_DEL}</button>
       </div>
     </div>`;
   }).join('');
-  body.querySelectorAll('[data-print]').forEach(b=>b.addEventListener('click',()=>printKwitansi(b.dataset.print)));
   body.querySelectorAll('[data-del-pay]').forEach(b=>b.addEventListener('click',()=>deletePayment(b.dataset.delPay)));
 }
 $('#btnSavePayment')?.addEventListener('click', async ()=>{
@@ -4747,34 +4721,6 @@ async function deletePayment(payId){
   renderFinBillList(); renderFinPaymentList(); renderFinanceTable();
   updateCicilanAuto();
   toast('Pembayaran dihapus','ok');
-}
-
-/* ---- Cetak kwitansi ---- */
-function printKwitansi(payId){
-  const pm=FIN_PAYMENTS.find(x=>x.id===payId); if(!pm)return;
-  const p=PARTICIPANTS.find(x=>x.id===pm.participant_id);
-  const cat=FIN_CATS.find(c=>c.id===pm.category_id);
-  const tglStr=pm.tanggal?new Date(pm.tanggal).toLocaleDateString('id-ID',{day:'2-digit',month:'long',year:'numeric'}):'-';
-  $('#kwitansiArea').innerHTML=`
-    <div class="kw-box">
-      <div class="kw-head">
-        <div><b>PT. JUARA</b><span>Kwitansi Pembayaran</span></div>
-        <div class="kw-no">No: ${escapeHtml(pm.no_kwitansi||pm.id.slice(0,8).toUpperCase())}</div>
-      </div>
-      <table class="kw-table">
-        <tr><td>Sudah terima dari</td><td>: <b>${escapeHtml(p?.nama||'-')}</b> (${escapeHtml(p?participantCode(p):'-')})</td></tr>
-        <tr><td>Untuk pembayaran</td><td>: ${escapeHtml(cat?.nama||'-')}</td></tr>
-        <tr><td>Jumlah</td><td>: <b>${formatRupiah(pm.jumlah)}</b></td></tr>
-        <tr><td>Metode</td><td>: ${escapeHtml(pm.metode||'-')}</td></tr>
-        <tr><td>Tanggal</td><td>: ${tglStr}</td></tr>
-        ${pm.catatan?`<tr><td>Catatan</td><td>: ${escapeHtml(pm.catatan)}</td></tr>`:''}
-      </table>
-      <div class="kw-sign">
-        <div><p>Yang Membayar</p><div class="kw-line"></div></div>
-        <div><p>Yang Menerima</p><div class="kw-line"></div></div>
-      </div>
-    </div>`;
-  window.print();
 }
 
 /* Menu Aksi (mobile) — tombol titik-tiga di kartu peserta yang membuka
