@@ -5,12 +5,14 @@
 // body: { action: 'list',    account_id, folder?, page?, page_size?, query? }
 // body: { action: 'read',    account_id, folder?, uid }
 // body: { action: 'unseen',  account_id, folder? }
+// body: { action: 'delete',  account_id, folder?, uid }
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { ImapFlow } from 'npm:imapflow@1.0.98';
 import { simpleParser } from 'npm:mailparser@3.7.1';
 import { Buffer } from 'node:buffer';
 import { requireAdmin } from '../_shared/auth.ts';
+import { findTrashMailbox, isTrashMailbox, type MailboxInfo } from './mailbox.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -353,9 +355,19 @@ Deno.serve(async (req: Request) => {
       const folder = body.folder || 'INBOX';
       const uid = body.uid;
       if (!uid) return jsonResponse({ error: 'uid wajib diisi.' }, 400);
+      const mailboxes = await client.list();
+      const sourceMailbox = mailboxes.find((mailbox: MailboxInfo) => mailbox.path === folder) ?? { path: folder };
+      const trashMailbox = findTrashMailbox(mailboxes);
       const lock = await client.getMailboxLock(folder);
       try {
-        await client.messageDelete(String(uid), { uid: true });
+        if (isTrashMailbox(sourceMailbox)) {
+          await client.messageDelete(String(uid), { uid: true });
+        } else {
+          if (!trashMailbox) {
+            throw new Error('Folder Sampah tidak ditemukan di server email; email tidak dihapus.');
+          }
+          await client.messageMove(String(uid), trashMailbox.path, { uid: true });
+        }
       } finally {
         lock.release();
       }

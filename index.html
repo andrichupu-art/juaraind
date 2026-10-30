@@ -2287,7 +2287,7 @@ function updateBulkDeleteBtn(){
 async function deleteSelectedMail(){
   const uids=[...MAIL_SELECTED];
   if(!uids.length)return;
-  if(!await customConfirm(`Hapus ${uids.length} email terpilih? Tindakan ini tidak bisa dibatalkan.`))return;
+  if(!await customConfirm(`Pindahkan ${uids.length} email terpilih ke Sampah? Email yang sudah berada di Sampah akan dihapus permanen.`))return;
   const btn=$('#btnMailBulkDelete'); if(btn)btn.disabled=true;
   let failCount=0;
   for(const uid of uids){
@@ -2500,7 +2500,7 @@ async function downloadAllMailAttachments(attachments, subject){
 }
 
 async function deleteMailMessage(uid){
-  if(!await customConfirm('Hapus email ini? Tindakan ini tidak bisa dibatalkan.'))return;
+  if(!await customConfirm('Pindahkan email ini ke Sampah? Email yang sudah berada di Sampah akan dihapus permanen.'))return;
   const btn=$('#btnMailDelete'); if(btn){ btn.disabled=true; btn.textContent='Menghapus…'; }
   try{
     await invokeMailImap({action:'delete',account_id:MAIL_ACTIVE,folder:MAIL_FOLDER,uid});
