@@ -1681,6 +1681,7 @@ syncAppViewport();
 /* ============ AUTH ============ */
 let MAIL_LOADED=false, MAIL_ACCOUNTS=[], MAIL_ACTIVE=null, MAIL_MSGS=[], MAIL_OPEN=null, MAIL_FOLDER='INBOX', MAIL_SELECTED=new Set(), MAIL_FOLDERS=[];
 let MAIL_PAGE=1, MAIL_TOTAL_PAGES=1; const MAIL_PAGE_SIZE=10;
+let MAIL_INBOX_TOTAL=null, MAIL_INBOX_PROBE_COUNT=0;
 let MAIL_FOLDER_REQUEST_ID=0, MAIL_LIST_REQUEST_ID=0, MAIL_READ_REQUEST_ID=0;
 let MAIL_WATCH_UNSEEN=new Map(), MAIL_WATCH_BASELINE=new Map(), MAIL_WATCH_TIMER=null, MAIL_WATCH_BASELINED=false;
 let MAIL_WATCH_CHECKING=false;
@@ -1799,6 +1800,7 @@ async function loadMailAccounts(){
 
   if(MAIL_ACCOUNTS.length){
     MAIL_ACTIVE=MAIL_ACCOUNTS[0].id;
+    MAIL_INBOX_TOTAL=null; MAIL_INBOX_PROBE_COUNT=0;
     $('#mailAcc').value=MAIL_ACTIVE; ensureCsel($('#mailAcc'));
     // FIX: folder dan daftar email dijalankan paralel (bukan berurutan) supaya
     // total waktu tunggu tidak dobel; di-await di sini supaya pemanggil (mis.
@@ -1977,6 +1979,7 @@ async function refreshMailListSilently(){
     const data=await invokeMailImap({action:'list',account_id:accountId,folder,page:1,page_size:MAIL_PAGE_SIZE});
     if(document.hidden || accountId!==MAIL_ACTIVE || folder!==MAIL_FOLDER || listRequestId!==MAIL_LIST_REQUEST_ID)return;
     const newMsgs=data?.messages||[];
+    if(typeof data?.total==='number') MAIL_INBOX_TOTAL=data.total;
     const changed=newMsgs.length!==MAIL_MSGS.length||
       newMsgs.some((m,i)=>!MAIL_MSGS[i]||MAIL_MSGS[i].uid!==m.uid||MAIL_MSGS[i].seen!==m.seen);
     MAIL_TOTAL_PAGES=Math.max(1,Number(data?.total_pages)||1);
@@ -1992,9 +1995,8 @@ async function refreshMailListSilently(){
   }catch(err){ console.warn('Refresh Kotak Masuk gagal:',err.message); }
 }
 
-// Probe ringan untuk menangkap email baru meskipun server tidak mengubah
-// jumlah unread. Hanya satu email terbaru yang diperiksa; daftar lengkap
-// dimuat ulang jika UID teratas berubah.
+// Probe berkala sebagai jaring pengaman jika jumlah email tidak berubah,
+// misalnya ada email baru bersamaan dengan penghapusan email lama.
 async function probeLatestInbox(){
   const accountId=MAIL_ACTIVE;
   const folder=MAIL_FOLDER;
@@ -2022,10 +2024,15 @@ async function checkMailNotifications(){
   MAIL_WATCH_CHECKING=true;
   try{
     const isFirstRun=!MAIL_WATCH_BASELINED;
+    let inboxTotalChanged=false;
     await Promise.all(MAIL_ACCOUNTS.map(async a=>{
       try{
         const data=await invokeMailImap({action:'unseen',account_id:a.id,folder:'INBOX'});
         const unseen=data?.unseen||0;
+        if(a.id===MAIL_ACTIVE && MAIL_FOLDER==='INBOX' && MAIL_PAGE===1 && !$('#mailSearch')?.value.trim() &&
+          typeof data?.total==='number' && MAIL_INBOX_TOTAL!==null && data.total!==MAIL_INBOX_TOTAL){
+          inboxTotalChanged=true;
+        }
         const prev=MAIL_WATCH_BASELINE.has(a.id)?MAIL_WATCH_BASELINE.get(a.id):unseen;
         MAIL_WATCH_UNSEEN.set(a.id,unseen);
         MAIL_WATCH_BASELINE.set(a.id,unseen);
@@ -2043,7 +2050,15 @@ async function checkMailNotifications(){
       }
     }));
     MAIL_WATCH_BASELINED=true;
-    if(!isFirstRun) await probeLatestInbox();
+    if(!isFirstRun && MAIL_ACTIVE && MAIL_FOLDER==='INBOX' && MAIL_PAGE===1 && !$('#mailSearch')?.value.trim()){
+      if(inboxTotalChanged){
+        MAIL_INBOX_PROBE_COUNT=0;
+        await refreshMailListSilently();
+      }else if(++MAIL_INBOX_PROBE_COUNT>=10){
+        MAIL_INBOX_PROBE_COUNT=0;
+        await probeLatestInbox();
+      }
+    }
     renderMailAccList();
     updateMailAccDropdownBadges();
   }finally{
@@ -2186,6 +2201,7 @@ async function loadMailList(accountId=MAIL_ACTIVE, folder=MAIL_FOLDER, page=MAIL
     const data=await invokeMailImap({action:'list',account_id:accountId,folder,page:MAIL_PAGE,page_size:MAIL_PAGE_SIZE,query});
     if(requestId!==MAIL_LIST_REQUEST_ID || accountId!==MAIL_ACTIVE || folder!==MAIL_FOLDER)return;
     MAIL_MSGS=data?.messages||[];
+    if(folder==='INBOX' && page===1 && !query && typeof data?.total==='number') MAIL_INBOX_TOTAL=data.total;
     MAIL_PAGE=Math.max(1,Number(data?.page)||1);
     MAIL_TOTAL_PAGES=Math.max(1,Number(data?.total_pages)||1);
     renderMailList();
@@ -2544,6 +2560,7 @@ async function sendMailReply(msg){
 
 $('#mailAcc').addEventListener('change', ()=>{
   MAIL_ACTIVE=$('#mailAcc').value; MAIL_FOLDER='INBOX'; MAIL_OPEN=null;
+  MAIL_INBOX_TOTAL=null; MAIL_INBOX_PROBE_COUNT=0;
   clearTimeout(MAIL_SEARCH_TIMER);
   MAIL_PAGE=1;
   const accountId=MAIL_ACTIVE;
