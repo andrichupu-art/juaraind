@@ -2531,7 +2531,8 @@ async function sendMailReply(msg){
     }});
     if(error)throw new Error(error.message||'Gagal mengirim balasan');
     if(data?.error)throw new Error(data.error);
-    toast('Balasan terkirim ✓','ok');
+    if(data?.sent_saved===false) toast('Balasan terkirim, tetapi gagal disimpan di Terkirim: '+(data.sent_error||'alasan tidak diketahui'),'err');
+    else toast('Balasan terkirim ✓','ok');
     $('#mailReplyBox').value='';
   }catch(err){
     console.error(err);
@@ -2660,7 +2661,8 @@ $('#btnMailSend').addEventListener('click', async ()=>{
     const {data,error}=await sb.functions.invoke('email-send',{body});
     if(error)throw new Error(error.message||'Gagal mengirim');
     if(data?.error)throw new Error(data.error);
-    toast('Email terkirim ✓','ok');
+    if(data?.sent_saved===false) toast('Email terkirim, tetapi gagal disimpan di Terkirim: '+(data.sent_error||'alasan tidak diketahui'),'err');
+    else toast('Email terkirim ✓','ok');
     MC_ATTACHMENTS=[]; renderMcAttachments();
     if(isSentFolder()) await loadMailList();
     $('#mailComposeModal').classList.remove('show');

@@ -8,6 +8,7 @@ import nodemailer from 'npm:nodemailer@6.9.14';
 import { ImapFlow } from 'npm:imapflow@1.0.98';
 import { Buffer } from 'node:buffer';
 import { requireAdmin } from '../_shared/auth.ts';
+import { findSentMailbox, type MailboxInfo } from '../_shared/mailbox.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -84,7 +85,7 @@ async function buildRawMessage(mail: Record<string, unknown>): Promise<Buffer> {
 async function appendToSent(
   acc: { email: string; password: string; imap_host: string; imap_port: number },
   rawMessage: Buffer
-): Promise<void> {
+): Promise<string> {
   const client = new ImapFlow({
     host: acc.imap_host || 'toscana.id.rapidplex.com',
     port: acc.imap_port || 993,
@@ -97,14 +98,13 @@ async function appendToSent(
   });
   await client.connect();
   try {
-    const list: Array<{ specialUse?: string; path: string; name?: string }> = await client.list();
-    const sentFolder =
-      list.find((f) => f.specialUse === '\\Sent') ??
-      list.find((f) => /^sent/i.test(f.path)) ??
-      list.find((f) => /sent/i.test(f.name || ''));
-    const folder = sentFolder?.path || 'Sent';
+    const list: MailboxInfo[] = await client.list();
+    const sentFolder = findSentMailbox(list);
+    if (!sentFolder) throw new Error('Folder Terkirim tidak ditemukan di server IMAP.');
+    const folder = sentFolder.path;
     console.log('append ke folder:', folder);
     await client.append(folder, rawMessage, ['\\Seen'], new Date());
+    return folder;
   } finally {
     try { client.logout(); } catch { /* noop */ }
   }
@@ -161,19 +161,27 @@ Deno.serve(async (req: Request) => {
     // Kirim via SMTP
     const info = await transporter.sendMail(mail);
 
-    // Append ke folder Sent — non-fatal
+    let sentFolder: string | null = null;
+    let sentError: string | null = null;
     try {
       const rawMessage = await buildRawMessage(mail);
-      await appendToSent(
+      sentFolder = await appendToSent(
         { email: acc.email, password, imap_host: acc.imap_host, imap_port: acc.imap_port },
         rawMessage
       );
-      console.log('append ke Sent berhasil');
+      console.log('append ke Terkirim berhasil:', sentFolder);
     } catch (appendErr) {
       console.error('append ke Sent gagal (non-fatal):', appendErr);
+      sentError = appendErr instanceof Error ? appendErr.message : String(appendErr);
     }
 
-    return jsonResponse({ ok: true, messageId: info.messageId });
+    return jsonResponse({
+      ok: true,
+      messageId: info.messageId,
+      sent_saved: sentFolder !== null,
+      ...(sentFolder ? { sent_folder: sentFolder } : {}),
+      ...(sentError ? { sent_error: sentError } : {}),
+    });
   } catch (err) {
     console.error(err);
     return jsonResponse({ error: (err as Error).message || 'Terjadi kesalahan.' }, 500);

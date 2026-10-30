@@ -12,7 +12,7 @@ import { ImapFlow } from 'npm:imapflow@1.0.98';
 import { simpleParser } from 'npm:mailparser@3.7.1';
 import { Buffer } from 'node:buffer';
 import { requireAdmin } from '../_shared/auth.ts';
-import { findTrashMailbox, isTrashMailbox, type MailboxInfo } from './mailbox.ts';
+import { findTrashMailbox, isTrashMailbox, type MailboxInfo } from '../_shared/mailbox.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
