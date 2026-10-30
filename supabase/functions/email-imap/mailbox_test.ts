@@ -1,4 +1,4 @@
-import { findSentMailbox, findTrashMailbox, isTrashMailbox } from '../_shared/mailbox.ts';
+import { findSentMailbox, findTrashMailbox, isSentMailbox, isTrashMailbox } from '../_shared/mailbox.ts';
 
 Deno.test('finds the selectable mailbox marked with the IMAP Trash special-use attribute', () => {
   const trash = { path: 'INBOX.Deleted', name: 'Deleted', specialUse: '\\Trash' };
@@ -49,4 +49,10 @@ Deno.test('recognizes the Indonesian Terkirim mailbox when special-use attribute
   ]);
 
   if (result?.path !== 'INBOX.Terkirim') throw new Error('Expected the Terkirim mailbox.');
+});
+
+Deno.test('does not classify a non-selectable Sent mailbox as Terkirim', () => {
+  if (isSentMailbox({ path: 'Sent', flags: new Set(['\\Noselect']) })) {
+    throw new Error('A non-selectable mailbox must not be used as Terkirim.');
+  }
 });

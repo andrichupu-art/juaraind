@@ -40,9 +40,11 @@ export function findTrashMailbox(mailboxes: readonly MailboxInfo[]): MailboxInfo
 }
 
 export function findSentMailbox(mailboxes: readonly MailboxInfo[]): MailboxInfo | undefined {
-  return mailboxes.find((mailbox) =>
-    !mailbox.flags?.has('\\Noselect') && mailbox.specialUse === '\\Sent'
-  ) ?? mailboxes.find((mailbox) =>
-    !mailbox.flags?.has('\\Noselect') && mailboxHasName(mailbox, SENT_NAMES)
+  return mailboxes.find((mailbox) => isSentMailbox(mailbox));
+}
+
+export function isSentMailbox(mailbox: MailboxInfo): boolean {
+  return !mailbox.flags?.has('\\Noselect') && (
+    mailbox.specialUse === '\\Sent' || mailboxHasName(mailbox, SENT_NAMES)
   );
 }

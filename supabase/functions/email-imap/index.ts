@@ -12,7 +12,7 @@ import { ImapFlow } from 'npm:imapflow@1.0.98';
 import { simpleParser } from 'npm:mailparser@3.7.1';
 import { Buffer } from 'node:buffer';
 import { requireAdmin } from '../_shared/auth.ts';
-import { findTrashMailbox, isTrashMailbox, type MailboxInfo } from '../_shared/mailbox.ts';
+import { findTrashMailbox, isSentMailbox, isTrashMailbox, type MailboxInfo } from '../_shared/mailbox.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -120,7 +120,7 @@ type ParsedAttachment = {
 
 function specialUseLabel(mbox: { path: string; name?: string; specialUse?: string }) {
   const use = mbox.specialUse;
-  if (use === '\\Sent') return 'Terkirim';
+  if (isSentMailbox(mbox)) return 'Terkirim';
   if (use === '\\Trash') return 'Sampah';
   if (use === '\\Drafts') return 'Draf';
   if (use === '\\Junk') return 'Spam';
