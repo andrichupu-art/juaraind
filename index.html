@@ -1117,7 +1117,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   background:var(--mail-read-bg)!important;
 }
 .mail-read-hd{
-  padding:20px 26px 15px;
+  padding:16px 22px 12px;
   border-bottom:1px solid var(--mail-border);
   background:#fff;
 }
@@ -1138,9 +1138,25 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 }
 .mail-read-body{
   flex:1;overflow:hidden;
-  padding:16px 26px;background:#fff;
+  padding:12px 22px;background:#fff;
 }
-.mail-read-body iframe{width:100%;height:100%;border:none;display:block;min-height:280px}
+.mail-read-body iframe{width:100%;height:100%;border:none;display:block;min-height:320px}
+.mail-attach-list{
+  display:flex;flex-wrap:wrap;align-items:center;gap:6px;
+  max-height:78px;overflow-y:auto;margin-top:10px;
+}
+.mail-attach-actions{display:flex;justify-content:flex-end;flex:1 0 100%}
+.mail-attachment{
+  display:flex;align-items:center;gap:7px;min-width:0;max-width:320px;
+  padding:6px 8px;border:1px solid var(--mail-border);border-radius:8px;
+  background:#F7F9FB;box-sizing:border-box;
+}
+.mail-attachment-name{
+  flex:1;min-width:0;font:600 .76rem var(--body);color:var(--ink);
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.mail-attachment-size{font:600 .68rem var(--body);color:var(--mut);flex-shrink:0}
+.mail-attachment-unavailable{font:600 .68rem var(--body);color:var(--mut);flex-shrink:0}
 
 /* Reply area */
 .mail-reply{
@@ -2156,6 +2172,46 @@ async function invokeMailImap(body){
   }
 }
 
+async function invokeMailImapBinary(body){
+  const call=async()=>{
+    const {data,error}=await sb.auth.getSession();
+    if(error)throw error;
+    if(!data.session?.access_token){
+      const authError=new Error('Sesi login berakhir. Silakan masuk kembali.');
+      authError.status=401;
+      throw authError;
+    }
+    const response=await fetch(`${SUPABASE_URL}/functions/v1/email-imap`,{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'apikey':SUPABASE_KEY,
+        'Authorization':`Bearer ${data.session.access_token}`
+      },
+      body:JSON.stringify(body)
+    });
+    if(!response.ok){
+      const responseText=await response.text();
+      let message=responseText||response.statusText||'Gagal memanggil layanan email';
+      try{
+        const payload=JSON.parse(responseText);
+        if(typeof payload?.error==='string')message=payload.error;
+      }catch{}
+      const requestError=new Error(message);
+      requestError.status=response.status;
+      throw requestError;
+    }
+    return response.blob();
+  };
+  try{
+    return await call();
+  }catch(err){
+    if(err?.status===546 || (err?.status>=400 && err.status<500))throw err;
+    console.warn('Unduhan lampiran gagal, mencoba ulang sekali:',err.message);
+    return await call();
+  }
+}
+
 async function loadMailFolders(accountId=MAIL_ACTIVE){
   const requestId=++MAIL_FOLDER_REQUEST_ID;
   let folders=[{path:'INBOX',name:'Kotak Masuk'}];
@@ -2348,16 +2404,16 @@ async function openMailMessage(uid){
         <div class="mail-read-meta"><span class="mi-avatar">${escapeHtml(mailInitial(sentFolder?msg.to:msg.from))}</span><span><b>${escapeHtml((sentFolder?msg.to:msg.from)||'-')}</b> · ${fmtMailDate(msg.date)}</span></div>
         ${sentFolder && msg.from ? `<div style="font:600 .78rem var(--body);color:var(--mut);margin-top:2px">Dari: ${escapeHtml(msg.from)}</div>` : ''}
         ${attachments.length ? `
-        <div class="mail-attach-list" id="mailReadAttachList" style="display:flex;flex-direction:column;gap:6px;margin-top:12px">
+        <div class="mail-attach-list" id="mailReadAttachList">
           ${downloadableAttachments.length>1 ? `
-          <div style="display:flex;justify-content:flex-end;margin-bottom:2px">
+          <div class="mail-attach-actions">
             <button type="button" class="btn b-ghost sm" id="btnMailAttachAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> Unduh Semua (${downloadableAttachments.length})</button>
           </div>` : ''}
           ${attachments.map((att,i)=>`
-            <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#F7F9FB">
-              <span style="flex:1;min-width:0;font:600 .8rem var(--body);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">📎 ${escapeHtml(att.filename||'lampiran')}</span>
-              <span style="font:600 .72rem var(--body);color:var(--mut);flex-shrink:0">${mcFormatSize(att.size||0)}</span>
-              ${canDownload(att) ? `<button type="button" class="icon-plain-btn" data-mail-att-download="${i}" title="Unduh lampiran"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg></button>` : '<span style="font:600 .7rem var(--body);color:var(--mut)">Lampiran di atas 1 MB</span>'}
+            <div class="mail-attachment">
+              <span class="mail-attachment-name" title="${escapeHtml(att.filename||'lampiran')}">📎 ${escapeHtml(att.filename||'lampiran')}</span>
+              <span class="mail-attachment-size">${att.size ? mcFormatSize(att.size) : 'Ukuran tidak diketahui'}</span>
+              ${canDownload(att) ? `<button type="button" class="icon-plain-btn" data-mail-att-download="${i}" title="Unduh lampiran"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg></button>` : `<span class="mail-attachment-unavailable">${att.size ? 'Melebihi batas 25 MB' : 'Ukuran tidak diketahui'}</span>`}
             </div>`).join('')}
         </div>` : ''}
       </div>
@@ -2381,7 +2437,8 @@ async function openMailMessage(uid){
     $('#mailReadBody').appendChild(ifr);
     const baseTag='<base target="_blank" rel="noopener noreferrer">';
     const imgLimitStyle=`<style>
-body{margin:0;padding:8px;font-family:sans-serif}
+body{margin:0;padding:14px;font-family:Arial,sans-serif;font-size:16px!important;line-height:1.6!important;color:#263238}
+body :is(p,div,td,th,li,span,a){font-size:max(14px,1em)!important;line-height:1.55!important}
 .mail-img-grid{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;align-items:flex-start}
 .mail-img-grid img{max-width:150px!important;max-height:130px!important;width:auto!important;height:auto!important;object-fit:contain!important;border-radius:6px!important;border:1px solid #dde3ed!important;background:#f5f6f8!important;display:block!important}
 img:not(.mail-img-grid img){max-width:150px!important;max-height:130px!important;width:auto!important;height:auto!important;object-fit:contain!important;border-radius:6px!important;border:1px solid #dde3ed!important;background:#f5f6f8!important}
@@ -2473,12 +2530,8 @@ img:not(.mail-img-grid img){max-width:150px!important;max-height:130px!important
   }
 }
 
-function saveMailAttachment(att){
+function saveMailAttachment(att, blob){
   try{
-    const bin=atob(att.content);
-    const bytes=new Uint8Array(bin.length);
-    for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
-    const blob=new Blob([bytes], {type: att.content_type||'application/octet-stream'});
     const url=URL.createObjectURL(blob);
     const a=document.createElement('a'); a.href=url; a.download=att.filename||'lampiran';
     document.body.appendChild(a); a.click(); a.remove();
@@ -2491,15 +2544,14 @@ function saveMailAttachment(att){
 
 async function downloadMailAttachment(att, context){
   try{
-    const data=await invokeMailImap({
+    const blob=await invokeMailImapBinary({
       action:'attachment',
       account_id:context.accountId,
       folder:context.folder,
       uid:context.uid,
       part:att.part
     });
-    if(!data?.attachment?.content)throw new Error('Isi lampiran tidak diterima dari server.');
-    saveMailAttachment(data.attachment);
+    saveMailAttachment(att, blob);
   }catch(err){
     console.error(err);
     toast('Gagal mengunduh lampiran: '+(err.message||'terjadi kesalahan'),'err');
@@ -2509,33 +2561,37 @@ async function downloadMailAttachment(att, context){
 async function downloadAllMailAttachments(attachments, subject, context){
   const downloadableAttachments=(attachments||[]).filter(att=>att.downloadable);
   if(!downloadableAttachments.length)return;
+  const maxZipBytes=50*1024*1024;
+  const totalBytes=downloadableAttachments.reduce((total,att)=>total+(Number(att.size)||0),0);
+  if(totalBytes>maxZipBytes){
+    toast('Total lampiran melebihi batas ZIP 50 MB. Unduh file satu per satu.','err');
+    return;
+  }
   const btn=$('#btnMailAttachAll');
   const orig=btn?btn.innerHTML:'';
   if(btn){ btn.disabled=true; btn.innerHTML='⏳ Menyiapkan ZIP…'; }
   try{
     const zip=new JSZip();
     let used=new Set();
+    let downloadedBytes=0;
     for(let i=0;i<downloadableAttachments.length;i++){
       const meta=downloadableAttachments[i];
       if(btn)btn.innerHTML=`⏳ Mengunduh lampiran ${i+1}/${downloadableAttachments.length}…`;
-      const data=await invokeMailImap({
+      const content=await invokeMailImapBinary({
         action:'attachment',
         account_id:context.accountId,
         folder:context.folder,
         uid:context.uid,
         part:meta.part
       });
-      const att=data?.attachment;
-      if(!att?.content)throw new Error(`Isi lampiran "${meta.filename||'lampiran'}" tidak diterima dari server.`);
-      const bin=atob(att.content);
-      const bytes=new Uint8Array(bin.length);
-      for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
-      let base=sanitizeName((att.filename||'lampiran').replace(/\.[^.]+$/,''));
-      const ext=(att.filename||'').includes('.')?att.filename.split('.').pop():'';
+      downloadedBytes+=content.size;
+      if(downloadedBytes>maxZipBytes)throw new Error('Total lampiran melebihi batas ZIP 50 MB. Unduh file satu per satu.');
+      let base=sanitizeName((meta.filename||'lampiran').replace(/\.[^.]+$/,''));
+      const ext=(meta.filename||'').includes('.')?meta.filename.split('.').pop():'';
       let fname=base+(ext?'.'+ext:'');
       let n=2; while(used.has(fname)){ fname=`${base}_${n}${ext?'.'+ext:''}`; n++; }
       used.add(fname);
-      zip.file(fname, bytes);
+      zip.file(fname, content);
     }
     const content=await zip.generateAsync({type:'blob'});
     const zipName=sanitizeName(subject||'lampiran-email')+'.zip';

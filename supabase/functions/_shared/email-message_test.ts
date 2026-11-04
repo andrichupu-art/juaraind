@@ -43,7 +43,10 @@ Deno.test('selects the HTML body and keeps attachment and inline-image parts sep
 
 Deno.test('limits attachment downloads per part and per message', () => {
   if (!isWithinAttachmentLimits(1024, 1024)) throw new Error('Small attachment should be downloadable.');
-  if (isWithinAttachmentLimits(1024 * 1024 + 1, 0)) throw new Error('Oversized attachment should be skipped.');
-  if (isWithinAttachmentLimits(1024, 3 * 1024 * 1024)) throw new Error('Total attachment limit should be enforced.');
+  if (isWithinAttachmentLimits(25 * 1024 * 1024 + 1, 0)) throw new Error('Oversized attachment should be skipped.');
+  if (!isWithinAttachmentLimits(25 * 1024 * 1024, 0)) throw new Error('Direct downloads should use the per-file limit.');
+  if (isWithinAttachmentLimits(1024, 3 * 1024 * 1024, 3 * 1024 * 1024)) {
+    throw new Error('The cumulative inline-image limit should be enforced.');
+  }
   if (isWithinAttachmentLimits(undefined, 0)) throw new Error('Unknown attachment sizes should not be downloaded.');
 });

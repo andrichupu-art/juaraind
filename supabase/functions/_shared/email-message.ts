@@ -1,5 +1,5 @@
 export const MAX_EMAIL_BODY_BYTES = 2 * 1024 * 1024;
-export const MAX_ATTACHMENT_BYTES = 1024 * 1024;
+export const MAX_ATTACHMENT_BYTES = 25 * 1024 * 1024;
 export const MAX_TOTAL_ATTACHMENT_BYTES = 3 * 1024 * 1024;
 
 export type MessageStructure = {
@@ -62,8 +62,12 @@ export function getMessageParts(structure: MessageStructure): MessagePartInfo {
   return { body: bodyCandidates[0], attachments, relatedImages };
 }
 
-export function isWithinAttachmentLimits(size: number | undefined, capturedBytes: number): boolean {
+export function isWithinAttachmentLimits(
+  size: number | undefined,
+  capturedBytes: number,
+  maxTotalBytes = MAX_ATTACHMENT_BYTES,
+): boolean {
   return Number.isFinite(size) &&
     (size as number) <= MAX_ATTACHMENT_BYTES &&
-    capturedBytes + (size as number) <= MAX_TOTAL_ATTACHMENT_BYTES;
+    capturedBytes + (size as number) <= maxTotalBytes;
 }

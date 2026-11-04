@@ -159,17 +159,24 @@ function guessImageMime(filename?: string): string | null {
   }
 }
 
-async function collectDownload(content: AsyncIterable<Uint8Array>, maxBytes: number): Promise<Buffer> {
-  const chunks: Buffer[] = [];
+async function collectDownload(content: AsyncIterable<Uint8Array>, maxBytes: number): Promise<ArrayBuffer> {
+  const chunks: Uint8Array[] = [];
   let size = 0;
   for await (const chunk of content) {
     const remaining = maxBytes - size;
     if (remaining <= 0) break;
     const limitedChunk = chunk.byteLength > remaining ? chunk.subarray(0, remaining) : chunk;
-    chunks.push(Buffer.from(limitedChunk));
+    chunks.push(limitedChunk);
     size += limitedChunk.byteLength;
   }
-  return Buffer.concat(chunks, size);
+  const buffer = new ArrayBuffer(size);
+  const result = new Uint8Array(buffer);
+  let offset = 0;
+  for (const chunk of chunks) {
+    result.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return buffer;
 }
 
 Deno.serve(async (req: Request) => {
@@ -290,7 +297,7 @@ Deno.serve(async (req: Request) => {
           .attachments.find((part) => part.part === partId);
         if (!attachment) return jsonResponse({ error: 'Lampiran tidak ditemukan.' }, 404);
         if (!isWithinAttachmentLimits(attachment.size, 0)) {
-          return jsonResponse({ error: 'Lampiran melebihi batas unduhan 1 MB.' }, 413);
+          return jsonResponse({ error: 'Ukuran lampiran tidak diketahui atau melebihi batas unduhan 25 MB.' }, 413);
         }
 
         const downloaded = await client.download(String(uid), attachment.part, {
@@ -301,12 +308,12 @@ Deno.serve(async (req: Request) => {
           return jsonResponse({ error: 'Isi lampiran tidak tersedia dari server IMAP.' }, 502);
         }
         const content = await collectDownload(downloaded.content, MAX_ATTACHMENT_BYTES);
-        return jsonResponse({
-          attachment: {
-            filename: partFilename(attachment) || 'lampiran',
-            content_type: attachment.type || 'application/octet-stream',
-            size: attachment.size || content.length,
-            content: content.toString('base64'),
+        return new Response(content, {
+          headers: {
+            ...corsHeaders,
+            'Content-Type': attachment.type || 'application/octet-stream',
+            'Content-Length': String(content.byteLength),
+            'Cache-Control': 'no-store',
           },
         });
       } finally {
@@ -354,7 +361,11 @@ Deno.serve(async (req: Request) => {
         for (const attachment of parts.relatedImages) {
           const cid = attachment.id?.replace(/^<|>$/g, '');
           if (!cid || !new RegExp(`cid:${cid.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}`, 'i').test(html)) continue;
-          if (!isWithinAttachmentLimits(attachment.size, capturedAttachmentBytes)) continue;
+          if (!isWithinAttachmentLimits(
+            attachment.size,
+            capturedAttachmentBytes,
+            MAX_TOTAL_ATTACHMENT_BYTES,
+          )) continue;
           const downloaded = await client.download(String(uid), attachment.part, {
             uid: true,
             maxBytes: Math.min(MAX_ATTACHMENT_BYTES, MAX_TOTAL_ATTACHMENT_BYTES - capturedAttachmentBytes),
@@ -366,14 +377,14 @@ Deno.serve(async (req: Request) => {
               Math.min(MAX_ATTACHMENT_BYTES, MAX_TOTAL_ATTACHMENT_BYTES - capturedAttachmentBytes),
             )
             : undefined;
-          if (content) capturedAttachmentBytes += content.length;
+          if (content) capturedAttachmentBytes += content.byteLength;
           if (cid && content) {
             const escapedCid = cid.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
             const mime = attachment.type.toLowerCase() || guessImageMime(partFilename(attachment)) ||
               'application/octet-stream';
             html = html.replace(
               new RegExp(`cid:${escapedCid}`, 'gi'),
-              `data:${mime};base64,${content.toString('base64')}`,
+              `data:${mime};base64,${Buffer.from(content).toString('base64')}`,
             );
           }
         }
