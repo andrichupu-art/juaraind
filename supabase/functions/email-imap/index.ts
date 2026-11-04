@@ -25,7 +25,7 @@ import { findTrashMailbox, isSentMailbox, isTrashMailbox, type MailboxInfo } fro
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, accept',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 function jsonResponse(body: unknown, status = 200): Response {
@@ -308,6 +308,16 @@ Deno.serve(async (req: Request) => {
           return jsonResponse({ error: 'Isi lampiran tidak tersedia dari server IMAP.' }, 502);
         }
         const content = await collectDownload(downloaded.content, MAX_ATTACHMENT_BYTES);
+        if (req.headers.get('accept') !== 'application/octet-stream') {
+          return jsonResponse({
+            attachment: {
+              filename: partFilename(attachment) || 'lampiran',
+              content_type: attachment.type || 'application/octet-stream',
+              size: attachment.size || content.byteLength,
+              content: Buffer.from(content).toString('base64'),
+            },
+          });
+        }
         return new Response(content, {
           headers: {
             ...corsHeaders,
