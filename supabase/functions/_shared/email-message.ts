@@ -1,134 +1,69 @@
-import { MailParser } from 'npm:mailparser@3.7.1';
-import { Buffer } from 'node:buffer';
-import { Readable } from 'node:stream';
-import { pipeline } from 'node:stream/promises';
+export const MAX_EMAIL_BODY_BYTES = 2 * 1024 * 1024;
+export const MAX_ATTACHMENT_BYTES = 1024 * 1024;
+export const MAX_TOTAL_ATTACHMENT_BYTES = 3 * 1024 * 1024;
 
-// Bound attachment data returned by one read request to stay within worker memory limits.
-const MAX_ATTACHMENT_BYTES = 1024 * 1024;
-const MAX_TOTAL_ATTACHMENT_BYTES = 3 * 1024 * 1024;
-
-export type ParsedAttachment = {
-  cid?: string;
-  content?: Buffer;
-  contentType?: string;
-  filename?: string;
+export type MessageStructure = {
+  part: string;
+  type: string;
+  parameters?: Record<string, string>;
+  disposition?: string;
+  dispositionParameters?: Record<string, string>;
+  id?: string;
   size?: number;
+  childNodes?: MessageStructure[];
 };
 
-export type ParsedEmailMessage = {
-  subject: string;
-  from: string;
-  from_email: string;
-  to: string;
-  date: Date | null;
-  html: string | null;
-  text: string;
-  message_id: string;
-  attachments: ParsedAttachment[];
+export type MessagePartInfo = {
+  body?: MessageStructure;
+  attachments: MessageStructure[];
+  relatedImages: MessageStructure[];
 };
 
-type MessageHeaders = { get(name: string): unknown };
-type MessagePart =
-  | { type: 'text'; text?: string; html?: string | false }
-  | {
-    type: 'attachment';
-    content: AsyncIterable<Uint8Array>;
-    contentId?: string;
-    contentType?: string;
-    filename?: string;
-    release(): void;
-  };
+export function partFilename(part: MessageStructure): string | undefined {
+  return part.dispositionParameters?.filename || part.parameters?.name;
+}
 
-export async function parseEmailStream(
-  source: Iterable<Uint8Array> | AsyncIterable<Uint8Array>,
-): Promise<ParsedEmailMessage> {
-  const parser = new MailParser();
-  let headers: MessageHeaders | undefined;
-  let text = '';
-  let html: string | false = false;
-  let capturedAttachmentBytes = 0;
-  let attachmentError: Error | undefined;
-  const attachmentJobs: Promise<void>[] = [];
-  const attachments: Array<ParsedAttachment & { size: number }> = [];
+function isAttachment(part: MessageStructure): boolean {
+  return part.disposition?.toLowerCase() === 'attachment' ||
+    !!partFilename(part) ||
+    (!!part.id && part.type.toLowerCase().startsWith('image/'));
+}
 
-  parser.on('headers', (messageHeaders: MessageHeaders) => {
-    headers = messageHeaders;
-  });
-  parser.on('data', (part: MessagePart) => {
-    if (part.type === 'text') {
-      text = part.text || '';
-      html = part.html || false;
+export function getMessageParts(structure: MessageStructure): MessagePartInfo {
+  const textParts: MessageStructure[] = [];
+  const attachments: MessageStructure[] = [];
+  const relatedImages: MessageStructure[] = [];
+
+  function visit(part: MessageStructure) {
+    if (part.childNodes?.length) {
+      part.childNodes.forEach(visit);
       return;
     }
-    if (part.type !== 'attachment') return;
 
-    attachmentJobs.push((async () => {
-      const chunks: Buffer[] = [];
-      let size = 0;
-      let retainContent = capturedAttachmentBytes < MAX_TOTAL_ATTACHMENT_BYTES;
-      try {
-        for await (const chunk of part.content) {
-          size += chunk.length;
-          if (
-            retainContent &&
-            size <= MAX_ATTACHMENT_BYTES &&
-            capturedAttachmentBytes + size <= MAX_TOTAL_ATTACHMENT_BYTES
-          ) {
-            chunks.push(Buffer.from(chunk));
-          } else {
-            retainContent = false;
-            chunks.length = 0;
-          }
-        }
-        const content = retainContent ? Buffer.concat(chunks) : undefined;
-        if (content) capturedAttachmentBytes += size;
-        attachments.push({
-          cid: part.contentId?.replace(/^<|>$/g, ''),
-          content,
-          contentType: part.contentType,
-          filename: part.filename,
-          size,
-        });
-      } catch (error) {
-        attachmentError = error instanceof Error ? error : new Error(String(error));
-        parser.destroy(attachmentError);
-      } finally {
-        part.release();
-      }
-    })());
+    if (isAttachment(part)) {
+      attachments.push(part);
+      if (part.id && part.type.toLowerCase().startsWith('image/')) relatedImages.push(part);
+      return;
+    }
+
+    if (part.type.toLowerCase() === 'text/html' || part.type.toLowerCase() === 'text/plain') {
+      textParts.push(part);
+    }
+  }
+
+  visit(structure);
+  const bodyCandidates = textParts.filter((part) => part.size === undefined || part.size <= MAX_EMAIL_BODY_BYTES);
+  bodyCandidates.sort((a, b) => {
+    const typeOrder = (part: MessageStructure) => part.type.toLowerCase() === 'text/html' ? 0 : 1;
+    const sizeOrder = (part: MessageStructure) => part.size ?? Number.MAX_SAFE_INTEGER;
+    return typeOrder(a) - typeOrder(b) || sizeOrder(a) - sizeOrder(b);
   });
 
-  await pipeline(Readable.from(source), parser);
-  await Promise.all(attachmentJobs);
-  if (attachmentError) throw attachmentError;
+  return { body: bodyCandidates[0], attachments, relatedImages };
+}
 
-  const from = headers?.get('from');
-  const to = headers?.get('to');
-  const date = headers?.get('date');
-  const messageId = headers?.get('message-id');
-
-  const addressText = (header: unknown) =>
-    typeof header === 'object' && header !== null && 'text' in header
-      ? String(header.text || '')
-      : '';
-  const firstAddress = (header: unknown) => {
-    if (typeof header !== 'object' || header === null || !('value' in header) || !Array.isArray(header.value)) {
-      return '';
-    }
-    const address = header.value[0]?.address;
-    return typeof address === 'string' ? address : '';
-  };
-
-  const subject = headers?.get('subject');
-  return {
-    subject: typeof subject === 'string' ? subject : '',
-    from: addressText(from),
-    from_email: firstAddress(from),
-    to: addressText(to),
-    date: date instanceof Date ? date : null,
-    html: typeof html === 'string' ? html : null,
-    text,
-    message_id: typeof messageId === 'string' ? messageId : '',
-    attachments,
-  };
+export function isWithinAttachmentLimits(size: number | undefined, capturedBytes: number): boolean {
+  return Number.isFinite(size) &&
+    (size as number) <= MAX_ATTACHMENT_BYTES &&
+    capturedBytes + (size as number) <= MAX_TOTAL_ATTACHMENT_BYTES;
 }

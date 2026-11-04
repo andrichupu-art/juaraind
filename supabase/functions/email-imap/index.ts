@@ -4,13 +4,23 @@
 // body: { action: 'folders', account_id }
 // body: { action: 'list',    account_id, folder?, page?, page_size?, query? }
 // body: { action: 'read',    account_id, folder?, uid }
+// body: { action: 'attachment', account_id, folder?, uid, part }
 // body: { action: 'unseen',  account_id, folder? }
 // body: { action: 'delete',  account_id, folder?, uid }
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { ImapFlow } from 'npm:imapflow@1.0.98';
+import { Buffer } from 'node:buffer';
 import { requireAdmin } from '../_shared/auth.ts';
-import { parseEmailStream, type ParsedAttachment, type ParsedEmailMessage } from '../_shared/email-message.ts';
+import {
+  getMessageParts,
+  isWithinAttachmentLimits,
+  MAX_ATTACHMENT_BYTES,
+  MAX_EMAIL_BODY_BYTES,
+  MAX_TOTAL_ATTACHMENT_BYTES,
+  partFilename,
+  type MessageStructure,
+} from '../_shared/email-message.ts';
 import { findTrashMailbox, isSentMailbox, isTrashMailbox, type MailboxInfo } from '../_shared/mailbox.ts';
 
 const corsHeaders = {
@@ -149,6 +159,19 @@ function guessImageMime(filename?: string): string | null {
   }
 }
 
+async function collectDownload(content: AsyncIterable<Uint8Array>, maxBytes: number): Promise<Buffer> {
+  const chunks: Buffer[] = [];
+  let size = 0;
+  for await (const chunk of content) {
+    const remaining = maxBytes - size;
+    if (remaining <= 0) break;
+    const limitedChunk = chunk.byteLength > remaining ? chunk.subarray(0, remaining) : chunk;
+    chunks.push(Buffer.from(limitedChunk));
+    size += limitedChunk.byteLength;
+  }
+  return Buffer.concat(chunks, size);
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
   if (req.method !== 'POST') return jsonResponse({ error: 'Method tidak didukung.' }, 405);
@@ -250,6 +273,47 @@ Deno.serve(async (req: Request) => {
       });
     }
 
+    if (action === 'attachment') {
+      const folder = body.folder || 'INBOX';
+      const uid = body.uid;
+      const partId = typeof body.part === 'string' ? body.part : '';
+      if (!uid) return jsonResponse({ error: 'uid wajib diisi.' }, 400);
+      if (!/^\d+(?:\.\d+)*$/.test(partId)) return jsonResponse({ error: 'Bagian lampiran tidak valid.' }, 400);
+
+      const lock = await client.getMailboxLock(folder);
+      try {
+        const fetched = await client.fetchOne(String(uid), { bodyStructure: true }, { uid: true });
+        if (!fetched?.bodyStructure) {
+          return jsonResponse({ error: 'Struktur isi email tidak tersedia dari server IMAP.' }, 502);
+        }
+        const attachment = getMessageParts(fetched.bodyStructure as MessageStructure)
+          .attachments.find((part) => part.part === partId);
+        if (!attachment) return jsonResponse({ error: 'Lampiran tidak ditemukan.' }, 404);
+        if (!isWithinAttachmentLimits(attachment.size, 0)) {
+          return jsonResponse({ error: 'Lampiran melebihi batas unduhan 1 MB.' }, 413);
+        }
+
+        const downloaded = await client.download(String(uid), attachment.part, {
+          uid: true,
+          maxBytes: MAX_ATTACHMENT_BYTES,
+        });
+        if (!downloaded?.content || typeof downloaded.content[Symbol.asyncIterator] !== 'function') {
+          return jsonResponse({ error: 'Isi lampiran tidak tersedia dari server IMAP.' }, 502);
+        }
+        const content = await collectDownload(downloaded.content, MAX_ATTACHMENT_BYTES);
+        return jsonResponse({
+          attachment: {
+            filename: partFilename(attachment) || 'lampiran',
+            content_type: attachment.type || 'application/octet-stream',
+            size: attachment.size || content.length,
+            content: content.toString('base64'),
+          },
+        });
+      } finally {
+        lock.release();
+      }
+    }
+
     if (action === 'read') {
       const folder = body.folder || 'INBOX';
       const uid = body.uid;
@@ -257,72 +321,80 @@ Deno.serve(async (req: Request) => {
       const lock = await client.getMailboxLock(folder);
       let result: Record<string, unknown> | null = null;
       try {
-        const raw = await client.download(String(uid), undefined, { uid: true });
-        let parsed: ParsedEmailMessage;
-        if (raw?.content && typeof raw.content[Symbol.asyncIterator] === 'function') {
-          parsed = await parseEmailStream(raw.content);
-        } else {
-          const fetched = await client.fetchOne(String(uid), { source: true }, { uid: true });
-          if (
-            !fetched ||
-            typeof fetched !== 'object' ||
-            !('source' in fetched) ||
-            !(fetched.source instanceof Uint8Array)
-          ) {
-            return jsonResponse({
-              error: 'Isi email tidak tersedia dari server IMAP. Muat ulang daftar email, lalu coba lagi.',
-            }, 502);
-          }
-          parsed = await parseEmailStream([fetched.source]);
+        const fetched = await client.fetchOne(String(uid), { envelope: true, bodyStructure: true }, { uid: true });
+        if (!fetched?.bodyStructure) {
+          return jsonResponse({ error: 'Struktur isi email tidak tersedia dari server IMAP.' }, 502);
         }
 
-        let html = parsed.html || (parsed.text ? `<pre style="white-space:pre-wrap;font-family:inherit">${escapeHtml(parsed.text)}</pre>` : '');
-        const attachments: ParsedAttachment[] = parsed.attachments || [];
-
-        const usedCids = new Set<string>();
-        for (const att of attachments) {
-          if (att.cid && att.content) {
-            const escapedCid = att.cid.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
-            const cidPattern = new RegExp(`cid:${escapedCid}`, 'g');
-            if (cidPattern.test(html)) {
-              const dataUri = `data:${att.contentType};base64,${att.content.toString('base64')}`;
-              html = html.replace(new RegExp(`cid:${escapedCid}`, 'g'), dataUri);
-              usedCids.add(att.cid);
-            }
+        const structure = fetched.bodyStructure as MessageStructure;
+        const parts = getMessageParts(structure);
+        let bodyContent = '';
+        let html = '';
+        if (parts.body) {
+          const downloadedBody = await client.download(String(uid), parts.body.part, {
+            uid: true,
+            maxBytes: MAX_EMAIL_BODY_BYTES,
+          });
+          if (downloadedBody?.content && typeof downloadedBody.content[Symbol.asyncIterator] === 'function') {
+            const bodyBuffer = await collectDownload(downloadedBody.content, MAX_EMAIL_BODY_BYTES);
+            bodyContent = new TextDecoder().decode(bodyBuffer);
+            if (parts.body.type.toLowerCase() === 'text/html') html = bodyContent;
           }
         }
-
-        const looseImages = attachments.filter((att) => {
-          if (!att.content) return false;
-          if (att.cid && usedCids.has(att.cid)) return false;
-          return att.contentType?.startsWith('image/') || !!guessImageMime(att.filename);
-        });
-        if (looseImages.length > 0) {
-          html += looseImages
-            .map((att) => {
-              const mime = att.contentType?.startsWith('image/') ? att.contentType : (guessImageMime(att.filename) || att.contentType || 'application/octet-stream');
-              const dataUri = `data:${mime};base64,${att.content!.toString('base64')}`;
-              return `<div style="margin-top:12px"><img src="${dataUri}" alt="${escapeHtml(att.filename || 'lampiran gambar')}" style="max-width:100%;border-radius:8px" /></div>`;
-            })
-            .join('');
+        if (!html && bodyContent) {
+          html = `<pre style="white-space:pre-wrap;font-family:inherit">${escapeHtml(bodyContent)}</pre>`;
+        }
+        if (!parts.body && !bodyContent) {
+          bodyContent = parts.attachments.length
+            ? '(Email ini tidak memiliki bagian teks yang dapat ditampilkan.)'
+            : '(tidak ada isi)';
         }
 
-        const attachmentsOut = attachments.map((att) => ({
-          filename: att.filename || 'lampiran',
-          content_type: att.contentType || 'application/octet-stream',
-          size: att.size ?? att.content?.length ?? 0,
-          ...(att.content ? { content: att.content.toString('base64') } : {}),
+        let capturedAttachmentBytes = 0;
+        for (const attachment of parts.relatedImages) {
+          const cid = attachment.id?.replace(/^<|>$/g, '');
+          if (!cid || !new RegExp(`cid:${cid.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&')}`, 'i').test(html)) continue;
+          if (!isWithinAttachmentLimits(attachment.size, capturedAttachmentBytes)) continue;
+          const downloaded = await client.download(String(uid), attachment.part, {
+            uid: true,
+            maxBytes: Math.min(MAX_ATTACHMENT_BYTES, MAX_TOTAL_ATTACHMENT_BYTES - capturedAttachmentBytes),
+          });
+          const content = downloaded?.content &&
+              typeof downloaded.content[Symbol.asyncIterator] === 'function'
+            ? await collectDownload(
+              downloaded.content,
+              Math.min(MAX_ATTACHMENT_BYTES, MAX_TOTAL_ATTACHMENT_BYTES - capturedAttachmentBytes),
+            )
+            : undefined;
+          if (content) capturedAttachmentBytes += content.length;
+          if (cid && content) {
+            const escapedCid = cid.replace(/[-/\\^$*+?.()|[\]{}]/g, '\\$&');
+            const mime = attachment.type.toLowerCase() || guessImageMime(partFilename(attachment)) ||
+              'application/octet-stream';
+            html = html.replace(
+              new RegExp(`cid:${escapedCid}`, 'gi'),
+              `data:${mime};base64,${content.toString('base64')}`,
+            );
+          }
+        }
+
+        const attachmentsOut = parts.attachments.map((part) => ({
+          part: part.part,
+          filename: partFilename(part) || 'lampiran',
+          content_type: part.type || 'application/octet-stream',
+          size: part.size || 0,
+          downloadable: isWithinAttachmentLimits(part.size, 0),
         }));
 
         result = {
-          subject: parsed.subject,
-          from: parsed.from,
-          from_email: parsed.from_email,
-          to: parsed.to,
-          date: parsed.date,
+          subject: fetched.envelope?.subject || '',
+          from: formatAddr(fetched.envelope?.from?.[0]),
+          from_email: fetched.envelope?.from?.[0]?.address || '',
+          to: formatAddrList(fetched.envelope?.to),
+          date: fetched.envelope?.date || null,
           html: html || null,
-          text: parsed.text,
-          message_id: parsed.message_id,
+          text: bodyContent,
+          message_id: fetched.envelope?.messageId || '',
           attachments: attachmentsOut,
         };
         try {
