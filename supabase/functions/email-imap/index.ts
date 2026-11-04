@@ -9,9 +9,8 @@
 
 import { createClient } from 'npm:@supabase/supabase-js@2';
 import { ImapFlow } from 'npm:imapflow@1.0.98';
-import { simpleParser } from 'npm:mailparser@3.7.1';
-import { Buffer } from 'node:buffer';
 import { requireAdmin } from '../_shared/auth.ts';
+import { parseEmailStream, type ParsedAttachment, type ParsedEmailMessage } from '../_shared/email-message.ts';
 import { findTrashMailbox, isSentMailbox, isTrashMailbox, type MailboxInfo } from '../_shared/mailbox.ts';
 
 const corsHeaders = {
@@ -109,14 +108,6 @@ async function getPooledClient(account_id: string, acc: { email: string; passwor
     throw err;
   }
 }
-
-type ParsedAttachment = {
-  cid?: string;
-  content?: Buffer;
-  contentType?: string;
-  filename?: string;
-  size?: number;
-};
 
 function specialUseLabel(mbox: { path: string; name?: string; specialUse?: string }) {
   const use = mbox.specialUse;
@@ -267,11 +258,9 @@ Deno.serve(async (req: Request) => {
       let result: Record<string, unknown> | null = null;
       try {
         const raw = await client.download(String(uid), undefined, { uid: true });
-        let buf: Buffer;
+        let parsed: ParsedEmailMessage;
         if (raw?.content && typeof raw.content[Symbol.asyncIterator] === 'function') {
-          const chunks: Uint8Array[] = [];
-          for await (const chunk of raw.content) chunks.push(chunk as Uint8Array);
-          buf = Buffer.concat(chunks);
+          parsed = await parseEmailStream(raw.content);
         } else {
           const fetched = await client.fetchOne(String(uid), { source: true }, { uid: true });
           if (
@@ -284,10 +273,8 @@ Deno.serve(async (req: Request) => {
               error: 'Isi email tidak tersedia dari server IMAP. Muat ulang daftar email, lalu coba lagi.',
             }, 502);
           }
-          buf = Buffer.from(fetched.source);
+          parsed = await parseEmailStream([fetched.source]);
         }
-
-        const parsed = await simpleParser(buf);
 
         let html = parsed.html || (parsed.text ? `<pre style="white-space:pre-wrap;font-family:inherit">${escapeHtml(parsed.text)}</pre>` : '');
         const attachments: ParsedAttachment[] = parsed.attachments || [];
@@ -320,24 +307,22 @@ Deno.serve(async (req: Request) => {
             .join('');
         }
 
-        const attachmentsOut = attachments
-          .filter((att) => !!att.content)
-          .map((att) => ({
-            filename: att.filename || 'lampiran',
-            content_type: att.contentType || 'application/octet-stream',
-            size: att.size ?? att.content!.length,
-            content: att.content!.toString('base64'),
-          }));
+        const attachmentsOut = attachments.map((att) => ({
+          filename: att.filename || 'lampiran',
+          content_type: att.contentType || 'application/octet-stream',
+          size: att.size ?? att.content?.length ?? 0,
+          ...(att.content ? { content: att.content.toString('base64') } : {}),
+        }));
 
         result = {
-          subject: parsed.subject || '',
-          from: parsed.from?.text || '',
-          from_email: parsed.from?.value?.[0]?.address || '',
-          to: parsed.to && 'text' in parsed.to ? parsed.to.text : '',
-          date: parsed.date || null,
+          subject: parsed.subject,
+          from: parsed.from,
+          from_email: parsed.from_email,
+          to: parsed.to,
+          date: parsed.date,
           html: html || null,
-          text: parsed.text || '',
-          message_id: parsed.messageId || '',
+          text: parsed.text,
+          message_id: parsed.message_id,
           attachments: attachmentsOut,
         };
         try {

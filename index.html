@@ -2139,13 +2139,18 @@ $('#btnMailAccAdd').addEventListener('click', async ()=>{
 async function invokeMailImap(body){
   const call=async()=>{
     const {data,error}=await sb.functions.invoke('email-imap',{body});
-    if(error)throw new Error(await fnErrorMessage(error,'Gagal memanggil layanan email'));
+    if(error){
+      const requestError=new Error(await fnErrorMessage(error,'Gagal memanggil layanan email'));
+      requestError.status=error.context?.status||error.status;
+      throw requestError;
+    }
     if(data?.error)throw new Error(data.error);
     return data;
   };
   try{
     return await call();
   }catch(err){
+    if(err?.status===546)throw err;
     console.warn('email-imap gagal, mencoba ulang sekali (kemungkinan cold-connect):',err.message);
     return await call();
   }
@@ -2332,6 +2337,8 @@ async function openMailMessage(uid){
     if(requestId!==MAIL_READ_REQUEST_ID || accountId!==MAIL_ACTIVE || folder!==MAIL_FOLDER || MAIL_OPEN!==uid)return;
     const msg=data?.message;
     if(!msg || typeof msg!=='object')throw new Error('Isi email tidak diterima dari server. Coba muat ulang daftar email.');
+    const attachments=msg.attachments||[];
+    const downloadableAttachments=attachments.filter(att=>typeof att.content==='string');
     $('#mailRead').innerHTML=`
       <div class="mail-read-hd">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
@@ -2339,18 +2346,19 @@ async function openMailMessage(uid){
         </div>
         <div class="mail-read-meta"><span class="mi-avatar">${escapeHtml(mailInitial(sentFolder?msg.to:msg.from))}</span><span><b>${escapeHtml((sentFolder?msg.to:msg.from)||'-')}</b> · ${fmtMailDate(msg.date)}</span></div>
         ${sentFolder && msg.from ? `<div style="font:600 .78rem var(--body);color:var(--mut);margin-top:2px">Dari: ${escapeHtml(msg.from)}</div>` : ''}
-        ${msg.attachments && msg.attachments.length ? `
+        ${attachments.length ? `
         <div class="mail-attach-list" id="mailReadAttachList" style="display:flex;flex-direction:column;gap:6px;margin-top:12px">
-          ${msg.attachments.length>1 ? `
+          ${downloadableAttachments.length>1 ? `
           <div style="display:flex;justify-content:flex-end;margin-bottom:2px">
-            <button type="button" class="btn b-ghost sm" id="btnMailAttachAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> Unduh Semua (${msg.attachments.length})</button>
+            <button type="button" class="btn b-ghost sm" id="btnMailAttachAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> Unduh Semua (${downloadableAttachments.length})</button>
           </div>` : ''}
-          ${msg.attachments.map((att,i)=>`
+          ${attachments.map((att,i)=>`
             <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--line);border-radius:9px;background:#F7F9FB">
               <span style="flex:1;min-width:0;font:600 .8rem var(--body);color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">📎 ${escapeHtml(att.filename||'lampiran')}</span>
               <span style="font:600 .72rem var(--body);color:var(--mut);flex-shrink:0">${mcFormatSize(att.size||0)}</span>
-              <button type="button" class="icon-plain-btn" data-mail-att-download="${i}" title="Unduh lampiran"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg></button>
+              ${att.content ? `<button type="button" class="icon-plain-btn" data-mail-att-download="${i}" title="Unduh lampiran"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg></button>` : '<span style="font:600 .7rem var(--body);color:var(--mut)">Tidak dapat diunduh di sini</span>'}
             </div>`).join('')}
+          ${attachments.some(att=>!att.content) ? '<span style="font:500 .72rem var(--body);color:var(--mut)">Lampiran besar tidak dimuat agar email tetap bisa dibuka. Unduh melalui aplikasi email lain.</span>' : ''}
         </div>` : ''}
       </div>
       <div class="mail-read-body" id="mailReadBody"></div>
@@ -2482,14 +2490,15 @@ function downloadMailAttachment(att){
 }
 
 async function downloadAllMailAttachments(attachments, subject){
-  if(!attachments||!attachments.length)return;
+  const downloadableAttachments=(attachments||[]).filter(att=>typeof att.content==='string');
+  if(!downloadableAttachments.length)return;
   const btn=$('#btnMailAttachAll');
   const orig=btn?btn.innerHTML:'';
   if(btn){ btn.disabled=true; btn.innerHTML='⏳ Menyiapkan ZIP…'; }
   try{
     const zip=new JSZip();
     let used=new Set();
-    attachments.forEach(att=>{
+    downloadableAttachments.forEach(att=>{
       const bin=atob(att.content);
       const bytes=new Uint8Array(bin.length);
       for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
