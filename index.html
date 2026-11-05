@@ -1137,12 +1137,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   font-weight:800;flex-shrink:0;
 }
 .mail-read-body{
-  flex:1;min-height:0;overflow:hidden;
-  padding:16px 24px;background:#fff;
+  flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;
+  padding:16px 24px 24px;background:#fff;overscroll-behavior:contain;
 }
-.mail-read-body iframe{width:100%;height:100%;border:none;display:block;min-height:360px;background:#fff}
+.mail-read-body iframe{width:100%;height:100%;border:none;display:block;min-height:360px;background:#fff;flex-shrink:0}
 .mail-attach-panel{
-  margin-top:14px;padding-top:12px;border-top:1px solid #e8eaed;
+  margin-top:18px;padding-top:16px;border-top:1px solid #e8eaed;
 }
 .mail-attach-toolbar{
   display:flex;align-items:center;justify-content:space-between;gap:12px;
@@ -1153,9 +1153,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 }
 .mail-attach-list{
   display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));
-  align-items:stretch;gap:8px;max-height:clamp(72px,20vh,168px);
-  overflow-y:auto;overscroll-behavior:contain;padding:2px 6px 6px 1px;
-  scrollbar-gutter:stable;
+  align-items:stretch;gap:8px;padding:2px 1px 6px;
 }
 .mail-attachment{
   display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:8px;
@@ -1179,11 +1177,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .mail-attachment-size{font:500 .7rem var(--body);color:#5f6368;white-space:nowrap}
 .mail-attachment-unavailable{font:500 .68rem var(--body);color:#5f6368;white-space:nowrap}
 
-/* Reply area */
+/* Reply area follows the message and attachments, like a conversation view */
 .mail-reply{
-  padding:14px 24px 18px;
+  margin-top:18px;padding:16px 0 0;
   display:flex;gap:12px;align-items:flex-end;
-  background:#f8f9fa;
   border-top:1px solid #e8eaed;
 }
 .mail-reply textarea{
@@ -1256,8 +1253,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .mail-read-body iframe{min-height:420px}
   .mail-read-hd{padding:16px}
   .mail-read-body{padding:12px 16px}
-  .mail-attach-list{grid-template-columns:minmax(0,1fr);max-height:150px}
-  .mail-reply{padding:12px 16px;gap:8px}
+  .mail-attach-list{grid-template-columns:minmax(0,1fr)}
+  .mail-reply{margin-top:14px;padding-top:12px;gap:8px}
   .mail-reply textarea{min-width:0;min-height:60px;padding:12px}
   .mail-reply .btn.b-navy,.mail-reply .btn.b-pri{min-height:46px;padding:0 18px}
 }
@@ -2434,6 +2431,8 @@ async function openMailMessage(uid){
         </div>
         <div class="mail-read-meta"><span class="mi-avatar">${escapeHtml(mailInitial(sentFolder?msg.to:msg.from))}</span><span><b>${escapeHtml((sentFolder?msg.to:msg.from)||'-')}</b> · ${fmtMailDate(msg.date)}</span></div>
         ${sentFolder && msg.from ? `<div style="font:600 .78rem var(--body);color:var(--mut);margin-top:2px">Dari: ${escapeHtml(msg.from)}</div>` : ''}
+      </div>
+      <div class="mail-read-body" id="mailReadBody">
         ${attachments.length ? `
         <section class="mail-attach-panel" aria-label="Lampiran email">
           <div class="mail-attach-toolbar">
@@ -2451,11 +2450,10 @@ async function openMailMessage(uid){
             </div>`).join('')}
           </div>
         </section>` : ''}
-      </div>
-      <div class="mail-read-body" id="mailReadBody"></div>
-      <div class="mail-reply">
-        <textarea id="mailReplyBox" placeholder="Tulis balasan…"></textarea>
-        <button class="btn b-pri sm" id="btnMailReplySend">Balas</button>
+        <div class="mail-reply">
+          <textarea id="mailReplyBox" placeholder="Tulis balasan…"></textarea>
+          <button class="btn b-pri sm" id="btnMailReplySend">Balas</button>
+        </div>
       </div>`;
     const ifr=document.createElement('iframe');
     // FIX: sandbox kosong ("") membuat iframe mencoba me-navigasi DIRINYA SENDIRI
@@ -2469,7 +2467,8 @@ async function openMailMessage(uid){
     // karena allow-scripts TIDAK diberikan — JS apa pun di dalam body email
     // (termasuk script/onclick nakal) tetap tidak akan pernah dieksekusi.
     ifr.setAttribute('sandbox','allow-same-origin allow-popups allow-popups-to-escape-sandbox');
-    $('#mailReadBody').appendChild(ifr);
+    const mailReadBody=$('#mailReadBody');
+    mailReadBody.insertBefore(ifr,mailReadBody.firstChild);
     const baseTag='<base target="_blank" rel="noopener noreferrer">';
     const imgLimitStyle=`<style>
 body{margin:0;padding:16px 18px;font-family:Arial,sans-serif;font-size:15px!important;line-height:1.65!important;color:#202124;background:#fff}
@@ -2516,12 +2515,8 @@ img:not(.mail-img-grid img){max-width:150px!important;max-height:130px!important
       try{
         const idoc=ifr.contentDocument;
         if(!idoc) return;
-        // Di mobile, tinggi iframe mengikuti isi email supaya pesan panjang
-        // tidak terpotong oleh tinggi panel tetap.
-        if(window.innerWidth<=860){
-          const contentHeight=Math.max(idoc.body?.scrollHeight||0,idoc.documentElement?.scrollHeight||0,420);
-          ifr.style.height=contentHeight+'px';
-        }
+        const contentHeight=Math.max(idoc.body?.scrollHeight||0,idoc.documentElement?.scrollHeight||0,360);
+        ifr.style.height=contentHeight+'px';
         idoc.querySelectorAll('img').forEach(img=>{
           img.style.cursor='zoom-in';
           img.addEventListener('click', (e)=>{
