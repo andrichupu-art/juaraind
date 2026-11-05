@@ -1117,16 +1117,16 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   background:var(--mail-read-bg)!important;
 }
 .mail-read-hd{
-  padding:16px 22px 12px;
+  padding:18px 24px 14px;
   border-bottom:1px solid var(--mail-border);
   background:#fff;
 }
 .mail-read-hd h4{
-  font:700 1.06rem var(--disp);color:var(--ink);
-  margin-bottom:8px;word-break:break-word;line-height:1.35;
+  font:700 1.2rem var(--disp);color:var(--ink);
+  margin-bottom:10px;word-break:break-word;line-height:1.35;
 }
 .mail-read-meta{
-  font:500 .76rem var(--body);color:var(--mut);
+  font:500 .82rem var(--body);color:var(--mut);
   display:flex;align-items:center;gap:8px;
 }
 .mail-read-meta .mi-avatar{
@@ -1137,47 +1137,71 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   font-weight:800;flex-shrink:0;
 }
 .mail-read-body{
-  flex:1;overflow:hidden;
-  padding:12px 22px;background:#fff;
+  flex:1;min-height:0;overflow:hidden;
+  padding:16px 24px;background:#fff;
 }
-.mail-read-body iframe{width:100%;height:100%;border:none;display:block;min-height:320px}
+.mail-read-body iframe{width:100%;height:100%;border:none;display:block;min-height:360px;background:#fff}
+.mail-attach-panel{
+  margin-top:14px;padding-top:12px;border-top:1px solid #e8eaed;
+}
+.mail-attach-toolbar{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  margin-bottom:8px;
+}
+.mail-attach-label{
+  color:#5f6368;font:600 .78rem var(--body);
+}
 .mail-attach-list{
-  display:flex;flex-wrap:wrap;align-items:center;gap:6px;
-  max-height:78px;overflow-y:auto;margin-top:10px;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,250px),1fr));
+  align-items:stretch;gap:8px;max-height:clamp(72px,20vh,168px);
+  overflow-y:auto;overscroll-behavior:contain;padding:2px 6px 6px 1px;
+  scrollbar-gutter:stable;
 }
-.mail-attach-actions{display:flex;justify-content:flex-end;flex:1 0 100%}
 .mail-attachment{
-  display:flex;align-items:center;gap:7px;min-width:0;max-width:320px;
-  padding:6px 8px;border:1px solid var(--mail-border);border-radius:8px;
-  background:#F7F9FB;box-sizing:border-box;
+  display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:8px;
+  min-width:0;padding:8px 10px;border:1px solid #dadce0;border-radius:8px;
+  background:#fff;box-sizing:border-box;transition:background .15s,border-color .15s;
+}
+.mail-attachment:hover{background:#f8fafd;border-color:#c5d3e2}
+.mail-attachment .icon-plain-btn{
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  width:32px;height:32px;border-radius:50%;color:#5f6368;
+}
+.mail-attachment .icon-plain-btn:hover{background:#e8f0fe;color:#174ea6}
+.mail-attachment .icon-plain-btn svg{width:17px!important;height:17px!important}
+.mail-attachment .mail-attachment-name{
+  display:block;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
 .mail-attachment-name{
-  flex:1;min-width:0;font:600 .76rem var(--body);color:var(--ink);
+  font:500 .8rem var(--body);color:#202124;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
 }
-.mail-attachment-size{font:600 .68rem var(--body);color:var(--mut);flex-shrink:0}
-.mail-attachment-unavailable{font:600 .68rem var(--body);color:var(--mut);flex-shrink:0}
+.mail-attachment-size{font:500 .7rem var(--body);color:#5f6368;white-space:nowrap}
+.mail-attachment-unavailable{font:500 .68rem var(--body);color:#5f6368;white-space:nowrap}
 
 /* Reply area */
 .mail-reply{
-  padding:12px 18px 16px;
-  display:flex;gap:9px;align-items:flex-end;
-  background:#F7F5F0;
-  border-top:1px solid var(--mail-border);
+  padding:14px 24px 18px;
+  display:flex;gap:12px;align-items:flex-end;
+  background:#f8f9fa;
+  border-top:1px solid #e8eaed;
 }
 .mail-reply textarea{
-  flex:1;border:1.5px solid var(--mail-border);
-  border-radius:12px;padding:10px 14px;
-  font:400 .84rem var(--body);resize:vertical;
-  min-height:42px;max-height:130px;
-  background:#fff;transition:.15s;color:var(--ink);
+  flex:1;border:1px solid #dadce0;
+  border-radius:12px;padding:14px 16px;
+  font:400 .95rem var(--body);resize:vertical;
+  min-height:64px;max-height:180px;
+  background:#fff;transition:.15s;color:#202124;
 }
 .mail-reply textarea:focus{
-  outline:none;border-color:var(--navy);
-  box-shadow:0 0 0 3px rgba(19,49,77,.07);
+  outline:none;border-color:#174ea6;
+  box-shadow:0 0 0 3px rgba(23,78,166,.1);
 }
 .mail-reply textarea::placeholder{color:#b4bfcc}
-.mail-reply .btn.b-navy,.mail-reply .btn.b-pri{border-radius:10px;padding:10px 18px;font-size:.82rem}
+.mail-reply .btn.b-navy,.mail-reply .btn.b-pri{
+  min-height:48px;border-radius:24px;padding:0 24px;font-size:.9rem;
+  white-space:nowrap;
+}
 
 /* Empty state */
 .mail-empty{
@@ -1230,6 +1254,12 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
   .mail-topbar-r .mail-icon-btn svg{width:13px;height:13px}
   .mail-read-body{overflow:auto;min-height:420px}
   .mail-read-body iframe{min-height:420px}
+  .mail-read-hd{padding:16px}
+  .mail-read-body{padding:12px 16px}
+  .mail-attach-list{grid-template-columns:minmax(0,1fr);max-height:150px}
+  .mail-reply{padding:12px 16px;gap:8px}
+  .mail-reply textarea{min-width:0;min-height:60px;padding:12px}
+  .mail-reply .btn.b-navy,.mail-reply .btn.b-pri{min-height:46px;padding:0 18px}
 }
 
 /* Override sisa tema lama */
@@ -2405,18 +2435,22 @@ async function openMailMessage(uid){
         <div class="mail-read-meta"><span class="mi-avatar">${escapeHtml(mailInitial(sentFolder?msg.to:msg.from))}</span><span><b>${escapeHtml((sentFolder?msg.to:msg.from)||'-')}</b> · ${fmtMailDate(msg.date)}</span></div>
         ${sentFolder && msg.from ? `<div style="font:600 .78rem var(--body);color:var(--mut);margin-top:2px">Dari: ${escapeHtml(msg.from)}</div>` : ''}
         ${attachments.length ? `
-        <div class="mail-attach-list" id="mailReadAttachList">
+        <section class="mail-attach-panel" aria-label="Lampiran email">
+          <div class="mail-attach-toolbar">
+            <span class="mail-attach-label">Lampiran · ${attachments.length}</span>
           ${downloadableAttachments.length>1 ? `
-          <div class="mail-attach-actions">
-            <button type="button" class="btn b-ghost sm" id="btnMailAttachAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> Unduh Semua (${downloadableAttachments.length})</button>
-          </div>` : ''}
+            <button type="button" class="btn b-ghost sm" id="btnMailAttachAll"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:14px;height:14px"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg> Unduh semua (${downloadableAttachments.length})</button>
+          ` : ''}
+          </div>
+          <div class="mail-attach-list" id="mailReadAttachList">
           ${attachments.map((att,i)=>`
             <div class="mail-attachment">
               <span class="mail-attachment-name" title="${escapeHtml(att.filename||'lampiran')}">📎 ${escapeHtml(att.filename||'lampiran')}</span>
               <span class="mail-attachment-size">${att.size ? mcFormatSize(att.size) : 'Ukuran tidak diketahui'}</span>
               ${canDownload(att) ? `<button type="button" class="icon-plain-btn" data-mail-att-download="${i}" title="Unduh lampiran"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><path d="M12 3v12"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg></button>` : `<span class="mail-attachment-unavailable">${att.size ? 'Melebihi batas 25 MB' : 'Ukuran tidak diketahui'}</span>`}
             </div>`).join('')}
-        </div>` : ''}
+          </div>
+        </section>` : ''}
       </div>
       <div class="mail-read-body" id="mailReadBody"></div>
       <div class="mail-reply">
@@ -2438,8 +2472,8 @@ async function openMailMessage(uid){
     $('#mailReadBody').appendChild(ifr);
     const baseTag='<base target="_blank" rel="noopener noreferrer">';
     const imgLimitStyle=`<style>
-body{margin:0;padding:14px;font-family:Arial,sans-serif;font-size:16px!important;line-height:1.6!important;color:#263238}
-body :is(p,div,td,th,li,span,a){font-size:max(14px,1em)!important;line-height:1.55!important}
+body{margin:0;padding:16px 18px;font-family:Arial,sans-serif;font-size:15px!important;line-height:1.65!important;color:#202124;background:#fff}
+body :is(p,div,td,th,li,span,a){font-size:max(14px,1em)!important;line-height:1.6!important}
 .mail-img-grid{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;align-items:flex-start}
 .mail-img-grid img{max-width:150px!important;max-height:130px!important;width:auto!important;height:auto!important;object-fit:contain!important;border-radius:6px!important;border:1px solid #dde3ed!important;background:#f5f6f8!important;display:block!important}
 img:not(.mail-img-grid img){max-width:150px!important;max-height:130px!important;width:auto!important;height:auto!important;object-fit:contain!important;border-radius:6px!important;border:1px solid #dde3ed!important;background:#f5f6f8!important}
