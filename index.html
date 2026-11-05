@@ -1439,7 +1439,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 <div class="modal" id="mailComposeModal">
   <div class="box" style="max-width:520px">
     <div class="box-h">
-      <div style="min-width:0"><h3>✎ Tulis Email Baru</h3><p>Kirim lewat akun email cPanel</p></div>
+      <div style="min-width:0"><h3 id="mcTitle">✎ Tulis Email Baru</h3><p id="mcSubtitle">Kirim lewat akun email cPanel</p></div>
       <button class="x" id="btnCloseMailCompose">✕</button>
     </div>
     <div class="box-body">
@@ -2451,8 +2451,7 @@ async function openMailMessage(uid){
           </div>
         </section>` : ''}
         <div class="mail-reply">
-          <textarea id="mailReplyBox" placeholder="Tulis balasan…"></textarea>
-          <button class="btn b-pri sm" id="btnMailReplySend">Balas</button>
+          <button class="btn b-pri" id="btnMailReplyOpen" type="button">Balas</button>
         </div>
       </div>`;
     const ifr=document.createElement('iframe');
@@ -2527,7 +2526,7 @@ img:not(.mail-img-grid img){max-width:150px!important;max-height:130px!important
         });
       }catch(e){ /* abaikan jika contentDocument tidak bisa diakses */ }
     });
-    $('#btnMailReplySend').addEventListener('click', ()=>sendMailReply(msg));
+    $('#btnMailReplyOpen').addEventListener('click', ()=>openMailReplyComposer(msg));
     $('#mailReadAttachList')?.querySelectorAll('[data-mail-att-download]').forEach(btn=>{
       btn.addEventListener('click', ()=>{
         const att=msg.attachments?.[Number(btn.dataset.mailAttDownload)];
@@ -2657,30 +2656,6 @@ async function deleteMailMessage(uid){
   }
 }
 
-async function sendMailReply(msg){
-  const body=$('#mailReplyBox').value.trim();
-  if(!body)return;
-  const btn=$('#btnMailReplySend'); const orig=btn.textContent; btn.disabled=true; btn.textContent='Mengirim…';
-  try{
-    const to=msg.from_email||msg.from;
-    const subject=/^re:/i.test(msg.subject||'')?msg.subject:'Re: '+(msg.subject||'');
-    const {data,error}=await sb.functions.invoke('email-send',{body:{
-      account_id:MAIL_ACTIVE, to, subject, message:body,
-      in_reply_to:msg.message_id, references:msg.message_id
-    }});
-    if(error)throw new Error(error.message||'Gagal mengirim balasan');
-    if(data?.error)throw new Error(data.error);
-    if(data?.sent_saved===false) toast('Balasan terkirim, tetapi gagal disimpan di Terkirim: '+(data.sent_error||'alasan tidak diketahui'),'err');
-    else toast('Balasan terkirim ✓','ok');
-    $('#mailReplyBox').value='';
-  }catch(err){
-    console.error(err);
-    toast('Gagal membalas: '+err.message,'err');
-  }finally{
-    btn.disabled=false; btn.textContent=orig;
-  }
-}
-
 $('#mailAcc').addEventListener('change', ()=>{
   MAIL_ACTIVE=$('#mailAcc').value; MAIL_FOLDER='INBOX'; MAIL_OPEN=null;
   MAIL_INBOX_TOTAL=null; MAIL_INBOX_PROBE_COUNT=0;
@@ -2722,6 +2697,7 @@ $('#mailAccModal').addEventListener('click', e=>{
 });
 
 let MC_ATTACHMENTS=[]; // {file, id}
+let MAIL_REPLY_CONTEXT=null;
 const MC_ATTACH_MAX_TOTAL=15*1024*1024; // 15MB
 
 function mcAttachTotalSize(){ return MC_ATTACHMENTS.reduce((s,a)=>s+a.file.size,0); }
@@ -2768,17 +2744,48 @@ function fileToBase64(file){
   });
 }
 
-$('#btnMailCompose').addEventListener('click', ()=>{
+function resetMailComposeMode(){
+  MAIL_REPLY_CONTEXT=null;
+  $('#mcTitle').textContent='✎ Tulis Email Baru';
+  $('#mcSubtitle').textContent='Kirim lewat akun email cPanel';
+  $('#btnMailSend').textContent='Kirim Sekarang';
+}
+function prepareMailCompose(){
   $('#mcTo').value=''; $('#mcSubject').value=''; $('#mcMessage').value=''; $('#mcErr').textContent='';
   MC_ATTACHMENTS=[]; renderMcAttachments();
   if(MAIL_ACTIVE){ $('#mcFrom').value=MAIL_ACTIVE; }
   ensureCsel($('#mcFrom'));
   $('#mailComposeModal').classList.add('show');
+}
+function openMailReplyComposer(msg){
+  const to=msg.from_email||msg.from||'';
+  const subject=/^re:/i.test(msg.subject||'')?msg.subject:'Re: '+(msg.subject||'');
+  MAIL_REPLY_CONTEXT={messageId:msg.message_id||'',references:msg.message_id||''};
+  prepareMailCompose();
+  $('#mcTitle').textContent='↩ Balas Email';
+  $('#mcSubtitle').textContent='Balasan akan dikirim ke '+to;
+  $('#mcTo').value=to;
+  $('#mcSubject').value=subject;
+  $('#btnMailSend').textContent='Kirim Balasan';
+  $('#mcMessage').focus();
+}
+$('#btnMailCompose').addEventListener('click', ()=>{
+  resetMailComposeMode();
+  prepareMailCompose();
 });
-$('#btnCloseMailCompose').addEventListener('click', ()=>$('#mailComposeModal').classList.remove('show'));
-$('#mailComposeModal').addEventListener('click', e=>{ if(e.target.id==='mailComposeModal')$('#mailComposeModal').classList.remove('show'); });
+$('#btnCloseMailCompose').addEventListener('click', ()=>{
+  $('#mailComposeModal').classList.remove('show');
+  resetMailComposeMode();
+});
+$('#mailComposeModal').addEventListener('click', e=>{
+  if(e.target.id==='mailComposeModal'){
+    $('#mailComposeModal').classList.remove('show');
+    resetMailComposeMode();
+  }
+});
 
 $('#btnMailSend').addEventListener('click', async ()=>{
+  const replyContext=MAIL_REPLY_CONTEXT;
   const account_id=$('#mcFrom').value;
   const to=$('#mcTo').value.trim(), subject=$('#mcSubject').value.trim(), message=$('#mcMessage').value.trim();
   $('#mcErr').textContent='';
@@ -2797,15 +2804,20 @@ $('#btnMailSend').addEventListener('click', async ()=>{
       btn.textContent='Mengirim…';
     }
     const body={account_id,to,subject,message};
+    if(replyContext?.messageId){
+      body.in_reply_to=replyContext.messageId;
+      body.references=replyContext.references;
+    }
     if(attachments.length) body.attachments=attachments;
     const {data,error}=await sb.functions.invoke('email-send',{body});
     if(error)throw new Error(error.message||'Gagal mengirim');
     if(data?.error)throw new Error(data.error);
-    if(data?.sent_saved===false) toast('Email terkirim, tetapi gagal disimpan di Terkirim: '+(data.sent_error||'alasan tidak diketahui'),'err');
-    else toast('Email terkirim ✓','ok');
+    if(data?.sent_saved===false) toast(`${replyContext?'Balasan':'Email'} terkirim, tetapi gagal disimpan di Terkirim: `+(data.sent_error||'alasan tidak diketahui'),'err');
+    else toast(replyContext?'Balasan terkirim ✓':'Email terkirim ✓','ok');
     MC_ATTACHMENTS=[]; renderMcAttachments();
     if(isSentFolder()) await loadMailList();
     $('#mailComposeModal').classList.remove('show');
+    resetMailComposeMode();
   }catch(err){
     console.error(err);
     $('#mcErr').textContent='Gagal mengirim: '+(err.message||'terjadi kesalahan');
