@@ -2507,7 +2507,38 @@ img:not(.mail-img-grid img){max-width:150px!important;max-height:130px!important
         return doc.documentElement.outerHTML;
       }catch(e){ return html; }
     }
-    ifr.srcdoc = msg.html ? (baseTag+imgLimitStyle+wrapMailImages(msg.html)) : ('<pre style="white-space:pre-wrap;font-family:inherit;padding:16px;margin:0">'+escapeHtml(msg.text||'(tidak ada isi)')+'</pre>');
+    function repairMailActivationLinks(html){
+      try{
+        const doc=new DOMParser().parseFromString(html,'text/html');
+        const links=[...doc.querySelectorAll('a[href]')];
+        const absoluteActivationLinks=links.flatMap(link=>{
+          try{
+            const href=link.getAttribute('href')||'';
+            if(!/^https?:\/\//i.test(href))return [];
+            const url=new URL(href);
+            return /activat|verif|confirm/i.test(url.pathname)?[{link,url}]:[];
+          }catch{ return []; }
+        });
+        links.forEach(link=>{
+          const label=link.textContent.trim();
+          const href=link.getAttribute('href')||'';
+          if(!/activat/i.test(label) || /^https?:\/\//i.test(href))return;
+          const fallback=absoluteActivationLinks.find(candidate=>candidate.link!==link);
+          if(fallback)link.href=fallback.url.href;
+          else{
+            link.href='#mail-invalid-activation';
+            link.dataset.mailInvalidActivation='true';
+          }
+        });
+        return doc.documentElement.outerHTML;
+      }catch(e){
+        console.warn('Tautan aktivasi email tidak dapat diperiksa:',e);
+        return html;
+      }
+    }
+    ifr.srcdoc = msg.html
+      ? (baseTag+imgLimitStyle+wrapMailImages(repairMailActivationLinks(msg.html)))
+      : ('<pre style="white-space:pre-wrap;font-family:inherit;padding:16px;margin:0">'+escapeHtml(msg.text||'(tidak ada isi)')+'</pre>');
     // LIGHTBOX: begitu iframe selesai render, pasang klik-preview ke tiap <img>
     // lewat contentDocument milik PARENT (bukan script di dalam email).
     ifr.addEventListener('load', ()=>{
@@ -2522,6 +2553,12 @@ img:not(.mail-img-grid img){max-width:150px!important;max-height:130px!important
             e.preventDefault();
             const src=img.currentSrc||img.src;
             if(src) openMailLightbox(src);
+          });
+        });
+        idoc.querySelectorAll('[data-mail-invalid-activation]').forEach(link=>{
+          link.addEventListener('click',e=>{
+            e.preventDefault();
+            toast('Tautan aktivasi tidak lengkap. Gunakan tautan HTTPS lengkap di isi email atau minta pengirim mengirim ulang.','err');
           });
         });
       }catch(e){ /* abaikan jika contentDocument tidak bisa diakses */ }
