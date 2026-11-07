@@ -1265,6 +1265,28 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .mail-body>.mail-read{min-height:0}
 .mail-body{border-top:none}
 
+/* Keep the desktop mail panes inside the viewport instead of scrolling the page. */
+@media(min-width:861px){
+  #appShell.email-only{
+    height:calc((var(--app-vh, 1vh) * 100) - 82px);
+    min-height:0;
+    overflow:hidden;
+  }
+  #appShell.email-only #secEmail{
+    height:100%;
+    min-height:0;
+  }
+  #appShell.email-only .mail-shell{
+    height:100%;
+    min-height:0;
+  }
+  #appShell.email-only .mail-body{
+    height:auto!important;
+    flex:1;
+    min-height:0;
+  }
+}
+
 </style>
 </head>
 <body>
