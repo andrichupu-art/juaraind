@@ -13,6 +13,7 @@ import { ImapFlow } from 'npm:imapflow@1.0.98';
 import { Buffer } from 'node:buffer';
 import { requireAdmin } from '../_shared/auth.ts';
 import {
+  decodeQuotedPrintable,
   getMessageParts,
   isWithinAttachmentLimits,
   MAX_ATTACHMENT_BYTES,
@@ -355,6 +356,9 @@ Deno.serve(async (req: Request) => {
           if (downloadedBody?.content && typeof downloadedBody.content[Symbol.asyncIterator] === 'function') {
             const bodyBuffer = await collectDownload(downloadedBody.content, MAX_EMAIL_BODY_BYTES);
             bodyContent = new TextDecoder().decode(bodyBuffer);
+            if (parts.body.encoding?.toLowerCase() === 'quoted-printable') {
+              bodyContent = decodeQuotedPrintable(bodyContent);
+            }
             if (parts.body.type.toLowerCase() === 'text/html') html = bodyContent;
           }
         }

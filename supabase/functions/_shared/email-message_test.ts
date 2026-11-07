@@ -1,8 +1,22 @@
 import {
+  decodeQuotedPrintable,
   getMessageParts,
   isWithinAttachmentLimits,
   type MessageStructure,
 } from './email-message.ts';
+
+Deno.test('decodes quoted-printable HTML and soft line breaks', () => {
+  const encoded =
+    '<a href="https://visa.vfsglobal.com/id/en=3D/tur/activateemail?q=3Dvalue=\r\nnext">ActivateAccount</a><p>Good=20day</p>';
+  const decoded = decodeQuotedPrintable(encoded);
+
+  if (
+    decoded !==
+      '<a href="https://visa.vfsglobal.com/id/en=/tur/activateemail?q=valuenext">ActivateAccount</a><p>Good day</p>'
+  ) {
+    throw new Error(`Unexpected decoded body: ${decoded}`);
+  }
+});
 
 Deno.test('selects the HTML body and keeps attachment and inline-image parts separate', () => {
   const structure: MessageStructure = {

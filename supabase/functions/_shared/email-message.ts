@@ -5,6 +5,7 @@ export const MAX_TOTAL_ATTACHMENT_BYTES = 3 * 1024 * 1024;
 export type MessageStructure = {
   part: string;
   type: string;
+  encoding?: string;
   parameters?: Record<string, string>;
   disposition?: string;
   dispositionParameters?: Record<string, string>;
@@ -21,6 +22,31 @@ export type MessagePartInfo = {
 
 export function partFilename(part: MessageStructure): string | undefined {
   return part.dispositionParameters?.filename || part.parameters?.name;
+}
+
+export function decodeQuotedPrintable(value: string): string {
+  const input = value.replace(/=\r?\n/g, '');
+  const chunks: Uint8Array[] = [];
+  const encoder = new TextEncoder();
+  const encodedBytes = /=([\da-f]{2})/gi;
+  let cursor = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = encodedBytes.exec(input)) !== null) {
+    chunks.push(encoder.encode(input.slice(cursor, match.index)));
+    chunks.push(new Uint8Array([Number.parseInt(match[1], 16)]));
+    cursor = match.index + match[0].length;
+  }
+
+  chunks.push(encoder.encode(input.slice(cursor)));
+  const byteLength = chunks.reduce((total, chunk) => total + chunk.length, 0);
+  const bytes = new Uint8Array(byteLength);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return new TextDecoder().decode(bytes);
 }
 
 function isAttachment(part: MessageStructure): boolean {
