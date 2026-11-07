@@ -2511,22 +2511,45 @@ img:not(.mail-img-grid img){max-width:150px!important;max-height:130px!important
       try{
         const doc=new DOMParser().parseFromString(html,'text/html');
         const links=[...doc.querySelectorAll('a[href]')];
-        const absoluteActivationLinks=links.flatMap(link=>{
+        const absoluteActivationUrls=links.flatMap(link=>{
           try{
             const href=link.getAttribute('href')||'';
             if(!/^https?:\/\//i.test(href))return [];
             const url=new URL(href);
-            return /activat|verif|confirm/i.test(url.pathname)?[{link,url}]:[];
+            return /activat|verif|confirm/i.test(url.pathname)?[url.href]:[];
           }catch{ return []; }
+        });
+        const visibleActivationUrls=(doc.body?.innerText||doc.body?.textContent||'')
+          .match(/https?:\/\/[^\s<>"']+/gi)||[];
+        const activationUrl=[...new Set([
+          ...absoluteActivationUrls,
+          ...visibleActivationUrls.map(value=>value.replace(/[),.;\]}]+$/,'').replace(/=20$/i,''))
+        ])].find(value=>{
+          try{
+            const url=new URL(value);
+            return /activat|verif|confirm/i.test(url.pathname);
+          }catch{ return false; }
         });
         links.forEach(link=>{
           const label=link.textContent.trim();
           const href=link.getAttribute('href')||'';
-          if(!/activat/i.test(label) || /^https?:\/\//i.test(href))return;
-          const fallback=absoluteActivationLinks.find(candidate=>candidate.link!==link);
-          if(fallback)link.href=fallback.url.href;
-          else{
+          if(!/activat/i.test(label))return;
+          let destination='';
+          try{
+            const url=new URL(href);
+            if(/^https?:$/.test(url.protocol) && /activat|verif|confirm/i.test(url.pathname)){
+              destination=url.href;
+            }
+          }catch{}
+          if(!destination)destination=activationUrl||'';
+          if(destination){
+            link.href=destination;
+            link.target='_self';
+            link.rel='noopener noreferrer';
+            link.dataset.mailActivation='true';
+          }else{
             link.href='#mail-invalid-activation';
+            link.target='_self';
             link.dataset.mailInvalidActivation='true';
           }
         });
@@ -2553,6 +2576,12 @@ img:not(.mail-img-grid img){max-width:150px!important;max-height:130px!important
             e.preventDefault();
             const src=img.currentSrc||img.src;
             if(src) openMailLightbox(src);
+          });
+        });
+        idoc.querySelectorAll('[data-mail-activation]').forEach(link=>{
+          link.addEventListener('click',e=>{
+            e.preventDefault();
+            window.location.assign(link.href);
           });
         });
         idoc.querySelectorAll('[data-mail-invalid-activation]').forEach(link=>{
