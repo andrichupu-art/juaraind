@@ -2511,13 +2511,23 @@ img:not(.mail-img-grid img){max-width:150px!important;max-height:130px!important
       try{
         const doc=new DOMParser().parseFromString(html,'text/html');
         const links=[...doc.querySelectorAll('a[href]')];
-        const absoluteActivationUrls=links.flatMap(link=>{
+        const appDomain='juaraind.com';
+        function externalActivationUrl(value){
           try{
-            const href=link.getAttribute('href')||'';
-            if(!/^https?:\/\//i.test(href))return [];
-            const url=new URL(href);
-            return /activat|verif|confirm/i.test(url.pathname)?[url.href]:[];
-          }catch{ return []; }
+            const url=new URL(value);
+            const hostname=url.hostname.toLowerCase();
+            const isAppDomain=hostname===appDomain||hostname.endsWith('.'+appDomain);
+            return /^https?:$/.test(url.protocol) &&
+              !isAppDomain &&
+              /activat|verif|confirm/i.test(url.pathname)
+              ? url.href
+              : '';
+          }catch{ return ''; }
+        }
+        const absoluteActivationUrls=links.flatMap(link=>{
+          const href=link.getAttribute('href')||'';
+          const destination=externalActivationUrl(href);
+          return destination?[destination]:[];
         });
         const visibleActivationUrls=(doc.body?.innerText||doc.body?.textContent||'')
           .match(/https?:\/\/[^\s<>"']+/gi)||[];
@@ -2525,22 +2535,13 @@ img:not(.mail-img-grid img){max-width:150px!important;max-height:130px!important
           ...absoluteActivationUrls,
           ...visibleActivationUrls.map(value=>value.replace(/[),.;\]}]+$/,'').replace(/=20$/i,''))
         ])].find(value=>{
-          try{
-            const url=new URL(value);
-            return /activat|verif|confirm/i.test(url.pathname);
-          }catch{ return false; }
+          return !!externalActivationUrl(value);
         });
         links.forEach(link=>{
           const label=link.textContent.trim();
           const href=link.getAttribute('href')||'';
           if(!/activat/i.test(label))return;
-          let destination='';
-          try{
-            const url=new URL(href);
-            if(/^https?:$/.test(url.protocol) && /activat|verif|confirm/i.test(url.pathname)){
-              destination=url.href;
-            }
-          }catch{}
+          let destination=externalActivationUrl(href);
           if(!destination)destination=activationUrl||'';
           if(destination){
             link.href=destination;
@@ -2581,7 +2582,13 @@ img:not(.mail-img-grid img){max-width:150px!important;max-height:130px!important
         idoc.querySelectorAll('[data-mail-activation]').forEach(link=>{
           link.addEventListener('click',e=>{
             e.preventDefault();
-            window.location.assign(link.href);
+            const destination=link.href;
+            if(!/^https?:\/\//i.test(destination) || /(^|\.)juaraind\.com$/i.test(new URL(destination).hostname)){
+              toast('Tautan aktivasi tidak mengarah ke situs aktivasi. Minta pengirim mengirim tautan baru.','err');
+              return;
+            }
+            const popup=window.open(destination,'_blank','noopener,noreferrer');
+            if(!popup)toast('Browser memblokir tab aktivasi. Izinkan pop-up lalu klik tautan lagi.','err');
           });
         });
         idoc.querySelectorAll('[data-mail-invalid-activation]').forEach(link=>{
