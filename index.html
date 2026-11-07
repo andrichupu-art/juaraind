@@ -2545,9 +2545,9 @@ img:not(.mail-img-grid img){max-width:150px!important;max-height:130px!important
           if(!destination)destination=activationUrl||'';
           if(destination){
             link.href=destination;
-            link.target='_self';
+            link.target='_blank';
             link.rel='noopener noreferrer';
-            link.dataset.mailActivation='true';
+            delete link.dataset.mailInvalidActivation;
           }else{
             link.href='#mail-invalid-activation';
             link.target='_self';
@@ -2577,18 +2577,6 @@ img:not(.mail-img-grid img){max-width:150px!important;max-height:130px!important
             e.preventDefault();
             const src=img.currentSrc||img.src;
             if(src) openMailLightbox(src);
-          });
-        });
-        idoc.querySelectorAll('[data-mail-activation]').forEach(link=>{
-          link.addEventListener('click',e=>{
-            e.preventDefault();
-            const destination=link.href;
-            if(!/^https?:\/\//i.test(destination) || /(^|\.)juaraind\.com$/i.test(new URL(destination).hostname)){
-              toast('Tautan aktivasi tidak mengarah ke situs aktivasi. Minta pengirim mengirim tautan baru.','err');
-              return;
-            }
-            const popup=window.open(destination,'_blank','noopener,noreferrer');
-            if(!popup)toast('Browser memblokir tab aktivasi. Izinkan pop-up lalu klik tautan lagi.','err');
           });
         });
         idoc.querySelectorAll('[data-mail-invalid-activation]').forEach(link=>{
