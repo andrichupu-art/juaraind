@@ -38,14 +38,21 @@ export function getMessageParts(structure: MessageStructure): MessagePartInfo {
     return part.type.toLowerCase() === 'message/rfc822';
   }
 
-  function findBody(part: MessageStructure): MessageStructure[] {
-    if (isAttachment(part) || isEmbeddedMessage(part)) return [];
+  function findBody(part: MessageStructure, includeEmbeddedMessage = false): MessageStructure[] {
+    if (isAttachment(part) || (isEmbeddedMessage(part) && !includeEmbeddedMessage)) return [];
 
     if (part.childNodes?.length) {
+      const type = part.type.toLowerCase();
+
+      if (type === 'multipart/report') {
+        const originalMessage = part.childNodes.find(isEmbeddedMessage);
+        const originalBody = originalMessage ? findBody(originalMessage, true) : [];
+        if (originalBody.length) return originalBody;
+      }
+
       const children = part.childNodes.filter((child) =>
         !isAttachment(child) && !isEmbeddedMessage(child)
       );
-      const type = part.type.toLowerCase();
 
       if (type === 'multipart/related') {
         const start = part.parameters?.start?.replace(/^<|>$/g, '').toLowerCase();
@@ -56,7 +63,7 @@ export function getMessageParts(structure: MessageStructure): MessagePartInfo {
         return bodyRoot ? findBody(bodyRoot) : [];
       }
 
-      return children.flatMap(findBody);
+      return children.flatMap((child) => findBody(child));
     }
 
     const type = part.type.toLowerCase();

@@ -68,6 +68,37 @@ Deno.test('prefers the HTML body over a plain-text report and ignores forwarded 
   }
 });
 
+Deno.test('uses the original message body from multipart reports', () => {
+  const structure: MessageStructure = {
+    part: '1',
+    type: 'multipart/report',
+    childNodes: [
+      { part: '1.1', type: 'text/plain', size: 400 },
+      { part: '1.2', type: 'message/delivery-status' },
+      {
+        part: '1.3',
+        type: 'message/rfc822',
+        childNodes: [
+          {
+            part: '1.3',
+            type: 'multipart/alternative',
+            childNodes: [
+              { part: '1.3.1', type: 'text/plain', size: 40 },
+              { part: '1.3.2', type: 'text/html', size: 120 },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+
+  const parts = getMessageParts(structure);
+
+  if (parts.body?.part !== '1.3.2') {
+    throw new Error('Expected the original HTML message body, not the report text.');
+  }
+});
+
 Deno.test('limits attachment downloads per part and per message', () => {
   if (!isWithinAttachmentLimits(1024, 1024)) throw new Error('Small attachment should be downloadable.');
   if (isWithinAttachmentLimits(25 * 1024 * 1024 + 1, 0)) throw new Error('Oversized attachment should be skipped.');

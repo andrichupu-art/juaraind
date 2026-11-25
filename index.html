@@ -911,7 +911,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .mail-lightbox-img{max-width:min(92vw,1100px);max-height:88vh;width:auto;height:auto;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.5);object-fit:contain;background:#fff}
 .mail-lightbox-close{position:absolute;top:18px;right:22px;width:40px;height:40px;border-radius:50%;background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;cursor:pointer;border:1.5px solid var(--line);box-shadow:0 6px 18px rgba(0,0,0,.3)}
 .mail-lightbox-close:hover{background:var(--red);color:#fff;border-color:var(--red)}
-.mail-img-grid img,.mail-read-body iframe{cursor:default}
+.mail-read-body iframe{cursor:default}
 
 /* ============================================================
    REDESAIN MODERN — KELOLA EMAIL
@@ -2491,48 +2491,16 @@ async function openMailMessage(uid){
     const mailReadBody=$('#mailReadBody');
     mailReadBody.insertBefore(ifr,mailReadBody.firstChild);
     const baseTag='<base target="_blank" rel="noopener noreferrer">';
-    const imgLimitStyle=`<style>
-body{margin:0;padding:16px 18px;font-family:Arial,sans-serif;font-size:15px!important;line-height:1.65!important;color:#202124;background:#fff}
-body :is(p,div,td,th,li,span,a){font-size:max(14px,1em)!important;line-height:1.6!important}
-.mail-img-grid{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0;align-items:flex-start}
-.mail-img-grid img{max-width:150px!important;max-height:130px!important;width:auto!important;height:auto!important;object-fit:contain!important;border-radius:6px!important;border:1px solid #dde3ed!important;background:#f5f6f8!important;display:block!important}
-img:not(.mail-img-grid img){max-width:150px!important;max-height:130px!important;width:auto!important;height:auto!important;object-fit:contain!important;border-radius:6px!important;border:1px solid #dde3ed!important;background:#f5f6f8!important}
+    const mailBodyStyle=`<style>
+body{margin:0;padding:12px 16px;font-family:Arial,sans-serif;color:#202124;background:#fff}
+img{max-width:100%}
 </style>`;
-    function wrapMailImages(html){
-      try{
-        const dp=new DOMParser();
-        const doc=dp.parseFromString(html,'text/html');
-        // Ambil semua img yang bukan di dalam tabel (biar layout email tabel tidak rusak)
-        const imgs=[...doc.querySelectorAll('body img')].filter(img=>!img.closest('table'));
-        if(imgs.length===0) return html;
-        // Kumpulkan img berdasarkan parent — setiap parent yang punya >=1 img, buat grid
-        const parents=new Map();
-        imgs.forEach(img=>{
-          const p=img.parentNode;
-          if(!parents.has(p)) parents.set(p,[]);
-          parents.get(p).push(img);
-        });
-        parents.forEach((group,parent)=>{
-          const grid=doc.createElement('div');
-          grid.className='mail-img-grid';
-          // Sisipkan grid sebelum img pertama dalam parent tsb
-          parent.insertBefore(grid,group[0]);
-          group.forEach(img=>{
-            // Bersihkan BR kosong di sekitar img
-            const prev=img.previousSibling;
-            const next=img.nextSibling;
-            if(prev&&prev.nodeName==='BR') prev.remove();
-            if(next&&next.nodeName==='BR') next.remove();
-            grid.appendChild(img);
-          });
-        });
-        return doc.documentElement.outerHTML;
-      }catch(e){ return html; }
-    }
     function repairMailActivationLinks(html){
       try{
         const doc=new DOMParser().parseFromString(html,'text/html');
         const links=[...doc.querySelectorAll('a[href]')];
+        const activationLinks=links.filter(link=>/activat/i.test(link.textContent.trim()));
+        if(!activationLinks.length) return html;
         const appDomain='juaraind.com';
         function externalActivationUrl(value){
           try{
@@ -2559,10 +2527,8 @@ img:not(.mail-img-grid img){max-width:150px!important;max-height:130px!important
         ])].find(value=>{
           return !!externalActivationUrl(value);
         });
-        links.forEach(link=>{
-          const label=link.textContent.trim();
+        activationLinks.forEach(link=>{
           const href=link.getAttribute('href')||'';
-          if(!/activat/i.test(label))return;
           let destination=externalActivationUrl(href);
           if(!destination)destination=activationUrl||'';
           if(destination){
@@ -2583,7 +2549,7 @@ img:not(.mail-img-grid img){max-width:150px!important;max-height:130px!important
       }
     }
     ifr.srcdoc = msg.html
-      ? (baseTag+imgLimitStyle+wrapMailImages(repairMailActivationLinks(msg.html)))
+      ? (baseTag+mailBodyStyle+repairMailActivationLinks(msg.html))
       : ('<pre style="white-space:pre-wrap;font-family:inherit;padding:16px;margin:0">'+escapeHtml(msg.text||'(tidak ada isi)')+'</pre>');
     // LIGHTBOX: begitu iframe selesai render, pasang klik-preview ke tiap <img>
     // lewat contentDocument milik PARENT (bukan script di dalam email).
