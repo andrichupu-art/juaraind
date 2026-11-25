@@ -34,6 +34,14 @@ export function getMessageParts(structure: MessageStructure): MessagePartInfo {
   const attachments: MessageStructure[] = [];
   const relatedImages: MessageStructure[] = [];
 
+  function withPartId(part: MessageStructure): MessageStructure {
+    const normalized: MessageStructure = { ...part, part: part.part || '1' };
+    if (part.childNodes) normalized.childNodes = part.childNodes.map(withPartId);
+    return normalized;
+  }
+
+  const root = withPartId(structure);
+
   function isEmbeddedMessage(part: MessageStructure): boolean {
     return part.type.toLowerCase() === 'message/rfc822';
   }
@@ -83,8 +91,8 @@ export function getMessageParts(structure: MessageStructure): MessagePartInfo {
     part.childNodes?.forEach(collectAttachments);
   }
 
-  collectAttachments(structure);
-  const body = findBody(structure).sort((a, b) => {
+  collectAttachments(root);
+  const body = findBody(root).sort((a, b) => {
     const typeOrder = (candidate: MessageStructure) =>
       candidate.type.toLowerCase() === 'text/html' ? 0 : 1;
     const sizeOrder = (candidate: MessageStructure) =>

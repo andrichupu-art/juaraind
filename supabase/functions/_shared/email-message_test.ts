@@ -37,6 +37,21 @@ Deno.test('selects the HTML body and keeps attachment and inline-image parts sep
   if (parts.relatedImages[0]?.part !== '2') throw new Error('Expected inline image metadata.');
 });
 
+Deno.test('assigns part 1 to a single-part root so IMAP downloads the body, not the raw source', () => {
+  const structure: MessageStructure = {
+    part: '',
+    type: 'text/plain',
+    encoding: 'quoted-printable',
+    size: 320,
+  };
+
+  const parts = getMessageParts(structure);
+
+  if (parts.body?.part !== '1') {
+    throw new Error('Expected the root body part to be normalized to 1.');
+  }
+});
+
 Deno.test('prefers the HTML body over a plain-text report and ignores forwarded messages', () => {
   const structure: MessageStructure = {
     part: '1',
