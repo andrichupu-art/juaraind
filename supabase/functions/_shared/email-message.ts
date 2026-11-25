@@ -24,31 +24,6 @@ export function partFilename(part: MessageStructure): string | undefined {
   return part.dispositionParameters?.filename || part.parameters?.name;
 }
 
-export function decodeQuotedPrintable(value: string): string {
-  const input = value.replace(/=\r?\n/g, '');
-  const chunks: Uint8Array[] = [];
-  const encoder = new TextEncoder();
-  const encodedBytes = /=([\da-f]{2})/gi;
-  let cursor = 0;
-  let match: RegExpExecArray | null;
-
-  while ((match = encodedBytes.exec(input)) !== null) {
-    chunks.push(encoder.encode(input.slice(cursor, match.index)));
-    chunks.push(new Uint8Array([Number.parseInt(match[1], 16)]));
-    cursor = match.index + match[0].length;
-  }
-
-  chunks.push(encoder.encode(input.slice(cursor)));
-  const byteLength = chunks.reduce((total, chunk) => total + chunk.length, 0);
-  const bytes = new Uint8Array(byteLength);
-  let offset = 0;
-  for (const chunk of chunks) {
-    bytes.set(chunk, offset);
-    offset += chunk.length;
-  }
-  return new TextDecoder().decode(bytes);
-}
-
 function isAttachment(part: MessageStructure): boolean {
   return part.disposition?.toLowerCase() === 'attachment' ||
     !!partFilename(part) ||
@@ -81,17 +56,7 @@ export function getMessageParts(structure: MessageStructure): MessagePartInfo {
         return bodyRoot ? findBody(bodyRoot) : [];
       }
 
-      const bodies = children.flatMap(findBody);
-      if (type === 'multipart/alternative') {
-        return bodies.sort((a, b) => {
-          const typeOrder = (candidate: MessageStructure) =>
-            candidate.type.toLowerCase() === 'text/html' ? 0 : 1;
-          const sizeOrder = (candidate: MessageStructure) =>
-            candidate.size ?? Number.MAX_SAFE_INTEGER;
-          return typeOrder(a) - typeOrder(b) || sizeOrder(a) - sizeOrder(b);
-        });
-      }
-      return bodies.slice(0, 1);
+      return children.flatMap(findBody);
     }
 
     const type = part.type.toLowerCase();
@@ -112,7 +77,13 @@ export function getMessageParts(structure: MessageStructure): MessagePartInfo {
   }
 
   collectAttachments(structure);
-  const body = findBody(structure)[0];
+  const body = findBody(structure).sort((a, b) => {
+    const typeOrder = (candidate: MessageStructure) =>
+      candidate.type.toLowerCase() === 'text/html' ? 0 : 1;
+    const sizeOrder = (candidate: MessageStructure) =>
+      candidate.size ?? Number.MAX_SAFE_INTEGER;
+    return typeOrder(a) - typeOrder(b) || sizeOrder(a) - sizeOrder(b);
+  })[0];
 
   return { body, attachments, relatedImages };
 }

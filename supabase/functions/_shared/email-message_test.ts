@@ -1,22 +1,4 @@
-import {
-  decodeQuotedPrintable,
-  getMessageParts,
-  isWithinAttachmentLimits,
-  type MessageStructure,
-} from './email-message.ts';
-
-Deno.test('decodes quoted-printable HTML and soft line breaks', () => {
-  const encoded =
-    '<a href="https://visa.vfsglobal.com/id/en=3D/tur/activateemail?q=3Dvalue=\r\nnext">ActivateAccount</a><p>Good=20day</p>';
-  const decoded = decodeQuotedPrintable(encoded);
-
-  if (
-    decoded !==
-      '<a href="https://visa.vfsglobal.com/id/en=/tur/activateemail?q=valuenext">ActivateAccount</a><p>Good day</p>'
-  ) {
-    throw new Error(`Unexpected decoded body: ${decoded}`);
-  }
-});
+import { getMessageParts, isWithinAttachmentLimits, type MessageStructure } from './email-message.ts';
 
 Deno.test('selects the HTML body and keeps attachment and inline-image parts separate', () => {
   const structure: MessageStructure = {
@@ -55,7 +37,7 @@ Deno.test('selects the HTML body and keeps attachment and inline-image parts sep
   if (parts.relatedImages[0]?.part !== '2') throw new Error('Expected inline image metadata.');
 });
 
-Deno.test('selects the main MIME body instead of later report or forwarded-message parts', () => {
+Deno.test('prefers the HTML body over a plain-text report and ignores forwarded messages', () => {
   const structure: MessageStructure = {
     part: '1',
     type: 'multipart/mixed',
@@ -81,8 +63,8 @@ Deno.test('selects the main MIME body instead of later report or forwarded-messa
 
   const parts = getMessageParts(structure);
 
-  if (parts.body?.part !== '1.2') {
-    throw new Error('Expected the HTML body from the first MIME body branch.');
+  if (parts.body?.part !== '2') {
+    throw new Error('Expected the HTML body instead of the earlier plain-text report.');
   }
 });
 
