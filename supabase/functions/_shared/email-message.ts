@@ -56,36 +56,65 @@ function isAttachment(part: MessageStructure): boolean {
 }
 
 export function getMessageParts(structure: MessageStructure): MessagePartInfo {
-  const textParts: MessageStructure[] = [];
   const attachments: MessageStructure[] = [];
   const relatedImages: MessageStructure[] = [];
 
-  function visit(part: MessageStructure) {
+  function isEmbeddedMessage(part: MessageStructure): boolean {
+    return part.type.toLowerCase() === 'message/rfc822';
+  }
+
+  function findBody(part: MessageStructure): MessageStructure[] {
+    if (isAttachment(part) || isEmbeddedMessage(part)) return [];
+
     if (part.childNodes?.length) {
-      part.childNodes.forEach(visit);
-      return;
+      const children = part.childNodes.filter((child) =>
+        !isAttachment(child) && !isEmbeddedMessage(child)
+      );
+      const type = part.type.toLowerCase();
+
+      if (type === 'multipart/related') {
+        const start = part.parameters?.start?.replace(/^<|>$/g, '').toLowerCase();
+        const root = start
+          ? children.find((child) => child.id?.replace(/^<|>$/g, '').toLowerCase() === start)
+          : undefined;
+        const bodyRoot = root ?? children[0];
+        return bodyRoot ? findBody(bodyRoot) : [];
+      }
+
+      const bodies = children.flatMap(findBody);
+      if (type === 'multipart/alternative') {
+        return bodies.sort((a, b) => {
+          const typeOrder = (candidate: MessageStructure) =>
+            candidate.type.toLowerCase() === 'text/html' ? 0 : 1;
+          const sizeOrder = (candidate: MessageStructure) =>
+            candidate.size ?? Number.MAX_SAFE_INTEGER;
+          return typeOrder(a) - typeOrder(b) || sizeOrder(a) - sizeOrder(b);
+        });
+      }
+      return bodies.slice(0, 1);
     }
 
+    const type = part.type.toLowerCase();
+    return (type === 'text/html' || type === 'text/plain') &&
+        (part.size === undefined || part.size <= MAX_EMAIL_BODY_BYTES)
+      ? [part]
+      : [];
+  }
+
+  function collectAttachments(part: MessageStructure) {
+    if (isEmbeddedMessage(part)) return;
     if (isAttachment(part)) {
       attachments.push(part);
       if (part.id && part.type.toLowerCase().startsWith('image/')) relatedImages.push(part);
       return;
     }
-
-    if (part.type.toLowerCase() === 'text/html' || part.type.toLowerCase() === 'text/plain') {
-      textParts.push(part);
-    }
+    part.childNodes?.forEach(collectAttachments);
   }
 
-  visit(structure);
-  const bodyCandidates = textParts.filter((part) => part.size === undefined || part.size <= MAX_EMAIL_BODY_BYTES);
-  bodyCandidates.sort((a, b) => {
-    const typeOrder = (part: MessageStructure) => part.type.toLowerCase() === 'text/html' ? 0 : 1;
-    const sizeOrder = (part: MessageStructure) => part.size ?? Number.MAX_SAFE_INTEGER;
-    return typeOrder(a) - typeOrder(b) || sizeOrder(a) - sizeOrder(b);
-  });
+  collectAttachments(structure);
+  const body = findBody(structure)[0];
 
-  return { body: bodyCandidates[0], attachments, relatedImages };
+  return { body, attachments, relatedImages };
 }
 
 export function isWithinAttachmentLimits(

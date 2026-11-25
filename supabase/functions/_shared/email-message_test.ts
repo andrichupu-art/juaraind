@@ -55,6 +55,37 @@ Deno.test('selects the HTML body and keeps attachment and inline-image parts sep
   if (parts.relatedImages[0]?.part !== '2') throw new Error('Expected inline image metadata.');
 });
 
+Deno.test('selects the main MIME body instead of later report or forwarded-message parts', () => {
+  const structure: MessageStructure = {
+    part: '1',
+    type: 'multipart/mixed',
+    childNodes: [
+      {
+        part: '1',
+        type: 'multipart/alternative',
+        childNodes: [
+          { part: '1.1', type: 'text/plain', size: 25 },
+          { part: '1.2', type: 'text/html', size: 80 },
+        ],
+      },
+      { part: '2', type: 'text/html', size: 20 },
+      {
+        part: '3',
+        type: 'message/rfc822',
+        childNodes: [
+          { part: '3.1', type: 'text/html', size: 10 },
+        ],
+      },
+    ],
+  };
+
+  const parts = getMessageParts(structure);
+
+  if (parts.body?.part !== '1.2') {
+    throw new Error('Expected the HTML body from the first MIME body branch.');
+  }
+});
+
 Deno.test('limits attachment downloads per part and per message', () => {
   if (!isWithinAttachmentLimits(1024, 1024)) throw new Error('Small attachment should be downloadable.');
   if (isWithinAttachmentLimits(25 * 1024 * 1024 + 1, 0)) throw new Error('Oversized attachment should be skipped.');
