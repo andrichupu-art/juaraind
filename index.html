@@ -1883,12 +1883,15 @@ async function loadMailAccounts(){
 // (atau gagal) panel sebenarnya ditampilkan. Ini menghindari kesan "patah-patah"
 // (toolbar kosong dulu, lalu satu-satu bagian terisi belakangan).
 async function initMailPanel(){
-  $('#mailShellLoading').style.display='none';
-  $('#mailShell').style.display='';
+  $('#mailShellLoading').style.display='flex';
+  $('#mailShell').style.display='none';
   try{
     await loadMailAccounts();
   }catch(err){
     console.error(err);
+  }finally{
+    $('#mailShellLoading').style.display='none';
+    $('#mailShell').style.display='';
   }
 }
 
@@ -2327,6 +2330,9 @@ async function loadMailList(accountId=MAIL_ACTIVE, folder=MAIL_FOLDER, page=MAIL
 function isSentFolder(){
   return MAIL_FOLDERS.find(f=>f.path===MAIL_FOLDER)?.name==='Terkirim';
 }
+function isTrashFolder(){
+  return MAIL_FOLDERS.find(f=>f.path===MAIL_FOLDER)?.name==='Sampah';
+}
 function renderMailEmptyState(title, subtitle='Silakan pilih folder lain atau muat ulang.'){
   const folderName=MAIL_FOLDERS.find(f=>f.path===MAIL_FOLDER)?.name||'folder ini';
   return `
@@ -2414,7 +2420,11 @@ function updateBulkDeleteBtn(){
 async function deleteSelectedMail(){
   const uids=[...MAIL_SELECTED];
   if(!uids.length)return;
-  if(!await customConfirm(`Pindahkan ${uids.length} email terpilih ke Sampah? Email yang sudah berada di Sampah akan dihapus permanen.`))return;
+  const inTrash=isTrashFolder();
+  const confirmMsg=inTrash
+    ? `Hapus ${uids.length} email terpilih secara permanen? Tindakan ini tidak dapat dibatalkan.`
+    : `Pindahkan ${uids.length} email terpilih ke Sampah?`;
+  if(!await customConfirm(confirmMsg,{okLabel:inTrash?'Ya, Hapus Permanen':'Ya, Pindahkan'}))return;
   const btn=$('#btnMailBulkDelete'); if(btn)btn.disabled=true;
   let failCount=0;
   for(const uid of uids){
@@ -2425,8 +2435,9 @@ async function deleteSelectedMail(){
     }catch(err){ console.error(err); failCount++; }
   }
   await loadMailList(MAIL_ACTIVE,MAIL_FOLDER,MAIL_PAGE);
-  if(failCount) toast(`${uids.length-failCount} email dihapus, ${failCount} gagal`,'err');
-  else toast('Email terpilih dihapus','ok');
+  const okMsg=inTrash?'dihapus permanen':'dipindahkan ke Sampah';
+  if(failCount) toast(`${uids.length-failCount} email ${okMsg}, ${failCount} gagal`,'err');
+  else toast(`${uids.length} email ${okMsg}`,'ok');
 }
 $('#btnMailBulkDelete')?.addEventListener('click', deleteSelectedMail);
 
@@ -2499,48 +2510,43 @@ img{max-width:100%}
       try{
         const doc=new DOMParser().parseFromString(html,'text/html');
         const links=[...doc.querySelectorAll('a[href]')];
-        const activationLinks=links.filter(link=>/activat/i.test(link.textContent.trim()));
+        const activationText=/activat|aktifkan|verif|confirm|konfirmasi/i;
+        const activationUrlHint=/activat|verif|confirm|token|registration|signup|akun|account/i;
+        const activationLinks=links.filter(link=>activationText.test((link.textContent||'').trim()));
         if(!activationLinks.length) return html;
         const appDomain='juaraind.com';
         function externalActivationUrl(value){
           try{
-            const url=new URL(value);
+            const url=new URL(value, 'https://email.juaraind.com');
             const hostname=url.hostname.toLowerCase();
             const isAppDomain=hostname===appDomain||hostname.endsWith('.'+appDomain);
             return /^https?:$/.test(url.protocol) &&
               !isAppDomain &&
-              /activat|verif|confirm/i.test(url.pathname)
+              activationUrlHint.test(url.href)
               ? url.href
               : '';
           }catch{ return ''; }
         }
         const absoluteActivationUrls=links.flatMap(link=>{
-          const href=link.getAttribute('href')||'';
-          const destination=externalActivationUrl(href);
+          const destination=externalActivationUrl(link.getAttribute('href')||'');
           return destination?[destination]:[];
         });
-        const visibleActivationUrls=(doc.body?.innerText||doc.body?.textContent||'')
-          .match(/https?:\/\/[^\s<>"']+/gi)||[];
-        const activationUrl=[...new Set([
-          ...absoluteActivationUrls,
-          ...visibleActivationUrls.map(value=>value.replace(/[),.;\]}]+$/,'').replace(/=20$/i,''))
-        ])].find(value=>{
-          return !!externalActivationUrl(value);
-        });
+        const visibleActivationUrls=((doc.body?.innerText||doc.body?.textContent||'')
+          .match(/https?:\/\/[^\s<>"']+/gi)||[])
+          .map(value=>value.replace(/[),.;\]}]+$/,'').replace(/=20$/gi,''));
+        const activationUrl=[...new Set([...absoluteActivationUrls,...visibleActivationUrls])]
+          .find(value=>!!externalActivationUrl(value));
         activationLinks.forEach(link=>{
           const href=link.getAttribute('href')||'';
-          let destination=externalActivationUrl(href);
-          if(!destination)destination=activationUrl||'';
+          const destination=externalActivationUrl(href)||activationUrl||'';
           if(destination){
             link.href=destination;
             link.target='_blank';
             link.rel='noopener noreferrer';
-            delete link.dataset.mailInvalidActivation;
-          }else{
-            link.href='#mail-invalid-activation';
-            link.target='_self';
-            link.dataset.mailInvalidActivation='true';
           }
+          // Jika tidak ada URL aktivasi eksternal yang bisa dipastikan, biarkan
+          // link asli apa adanya agar tautan sah tidak sengaja dinonaktifkan.
+          delete link.dataset.mailInvalidActivation;
         });
         return doc.documentElement.outerHTML;
       }catch(e){
@@ -2687,7 +2693,11 @@ async function downloadAllMailAttachments(attachments, subject, context){
 }
 
 async function deleteMailMessage(uid){
-  if(!await customConfirm('Pindahkan email ini ke Sampah? Email yang sudah berada di Sampah akan dihapus permanen.'))return;
+  const inTrash=isTrashFolder();
+  const confirmMsg=inTrash
+    ? 'Hapus email ini secara permanen? Tindakan ini tidak dapat dibatalkan.'
+    : 'Pindahkan email ini ke Sampah?';
+  if(!await customConfirm(confirmMsg,{okLabel:inTrash?'Ya, Hapus Permanen':'Ya, Pindahkan'}))return;
   const btn=$('#btnMailDelete'); if(btn){ btn.disabled=true; btn.textContent='Menghapus…'; }
   try{
     await invokeMailImap({action:'delete',account_id:MAIL_ACTIVE,folder:MAIL_FOLDER,uid});
@@ -2697,7 +2707,7 @@ async function deleteMailMessage(uid){
       $('#mailRead').innerHTML='<div class="mail-empty"><p>Pilih email untuk membaca</p></div>';
     }
     await loadMailList(MAIL_ACTIVE,MAIL_FOLDER,MAIL_PAGE);
-    toast('Email dihapus','ok');
+    toast(inTrash?'Email dihapus permanen':'Email dipindahkan ke Sampah','ok');
   }catch(err){
     console.error(err);
     toast('Gagal menghapus email: '+err.message,'err');
